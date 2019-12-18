@@ -436,9 +436,12 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time)
 	int m=(int)(runtime/60);
 	int s=runtime-(m*60);
 
-
-	printf ("%02d:%02d:%02d Queries send: %7llu, rcv: %7llu, ", h,m,s,
-			diff.counter_send, diff.counter_received
+	float dp=0.0f;
+	if (diff.counter_send) {
+		dp=0.0f-((float)(diff.counter_send-diff.counter_received)*100.0f/(float)diff.counter_send);
+	}
+	printf ("%02d:%02d:%02d send: %7llu, rcv: %7llu, diff: %4.1f%%, ", h,m,s,
+			diff.counter_send, diff.counter_received, dp
 			);
 	printf ("Data send: %6llu KB, rcv: %6llu KB", diff.bytes_send/1024, diff.bytes_received/1024);
 	printf ("\n");
