@@ -256,6 +256,14 @@ AC_CHECK_FUNCS([inet_ntop inet_pton inet_aton inet_ntoa inet_ntoa_r inet_addr in
 AC_CHECK_FUNCS([ioctl])
 AC_CHECK_FUNCS([signal syslog openlog closelog])
 
+
+AC_CHECK_LIB(pthread, pthread_set_name_np,
+	AC_DEFINE(HAVE_PTHREAD_SET_NAME_NP,1),,)
+AC_CHECK_LIB(pthread, pthread_setname_np,
+	AC_DEFINE(HAVE_PTHREAD_SETNAME_NP,1),,)
+
+
+
 AC_CACHE_CHECK([for sa_len in struct sockaddr], ac_cv_struct_sa_len,
 [AC_TRY_COMPILE([#include <sys/types.h>
 #include <sys/socket.h>], [struct sockaddr s; s.sa_len;],
