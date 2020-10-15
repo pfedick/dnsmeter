@@ -460,9 +460,11 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time)
 
 void DNSSender::calcTimeslice(int queryrate)
 {
+	Timeslices=0.1f;
+	/*
 	Timeslices=(1000.0f/queryrate)*ThreadCount;
-	//if (Zeitscheibe<1.0f) Zeitscheibe=1.0f;
 	if (Timeslices<0.1f) Timeslices=0.1f;
+	*/
 }
 
 
