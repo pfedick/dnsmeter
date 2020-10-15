@@ -248,9 +248,9 @@ void DNSSenderThread::runWithRateLimit()
 	verbose=true;
 	if (verbose) {
 		//printf ("qps=%d, runtime=%d\n",queryrate, runtime);
-		printf ("runtime: %d s, timeslice: %0.6f s, total timeslices: %llu, Qpts: %llu, Source: %s:%d\n",
+		printf ("runtime: %d s, timeslice: %0.6f s, total timeslices: %llu, Qpts: %0.2f, Destination: %s:%d\n",
 				runtime,Timeslice,total_timeslices,
-				queries_rest/total_timeslices,
+				(double)queries_rest/(double)total_timeslices,
 				(const char*)addr.toIPAddress().toString(), addr.port());
 	}
 	double now=getNsec();
