@@ -262,7 +262,7 @@ void DNSSenderThread::runWithRateLimit()
 	double total_idle=0.0;
 
 	ppluint64 timeslices_per_second=1000.0/(Timeslice*1000.0);
-	for (zr=0;zr<runtime;zr++) {
+	for (int zr=0;zr<runtime;zr++) {
 		ppluint64 queries_per_second_rest=queryrate;
 		for (ppluint64 z=0;z<timeslices_per_second;z++) {
 			next_timeslice+=Timeslice;
