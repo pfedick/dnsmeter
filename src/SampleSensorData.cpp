@@ -27,7 +27,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 
 #ifdef __FreeBSD__
 #include <sys/resource.h>
@@ -254,11 +253,11 @@ void sampleSensorData(SystemStat &stat)
 
 double SystemStat::Cpu::getUsage(const SystemStat::Cpu &sample1,const SystemStat::Cpu &sample2)
 {
-	double usage=100.0 * (double)((sample2.user+sample2.nice+sample2.system) -
+	return 100.0 * (double)((sample2.user+sample2.nice+sample2.system) -
 			(sample1.user+sample1.nice+sample1.system)) /
 			(double)((sample2.user+sample2.nice+sample2.system+sample2.idle) -
 					(sample1.user+sample1.nice+sample1.system+sample1.idle));
-	return fabs(usage);
+
 }
 
 static unsigned long delta_with_overflow(unsigned long sample1, unsigned long sample2)
