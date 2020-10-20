@@ -479,13 +479,8 @@ void DNSSender::run(int queryrate)
 	}
 
 	ppl7::ThreadPool::iterator it;
-	int queries_rest=queryrate;
-	int threads_rest=ThreadCount;
 	for (it=threadpool.begin();it!=threadpool.end();++it) {
-		int queries_thread=queries_rest/threads_rest;
-		threads_rest--;
-		queries_rest-=queries_thread;
-		((DNSSenderThread*)(*it))->setQueryRate(queries_thread);
+		((DNSSenderThread*)(*it))->setQueryRate(queryrate/ThreadCount);
 		((DNSSenderThread*)(*it))->setTimeslice(Timeslices);
 	}
 	vis_prev_results.clear();
