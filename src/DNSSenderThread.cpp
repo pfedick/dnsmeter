@@ -241,15 +241,16 @@ static inline double getNsec()
 void DNSSenderThread::runWithRateLimit()
 {
 	struct timespec ts;
-	ppluint64 total_timeslices=runtime*1000/(Timeslice*1000.0);
+	ppluint64 total_timeslices=runtime*1000.0/(Timeslice*1000.0);
+	ppluint64 timeslices_per_second=(ppluint64)(1000.0/(Timeslice*1000.0));
 	ppluint64 queries_rest=runtime*queryrate;
 	ppl7::SockAddr addr=Socket.getSockAddr();
 	verbose=true;
 	if (verbose) {
 		//printf ("qps=%d, runtime=%d\n",queryrate, runtime);
-		printf ("runtime: %d s, timeslice: %0.6f s, total timeslices: %llu, Qpts: %llu, Source: %s:%d\n",
+		printf ("runtime: %d s, timeslice: %0.6f s, total timeslices: %llu, Qpts: %0.2f, Destination: %s:%d\n",
 				runtime,Timeslice,total_timeslices,
-				queries_rest/total_timeslices,
+				(double)queries_rest/(double)total_timeslices,
 				(const char*)addr.toIPAddress().toString(), addr.port());
 	}
 	double now=getNsec();
@@ -260,34 +261,33 @@ void DNSSenderThread::runWithRateLimit()
 	double end=start+(double)runtime;
 	double total_idle=0.0;
 
-	for (ppluint64 z=0;z<total_timeslices;z++) {
-		next_timeslice+=Timeslice;
-		ppluint64 timeslices_rest=total_timeslices-z;
-		ppluint64 queries_per_timeslice=queries_rest/timeslices_rest;
-		if (timeslices_rest==1)
-			queries_per_timeslice=queries_rest;
-		for (ppluint64 i=0;i<queries_per_timeslice;i++) {
-			sendPacket();
-		}
-
-		queries_rest-=queries_per_timeslice;
-		while ((now=getNsec())<next_timeslice) {
-			if (now<next_timeslice) {
-				total_idle+=next_timeslice-now;
-				ts.tv_sec=0;
-				ts.tv_nsec=(next_timeslice-now)*1000000000;
-				nanosleep(&ts,NULL);
+	for (int zr=0;zr<runtime;zr++) {
+		ppluint64 queries_per_second_rest=queryrate;
+		for (ppluint64 z=0;z<timeslices_per_second;z++) {
+			next_timeslice+=Timeslice;
+			ppluint64 timeslices_rest=timeslices_per_second-z;
+			ppluint64 queries_per_timeslice=queries_per_second_rest/timeslices_rest;
+			if (timeslices_rest==1)
+				queries_per_timeslice=queries_per_second_rest;
+			for (ppluint64 i=0;i<queries_per_timeslice;i++) {
+				sendPacket();
+			}
+			queries_per_second_rest-=queries_per_timeslice;
+			while ((now=getNsec())<next_timeslice) {
+				if (now<next_timeslice) {
+					total_idle+=next_timeslice-now;
+					ts.tv_sec=0;
+					ts.tv_nsec=(next_timeslice-now)*1000000000;
+					nanosleep(&ts,NULL);
+				}
+			}
+			if (now>next_checktime) {
+				next_checktime=now+0.1;
+				if (this->threadShouldStop()) break;
+				if (ppl7::GetMicrotime()>=end) break;
+				//printf ("Zeitscheiben rest: %llu\n", z);
 			}
 		}
-		if (now>next_checktime) {
-			next_checktime=now+0.1;
-			if (this->threadShouldStop()) break;
-			if (ppl7::GetMicrotime()>=end) break;
-			//printf ("Zeitscheiben rest: %llu\n", z);
-		}
-	}
-	if (verbose) {
-		//printf ("total idle: %0.6f\n",total_idle);
 	}
 }
 

@@ -460,9 +460,11 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time)
 
 void DNSSender::calcTimeslice(int queryrate)
 {
+	Timeslices=0.1f;
+	/*
 	Timeslices=(1000.0f/queryrate)*ThreadCount;
-	//if (Zeitscheibe<1.0f) Zeitscheibe=1.0f;
 	if (Timeslices<0.1f) Timeslices=0.1f;
+	*/
 }
 
 
@@ -479,8 +481,13 @@ void DNSSender::run(int queryrate)
 	}
 
 	ppl7::ThreadPool::iterator it;
+	int queries_rest=queryrate;
+	int threads_rest=ThreadCount;
 	for (it=threadpool.begin();it!=threadpool.end();++it) {
-		((DNSSenderThread*)(*it))->setQueryRate(queryrate/ThreadCount);
+		int queries_thread=queries_rest/threads_rest;
+		threads_rest--;
+		queries_rest-=queries_thread;
+		((DNSSenderThread*)(*it))->setQueryRate(queries_thread);
 		((DNSSenderThread*)(*it))->setTimeslice(Timeslices);
 	}
 	vis_prev_results.clear();
