@@ -173,6 +173,8 @@ RawSocketReceiver::RawSocketReceiver()
 		printf("INFO: using fast bpf zero copy buffer for packet capturing\n");
 		return;
 	} catch (const ppl7::Exception &ex) {
+		printf("INFO: failed to setup fast bpf zero copy buffer for packet capturing\n");
+		ex.print();
 		useZeroCopyBuffer=false;
 		free(buffer);
 	}
