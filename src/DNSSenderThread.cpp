@@ -240,6 +240,9 @@ static inline double getNsec()
 
 void DNSSenderThread::runWithRateLimit()
 {
+	Timeslices=(1000.0f/queryrate);
+	if (Timeslices<0.1f) Timeslices=0.1f;
+
 	struct timespec ts;
 	ppluint64 total_timeslices=runtime*1000.0/(Timeslice*1000.0);
 	ppluint64 timeslices_per_second=(ppluint64)(1000.0/(Timeslice*1000.0));
