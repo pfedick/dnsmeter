@@ -162,7 +162,7 @@ RawSocketReceiver::RawSocketReceiver()
 #ifdef __FreeBSD__
 	useZeroCopyBuffer=false;
 	sd=open_bpf();
-	buffer=(unsigned char*)malloc(sizeof(struct bpf_zbuf));
+	buffer=(unsigned char*)calloc(1,sizeof(struct bpf_zbuf));
 	if (!buffer) { close(sd); throw ppl7::OutOfMemoryException();}
 	struct bpf_zbuf *zbuf=(struct bpf_zbuf*)buffer;
 
@@ -173,8 +173,8 @@ RawSocketReceiver::RawSocketReceiver()
 		printf("INFO: using fast bpf zero copy buffer for packet capturing\n");
 		return;
 	} catch (const ppl7::Exception &ex) {
-		printf("INFO: failed to setup fast bpf zero copy buffer for packet capturing\n");
-		ex.print();
+		printf("INFO: failed to setup fast bpf zero copy buffer for packet capturing [%s]\n", (const char*)ex.toString());
+		printf("INFO: check with sysctl if \"net.bpf.zerocopy_enable\" is set to 1!\n");
 		useZeroCopyBuffer=false;
 		free(buffer);
 	}
