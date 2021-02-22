@@ -228,7 +228,6 @@ class DNSSender
 		int Timeout;
 		int ThreadCount;
 		int DnssecRate;
-		float Timeslices;
 		bool ignoreResponses;
 		bool spoofingEnabled;
 		bool spoofFromPcap;
@@ -246,8 +245,6 @@ class DNSSender
 		void getSource(int argc, char**argv);
 		int getParameter(int argc, char**argv);
 		int openFiles();
-		void calcTimeslice(int queryrate);
-
 		void showCurrentStats(ppl7::ppl_time_t start_time);
 
 	public:
@@ -283,7 +280,6 @@ class DNSSenderThread : public ppl7::Thread
 		int timeout;
 		int DnssecRate;
 		int dnsseccounter;
-		double Timeslice;
 
 		double duration;
 		bool spoofingEnabled;

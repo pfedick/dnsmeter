@@ -196,7 +196,6 @@ DNSSender::DNSSender()
 	Runtime=10;
 	Timeout=2;
 	ThreadCount=1;
-	Timeslices=1.0f;
 	ignoreResponses=false;
 	DnssecRate=0;
 	TargetPort=53;
@@ -406,7 +405,6 @@ void DNSSender::prepareThreads()
 		thread->setDestination(TargetIP,TargetPort);
 		thread->setRuntime(Runtime);
 		thread->setTimeout(Timeout);
-		thread->setTimeslice(Timeslices);
 		thread->setDNSSECRate(DnssecRate);
 		thread->setVerbose(false);
 		thread->setPayload(payload);
@@ -452,19 +450,9 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time)
 	printf ("%02d:%02d:%02d send: %7llu, rcv: %7llu, ", h,m,s,
 			diff.counter_send, diff.counter_received
 			);
-	printf ("diff: %4.1f%%, ",dp);
+	printf ("diff: %6.1f%%, ",dp);
 	printf ("Data send: %6llu KB, rcv: %6llu KB", diff.bytes_send/1024, diff.bytes_received/1024);
 	printf ("\n");
-}
-
-
-void DNSSender::calcTimeslice(int queryrate)
-{
-	Timeslices=0.1f;
-	/*
-	Timeslices=(1000.0f/queryrate)*ThreadCount;
-	if (Timeslices<0.1f) Timeslices=0.1f;
-	*/
 }
 
 
@@ -472,9 +460,8 @@ void DNSSender::run(int queryrate)
 {
 	printf ("###############################################################################\n");
 	if (queryrate) {
-		calcTimeslice(queryrate);
-		printf ("# Start Session with Threads: %d, Queryrate: %d, Timeslot: %0.6f ms\n",
-				ThreadCount,queryrate, Timeslices);
+		printf ("# Start Session with Threads: %d, Queryrate: %d\n",
+				ThreadCount,queryrate);
 	} else {
 		printf ("# Start Session with Threads: %d, Queryrate: unlimited\n",
 				ThreadCount);
@@ -488,7 +475,6 @@ void DNSSender::run(int queryrate)
 		threads_rest--;
 		queries_rest-=queries_thread;
 		((DNSSenderThread*)(*it))->setQueryRate(queries_thread);
-		((DNSSenderThread*)(*it))->setTimeslice(Timeslices);
 	}
 	vis_prev_results.clear();
 	sampleSensorData(sys1);

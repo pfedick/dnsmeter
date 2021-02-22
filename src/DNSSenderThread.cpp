@@ -38,7 +38,6 @@ DNSSenderThread::DNSSenderThread()
 {
 	buffer=(unsigned char*)malloc(4096);
 	if (!buffer) throw ppl7::OutOfMemoryException();
-	Timeslice=0.0f;
 	runtime=10;
 	timeout=5;
 	queryrate=0;
@@ -101,14 +100,6 @@ void DNSSenderThread::setDNSSECRate(int rate)
 void DNSSenderThread::setQueryRate(ppluint64 qps)
 {
 	queryrate=qps;
-}
-
-
-void DNSSenderThread::setTimeslice(float ms)
-{
-	if (ms==0.0f || ms >1000.0f) throw ppl7::InvalidArgumentsException();
-	//if ((1000 % ms)!=0) throw ppl7::InvalidArgumentsException();
-	Timeslice=(double)ms/1000;
 }
 
 
@@ -240,19 +231,18 @@ static inline double getNsec()
 
 void DNSSenderThread::runWithRateLimit()
 {
-	Timeslices=(1000.0f/queryrate);
-	if (Timeslices<0.1f) Timeslices=0.1f;
-
 	struct timespec ts;
-	ppluint64 total_timeslices=runtime*1000.0/(Timeslice*1000.0);
-	ppluint64 timeslices_per_second=(ppluint64)(1000.0/(Timeslice*1000.0));
+	double Timeslice=1.0f/queryrate;
+	if (Timeslice<0.0001f) Timeslice=0.0001f;
+
+	ppluint64 total_timeslices=runtime/Timeslice;
+	ppluint64 timeslices_per_second=(ppluint64)(1.0f/Timeslice);
 	ppluint64 queries_rest=runtime*queryrate;
 	ppl7::SockAddr addr=Socket.getSockAddr();
 	verbose=true;
 	if (verbose) {
-		//printf ("qps=%d, runtime=%d\n",queryrate, runtime);
-		printf ("runtime: %d s, timeslice: %0.6f s, total timeslices: %llu, Qpts: %llu, Source: %s:%d\n",
-				runtime,Timeslice,total_timeslices,
+		printf ("runtime: %d s, timeslice: %0.4f s, total: %llu, per second: %llu, Qpts: %llu, Source: %s:%d\n",
+				runtime,Timeslice,total_timeslices, timeslices_per_second,
 				queries_rest/total_timeslices,
 				(const char*)addr.toIPAddress().toString(), addr.port());
 	}
@@ -272,6 +262,8 @@ void DNSSenderThread::runWithRateLimit()
 			ppluint64 queries_per_timeslice=queries_per_second_rest/timeslices_rest;
 			if (timeslices_rest==1)
 				queries_per_timeslice=queries_per_second_rest;
+			//printf ("zr=%d, z=%llu, ts rest=%llu, qpts=%llu, qps_rest=%llu, now=%0.8f\n",
+			//		zr, z,timeslices_rest,queries_per_timeslice,queries_per_second_rest,now);
 			for (ppluint64 i=0;i<queries_per_timeslice;i++) {
 				sendPacket();
 			}
@@ -281,14 +273,14 @@ void DNSSenderThread::runWithRateLimit()
 					total_idle+=next_timeslice-now;
 					ts.tv_sec=0;
 					ts.tv_nsec=(next_timeslice-now)*1000000000;
+					//printf("nanosleep???\n");
 					nanosleep(&ts,NULL);
 				}
 			}
 			if (now>next_checktime) {
 				next_checktime=now+0.1;
-				if (this->threadShouldStop()) break;
-				if (ppl7::GetMicrotime()>=end) break;
-				//printf ("Zeitscheiben rest: %llu\n", z);
+				if (this->threadShouldStop()) return;
+				if (ppl7::GetMicrotime()>=end) return;
 			}
 		}
 	}
