@@ -432,7 +432,8 @@ void DNSSender::openCSVFile(const ppl7::String &Filename)
 void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time)
 {
 	DNSSender::Results result, diff;
-	ppl7::ppl_time_t runtime=ppl7::GetTime()-start_time;
+	//ppl7::ppl_time_t runtime=ppl7::GetTime()-start_time;
+	ppl7::ppl_time_t runtime=ppl7::GetTime();
 	getResults(result);
 	diff=result-vis_prev_results;
 	vis_prev_results=result;
@@ -442,12 +443,15 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time)
 	int m=(int)(runtime/60);
 	int s=runtime-(m*60);
 
+	ppl7::DateTime now=ppl7::DateTime().currentTime();
+
+
 	double dp=0.0f;
 	if (diff.counter_send) {
 		double differenz=(double)diff.counter_send-(double)diff.counter_received;
 		dp=0.0f-differenz*100.0f/(double)diff.counter_send;
 	}
-	printf ("%02d:%02d:%02d send: %7llu, rcv: %7llu, ", h,m,s,
+	printf ("%02d:%02d:%02d send: %7llu, rcv: %7llu, ", now.hour(),now.minute(),now.second(),
 			diff.counter_send, diff.counter_received
 			);
 	printf ("diff: %6.1f%%, ",dp);
