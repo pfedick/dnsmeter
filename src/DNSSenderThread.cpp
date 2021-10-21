@@ -192,6 +192,10 @@ void DNSSenderThread::run()
 	errors=0;
 	duration=0.0;
 	for (int i=0;i<255;i++) counter_errorcodes[i]=0;
+
+        ppl7::ppl_time_t sync_start=ppl7::GetTime();
+        while (ppl7::GetTime()==sync_start) ppl7::MSleep(1);
+
 	double start=ppl7::GetMicrotime();
 	if (queryrate>0) {
 		runWithRateLimit();
@@ -233,10 +237,11 @@ void DNSSenderThread::runWithRateLimit()
 {
 	struct timespec ts;
 	double Timeslice=1.0f/queryrate;
-	if (Timeslice<0.0001f) Timeslice=0.0001f;
+	if (Timeslice<0.002f) Timeslice=0.002f;
+	//Timeslice=0.01;
 
-	ppluint64 total_timeslices=runtime/Timeslice;
-	ppluint64 timeslices_per_second=(ppluint64)(1.0f/Timeslice);
+	ppluint64 total_timeslices=round((double)runtime/Timeslice);
+	ppluint64 timeslices_per_second=(ppluint64)round((1.0f/Timeslice));
 	ppluint64 queries_rest=runtime*queryrate;
 	ppl7::SockAddr addr=Socket.getSockAddr();
 	verbose=true;
@@ -260,8 +265,12 @@ void DNSSenderThread::runWithRateLimit()
 			next_timeslice+=Timeslice;
 			ppluint64 timeslices_rest=timeslices_per_second-z;
 			ppluint64 queries_per_timeslice=queries_per_second_rest/timeslices_rest;
-			if (timeslices_rest==1)
-				queries_per_timeslice=queries_per_second_rest;
+			if (timeslices_rest==1) {
+				if (queries_per_second_rest!=queries_per_timeslice) {
+					printf("Adjusting qpt from %llu to %llu for last slice!\n",queries_per_timeslice,queries_per_second_rest);
+					queries_per_timeslice=queries_per_second_rest;
+				}
+			}
 			//printf ("zr=%d, z=%llu, ts rest=%llu, qpts=%llu, qps_rest=%llu, now=%0.8f\n",
 			//		zr, z,timeslices_rest,queries_per_timeslice,queries_per_second_rest,now);
 			for (ppluint64 i=0;i<queries_per_timeslice;i++) {

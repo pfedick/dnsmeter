@@ -487,10 +487,11 @@ void DNSSender::run(int queryrate)
 	if (Receiver) Receiver->threadStart();
 	threadpool.startThreads();
 	ppl7::ppl_time_t start=ppl7::GetTime();
-	ppl7::ppl_time_t report=start+1;
+	while (ppl7::GetTime()==start) ppl7::MSleep(1);
+	ppl7::ppl_time_t report=start+2;
 	ppl7::MSleep(500);
 	while (threadpool.running()==true && stopFlag==false) {
-		ppl7::MSleep(100);
+		ppl7::USleep(500);
 		ppl7::ppl_time_t now=ppl7::GetTime();
 		if (now>=report) {
 			report=now+1;
@@ -576,13 +577,14 @@ void DNSSender::presentResults(const DNSSender::Results &result)
 	printf ("DNS Queries rcv:  %10llu, Qps: %7llu, Data rcv:  %7llu KB = %6llu MBit\n",
 			result.counter_received, qps_received, result.bytes_received/1024, bps_received/(1024*1024));
 
-	printf ("DNS Queries lost: %10llu = %0.3f %%\n",result.packages_lost,
+	printf ("DNS Queries lost: %10llu, Qps: %7llu = %0.3f %%\n",result.packages_lost,
+			qps_send-qps_received,
 			(double)result.packages_lost*100.0/(double)result.counter_send);
 
-	printf ("DNS rtt average: %0.4f ms, "
-			"min: %0.4f ms, "
-			"max: %0.4f ms\n",
-			result.rtt_total*1000.0/(double)ThreadCount,
+	printf ("DNS rtt average: %0.3f ms, "
+			"min: %0.3f ms, "
+			"max: %0.3f ms\n",
+			result.rtt_total*1000.0/(double)transmit.packets,
 			result.rtt_min*1000.0,
 			result.rtt_max*1000.0);
 	printf ("DNS truncated: %llu\nDNS RCODES: ", result.truncated);
