@@ -433,15 +433,17 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time)
 {
 	DNSSender::Results result, diff;
 	//ppl7::ppl_time_t runtime=ppl7::GetTime()-start_time;
-	ppl7::ppl_time_t runtime=ppl7::GetTime();
+	//ppl7::ppl_time_t runtime=ppl7::GetTime();
 	getResults(result);
 	diff=result-vis_prev_results;
 	vis_prev_results=result;
 
+	/*
 	int h=(int)(runtime/3600);
 	runtime-=h*3600;
 	int m=(int)(runtime/60);
 	int s=runtime-(m*60);
+	*/
 
 	ppl7::DateTime now=ppl7::DateTime().currentTime();
 
