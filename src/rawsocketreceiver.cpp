@@ -335,7 +335,7 @@ static void read_buffer(unsigned char *ptr, size_t size, RawSocketReceiver::Coun
 		struct bpf_hdr* bpfh=(struct bpf_hdr*)ptr;
 		if (bpfh->bh_caplen==0 || bpfh->bh_hdrlen==0) break;
 		size_t chunk_size=BPF_WORDALIGN(bpfh->bh_caplen+bpfh->bh_hdrlen);
-		count_packet(counter,ptr+bpfh->bh_hdrlen,chunk_size-bpfh->bh_datalen);
+		count_packet(counter,ptr+bpfh->bh_hdrlen,bpfh->bh_datalen);
 		ptr+=chunk_size;
 		done+=chunk_size;
 	}
