@@ -58,7 +58,7 @@ unsigned short getQueryTimestamp()
 {
 	struct timeval tp;
 	if (gettimeofday(&tp,NULL)==0) {
-		return (tp.tv_sec%6)*10000+(tp.tv_usec/100);
+		return (unsigned short)((tp.tv_sec%60)*1000+(tp.tv_usec/1000));
 	}
 	return 0;
 }
@@ -68,7 +68,7 @@ double getQueryRTT(unsigned short start)
 	unsigned short now=getQueryTimestamp();
 	unsigned short diff=now-start;
 	if (now<start) diff=60000-start+now;
-	return (double)(diff)/10000.0f;
+	return (double)(diff)/1000.0f;
 }
 
 
