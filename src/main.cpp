@@ -71,7 +71,6 @@ double getQueryRTT(unsigned short start)
 	return (double)(diff)/1000.0f;
 }
 
-
 int main(int argc, char**argv)
 {
 	res_init();
@@ -541,12 +540,12 @@ void DNSSender::saveResultsToCsv(const DNSSender::Results &result)
 {
 
 	if (CSVFile.isOpen()) {
-		CSVFile.putsf ("%llu;%llu;%llu;%0.3f;%0.4f;%0.4f;%0.4f;\n",
+		CSVFile.putsf ("%llu;%llu;%llu;%0.3f;%0.0f;%0.0f;%0.0f;\n",
 				(ppluint64)((double)result.counter_send/(double)Runtime),
 				(ppluint64)((double)result.counter_received/(double)Runtime),
 				(ppluint64)((double)result.counter_errors/(double)Runtime),
 				(double)result.packages_lost*100.0/(double)result.counter_send,
-				result.rtt_total*1000.0/(double)ThreadCount,
+				result.rtt_avg*1000.0,
 				result.rtt_min*1000.0,
 				result.rtt_max*1000.0
 		);
@@ -581,10 +580,10 @@ void DNSSender::presentResults(const DNSSender::Results &result)
 			qps_send-qps_received,
 			(double)result.packages_lost*100.0/(double)result.counter_send);
 
-	printf ("DNS rtt average: %0.3f ms, "
-			"min: %0.3f ms, "
-			"max: %0.3f ms\n",
-			result.rtt_total*1000.0/(double)transmit.packets,
+	printf ("DNS rtt average: %0.0f ms, "
+			"min: %0.0f ms, "
+			"max: %0.0f ms\n",
+			result.rtt_avg*1000.0,
 			result.rtt_min*1000.0,
 			result.rtt_max*1000.0);
 	printf ("DNS truncated: %llu\nDNS RCODES: ", result.truncated);
