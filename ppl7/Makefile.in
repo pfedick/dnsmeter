@@ -99,15 +99,15 @@ RELEASE	= release/core_AVLTree.o \
 	release/math_ca.o \
 	release/math_crc32.o \
 	release/math_md5.o \
-	release/math_random.o  release/inet_inet_functions.o \
+	release/math_random.o  release/inet_SocketMessage.o \
+	release/inet_TCPSocket.o \
+	release/inet_UDPSocket.o \
+	release/inet_inet_functions.o \
 	release/inet_ipaddress.o \
 	release/inet_ipnetwork.o \
 	release/inet_openssl.o \
 	release/inet_resolver.o \
-	release/inet_sockaddr.o \
-	release/inet_SocketMessage.o \
-	release/inet_TCPSocket.o \
-	release/inet_UDPSocket.o    
+	release/inet_sockaddr.o    
 
 CORE_RELEASE = release/core_AVLTree.o \
 	release/core_Compat.o \
@@ -142,15 +142,15 @@ CORE_RELEASE = release/core_AVLTree.o \
 
 CRYPTO_RELEASE = 
 
-INET_RELEASE = release/inet_inet_functions.o \
+INET_RELEASE = release/inet_SocketMessage.o \
+	release/inet_TCPSocket.o \
+	release/inet_UDPSocket.o \
+	release/inet_inet_functions.o \
 	release/inet_ipaddress.o \
 	release/inet_ipnetwork.o \
 	release/inet_openssl.o \
 	release/inet_resolver.o \
-	release/inet_sockaddr.o \
-	release/inet_SocketMessage.o \
-	release/inet_TCPSocket.o \
-	release/inet_UDPSocket.o
+	release/inet_sockaddr.o
 
 DB_RELEASE = 
 
@@ -195,15 +195,15 @@ DEBUG	= debug/core_AVLTree.o \
 	debug/math_ca.o \
 	debug/math_crc32.o \
 	debug/math_md5.o \
-	debug/math_random.o  debug/inet_inet_functions.o \
+	debug/math_random.o  debug/inet_SocketMessage.o \
+	debug/inet_TCPSocket.o \
+	debug/inet_UDPSocket.o \
+	debug/inet_inet_functions.o \
 	debug/inet_ipaddress.o \
 	debug/inet_ipnetwork.o \
 	debug/inet_openssl.o \
 	debug/inet_resolver.o \
-	debug/inet_sockaddr.o \
-	debug/inet_SocketMessage.o \
-	debug/inet_TCPSocket.o \
-	debug/inet_UDPSocket.o    
+	debug/inet_sockaddr.o    
 
 ASM_OBJ_DEBUG	=	
 
@@ -241,15 +241,15 @@ COVERAGE	= coverage/core_AVLTree.o \
 	coverage/math_ca.o \
 	coverage/math_crc32.o \
 	coverage/math_md5.o \
-	coverage/math_random.o  coverage/inet_inet_functions.o \
+	coverage/math_random.o  coverage/inet_SocketMessage.o \
+	coverage/inet_TCPSocket.o \
+	coverage/inet_UDPSocket.o \
+	coverage/inet_inet_functions.o \
 	coverage/inet_ipaddress.o \
 	coverage/inet_ipnetwork.o \
 	coverage/inet_openssl.o \
 	coverage/inet_resolver.o \
-	coverage/inet_sockaddr.o \
-	coverage/inet_SocketMessage.o \
-	coverage/inet_TCPSocket.o \
-	coverage/inet_UDPSocket.o    
+	coverage/inet_sockaddr.o    
 
 ASM_OBJ_COVERAGE	=	
 
@@ -559,6 +559,21 @@ release/math_random.o:	$(srcdir)/math/random.cpp $(incdir)/ppl7.h $(incdir)/ppl7
 
 ### CRYPTO
 ### INTERNET
+release/inet_SocketMessage.o:	$(srcdir)/internet/SocketMessage.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/SocketMessage.cpp<<<
+	$(CXX) -Wall -O2 -o release/inet_SocketMessage.o -c $(srcdir)/internet/SocketMessage.cpp $(CFLAGS) 
+
+release/inet_TCPSocket.o:	$(srcdir)/internet/TCPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/TCPSocket.cpp<<<
+	$(CXX) -Wall -O2 -o release/inet_TCPSocket.o -c $(srcdir)/internet/TCPSocket.cpp $(CFLAGS) 
+
+release/inet_UDPSocket.o:	$(srcdir)/internet/UDPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/UDPSocket.cpp<<<
+	$(CXX) -Wall -O2 -o release/inet_UDPSocket.o -c $(srcdir)/internet/UDPSocket.cpp $(CFLAGS) 
+
 release/inet_inet_functions.o:	$(srcdir)/internet/inet_functions.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
 	###############################################################################
 	# Compiling >>>internet/inet_functions.cpp<<<
@@ -588,21 +603,6 @@ release/inet_sockaddr.o:	$(srcdir)/internet/sockaddr.cpp $(incdir)/ppl7.h $(incd
 	###############################################################################
 	# Compiling >>>internet/sockaddr.cpp<<<
 	$(CXX) -Wall -O2 -o release/inet_sockaddr.o -c $(srcdir)/internet/sockaddr.cpp $(CFLAGS) 
-
-release/inet_SocketMessage.o:	$(srcdir)/internet/SocketMessage.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/SocketMessage.cpp<<<
-	$(CXX) -Wall -O2 -o release/inet_SocketMessage.o -c $(srcdir)/internet/SocketMessage.cpp $(CFLAGS) 
-
-release/inet_TCPSocket.o:	$(srcdir)/internet/TCPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/TCPSocket.cpp<<<
-	$(CXX) -Wall -O2 -o release/inet_TCPSocket.o -c $(srcdir)/internet/TCPSocket.cpp $(CFLAGS) 
-
-release/inet_UDPSocket.o:	$(srcdir)/internet/UDPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/UDPSocket.cpp<<<
-	$(CXX) -Wall -O2 -o release/inet_UDPSocket.o -c $(srcdir)/internet/UDPSocket.cpp $(CFLAGS) 
 
 ### DATABASE
 ### GRAFIX
@@ -769,6 +769,21 @@ debug/math_random.o:	$(srcdir)/math/random.cpp $(incdir)/ppl7.h $(incdir)/ppl7-e
 
 ### CRYPTO
 ### INTERNET
+debug/inet_SocketMessage.o:	$(srcdir)/internet/SocketMessage.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/SocketMessage.cpp<<<
+	$(CXX) -Wall -O -o debug/inet_SocketMessage.o -c $(srcdir)/internet/SocketMessage.cpp -ggdb -D_DEBUG $(CFLAGS) -DDEBUG=DEBUG 
+
+debug/inet_TCPSocket.o:	$(srcdir)/internet/TCPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/TCPSocket.cpp<<<
+	$(CXX) -Wall -O -o debug/inet_TCPSocket.o -c $(srcdir)/internet/TCPSocket.cpp -ggdb -D_DEBUG $(CFLAGS) -DDEBUG=DEBUG 
+
+debug/inet_UDPSocket.o:	$(srcdir)/internet/UDPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/UDPSocket.cpp<<<
+	$(CXX) -Wall -O -o debug/inet_UDPSocket.o -c $(srcdir)/internet/UDPSocket.cpp -ggdb -D_DEBUG $(CFLAGS) -DDEBUG=DEBUG 
+
 debug/inet_inet_functions.o:	$(srcdir)/internet/inet_functions.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
 	###############################################################################
 	# Compiling >>>internet/inet_functions.cpp<<<
@@ -798,21 +813,6 @@ debug/inet_sockaddr.o:	$(srcdir)/internet/sockaddr.cpp $(incdir)/ppl7.h $(incdir
 	###############################################################################
 	# Compiling >>>internet/sockaddr.cpp<<<
 	$(CXX) -Wall -O -o debug/inet_sockaddr.o -c $(srcdir)/internet/sockaddr.cpp -ggdb -D_DEBUG $(CFLAGS) -DDEBUG=DEBUG 
-
-debug/inet_SocketMessage.o:	$(srcdir)/internet/SocketMessage.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/SocketMessage.cpp<<<
-	$(CXX) -Wall -O -o debug/inet_SocketMessage.o -c $(srcdir)/internet/SocketMessage.cpp -ggdb -D_DEBUG $(CFLAGS) -DDEBUG=DEBUG 
-
-debug/inet_TCPSocket.o:	$(srcdir)/internet/TCPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/TCPSocket.cpp<<<
-	$(CXX) -Wall -O -o debug/inet_TCPSocket.o -c $(srcdir)/internet/TCPSocket.cpp -ggdb -D_DEBUG $(CFLAGS) -DDEBUG=DEBUG 
-
-debug/inet_UDPSocket.o:	$(srcdir)/internet/UDPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/UDPSocket.cpp<<<
-	$(CXX) -Wall -O -o debug/inet_UDPSocket.o -c $(srcdir)/internet/UDPSocket.cpp -ggdb -D_DEBUG $(CFLAGS) -DDEBUG=DEBUG 
 
 ### DATABASE
 ### GRAFIX
@@ -974,6 +974,21 @@ coverage/math_random.o:	$(srcdir)/math/random.cpp $(incdir)/ppl7.h $(incdir)/ppl
 	# Compiling >>>math/random.cpp<<<
 	$(CXX) -Wall -o coverage/math_random.o -c $(srcdir)/math/random.cpp $(CFLAGS) @GCOV_CFLAGS@ 
 
+coverage/inet_SocketMessage.o:	$(srcdir)/internet/SocketMessage.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/SocketMessage.cpp<<<
+	$(CXX) -Wall -o coverage/inet_SocketMessage.o -c $(srcdir)/internet/SocketMessage.cpp $(CFLAGS) @GCOV_CFLAGS@ 
+
+coverage/inet_TCPSocket.o:	$(srcdir)/internet/TCPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/TCPSocket.cpp<<<
+	$(CXX) -Wall -o coverage/inet_TCPSocket.o -c $(srcdir)/internet/TCPSocket.cpp $(CFLAGS) @GCOV_CFLAGS@ 
+
+coverage/inet_UDPSocket.o:	$(srcdir)/internet/UDPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
+	###############################################################################
+	# Compiling >>>internet/UDPSocket.cpp<<<
+	$(CXX) -Wall -o coverage/inet_UDPSocket.o -c $(srcdir)/internet/UDPSocket.cpp $(CFLAGS) @GCOV_CFLAGS@ 
+
 coverage/inet_inet_functions.o:	$(srcdir)/internet/inet_functions.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
 	###############################################################################
 	# Compiling >>>internet/inet_functions.cpp<<<
@@ -1003,21 +1018,6 @@ coverage/inet_sockaddr.o:	$(srcdir)/internet/sockaddr.cpp $(incdir)/ppl7.h $(inc
 	###############################################################################
 	# Compiling >>>internet/sockaddr.cpp<<<
 	$(CXX) -Wall -o coverage/inet_sockaddr.o -c $(srcdir)/internet/sockaddr.cpp $(CFLAGS) @GCOV_CFLAGS@ 
-
-coverage/inet_SocketMessage.o:	$(srcdir)/internet/SocketMessage.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/SocketMessage.cpp<<<
-	$(CXX) -Wall -o coverage/inet_SocketMessage.o -c $(srcdir)/internet/SocketMessage.cpp $(CFLAGS) @GCOV_CFLAGS@ 
-
-coverage/inet_TCPSocket.o:	$(srcdir)/internet/TCPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/TCPSocket.cpp<<<
-	$(CXX) -Wall -o coverage/inet_TCPSocket.o -c $(srcdir)/internet/TCPSocket.cpp $(CFLAGS) @GCOV_CFLAGS@ 
-
-coverage/inet_UDPSocket.o:	$(srcdir)/internet/UDPSocket.cpp $(incdir)/ppl7.h $(incdir)/ppl7-exceptions.h $(incdir)/ppl7-types.h $(incdir)/ppl7-config.h Makefile $(incdir)/ppl7-inet.h 
-	###############################################################################
-	# Compiling >>>internet/UDPSocket.cpp<<<
-	$(CXX) -Wall -o coverage/inet_UDPSocket.o -c $(srcdir)/internet/UDPSocket.cpp $(CFLAGS) @GCOV_CFLAGS@ 
 
 
 

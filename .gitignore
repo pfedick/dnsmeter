@@ -8,3 +8,8 @@
 /dnsmeter
 /.settings/
 /testdaten/
+/tests/compile/
+/tests/testsuite
+/tests/Makefile
+/.vscode/
+payload*

@@ -1,0 +1,501 @@
+###############################################################################
+# This file is part of "Patrick's Programming Library", Version 7 (PPL7).
+# Web: http://www.pfp.de/ppl/
+#
+###############################################################################
+#
+# Copyright (c) 2018, Patrick Fedick <patrick@pfp.de>
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#   1. Redistributions of source code must retain the above copyright notice,
+#      this list of conditions and the following disclaimer. 
+#   2. Redistributions in binary form must reproduce the above copyright notice,
+#      this list of conditions and the following disclaimer in the documentation
+#      and/or other materials provided with the distribution. 
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+###############################################################################
+
+GTEST_DIR	= @GTEST_PREFIX@
+CC			= @CC@
+CXX			= @CXX@
+EXTRA_CFLAGS = 
+INCLUDE	= -I. -I$(GTEST_DIR)/include
+CFLAGS	= -ggdb -Wall  $(INCLUDE) `../ppl7-config --cflags debug source` $(EXTRA_CFLAGS)
+CPPFLAGS	= @CPPFLAGS@
+CXXFLAGS	= @CXXFLAGS@
+LDFLAGS		= @LDFLAGS@
+LIBS	= `../ppl7-config --libs debug source` -lstdc++
+LIBS_REL = `../ppl7-config --libs release source` -lstdc++
+LIBS_COVERAGE	= `../ppl7-config --libs coverage source` @GCOV_LDFLAGS@ -lstdc++
+
+OBJECTS_COMMON = compile/textsnippets.o compile/wordlist.o
+
+OBJECTS_TESTSUITE = $(OBJECTS_COMMON) compile/main.o compile/libgtest.a
+
+OBJECTS_CORE = compile/array.o compile/assocarray.o compile/avltree.o \
+	compile/bytearray.o compile/bytearrayptr.o compile/configparser.o \
+	compile/datetime.o compile/dir.o compile/file.o compile/filestatic.o \
+	compile/functions.o compile/gzfile.o compile/iconv.o compile/list.o \
+	compile/logger.o compile/math.o compile/memorygroup.o compile/memoryheap.o \
+	compile/pointer.o compile/stringfunctions.o compile/strings.o \
+	compile/time.o compile/variant.o compile/widestrings.o \
+	compile/json.o compile/perlhelper.o compile/pythonhelper.o  
+
+OBJECTS_CRYPTO = compile/crypto.o compile/digest.o
+
+OBJECTS_DATABASE = compile/db_postgres.o compile/db_sqlite.o compile/db_mysql.o
+
+OBJECTS_GRAFIX = compile/grafix.o compile/grafix_drawable.o compile/grafix_imagefilter.o \
+	compile/grafix_color.o compile/grafix_font.o compile/grafix_image.o \
+	compile/grafix_point.o compile/grafix_point3d.o compile/grafix_rect.o \
+	compile/grafix_rgbformat.o compile/grafix_size.o
+
+OBJECTS_INET =  compile/inet.o compile/resolver.o compile/inet_ipaddress.o compile/inet_ipnetwork.o \
+	compile/tcpsocket.o compile/inet_sockaddr.o compile/wikiparser.o
+
+OBJECTS_AUDIO = compile/audioinfo.o compile/id3tag.o \
+	compile/audio_decoder_mp3.o compile/audio_decoder_aiff.o compile/audio_decoder_wave.o \
+	compile/audio_encoder_mp3.o compile/audio_encoder_aiff.o compile/audio_encoder_wave.o
+
+
+OBJECTS_PPL6COMPAT = compile/ppl6strings.o compile/ppl6assocarray.o
+
+OBJECTS_LEGACY = $(OBJECTS_CORE) $(OBJECTS_CRYPTO) $(OBJECTS_GRAFIX) $(OBJECTS_INET) \
+	$(OBJECTS_AUDIO)
+ 
+
+TESTSUITES = testsuite test_core test_crypto test_database test_audio test_grafix test_inet
+
+all: $(TESTSUITES) toolkit loggertest dbtest gfxreftest stringspeed
+
+
+coverage: $(PROGNAME)_coverage dbtest_coverage
+ 
+test: $(TESTSUITES)
+	-./test_core
+	-./test_audio
+	-./test_crypto
+	-./test_grafix
+	-./test_inet
+	
+xml: $(TESTSUITES)
+	-./test_core --gtest_output=xml:testresult_core.xml
+	-./test_audio --gtest_output=xml:testresult_audio.xml
+	-./test_crypto --gtest_output=xml:testresult_crypto.xml
+	-./test_grafix --gtest_output=xml:testresult_grafix.xml
+	-./test_inet --gtest_output=xml:testresult_inet.xml
+	
+memcheck: $(TESTSUITES)
+	valgrind --tool=memcheck --leak-check=full --show-reachable=no --suppressions=valgrind.suppressions --xml=yes --xml-file=testresult_core.valgrind ./testsuite
+
+
+clean:
+	-rm -rf compile tmp.grafixtest.png
+	-rm -rf *.core
+	-rm -rf test_* testresult_*
+
+################################################################################
+# TESTSUITES
+################################################################################
+
+test_core: $(OBJECTS_CORE) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_core $(CFLAGS) $(OBJECTS_CORE) $(OBJECTS_TESTSUITE) $(LIBS)
+	
+test_core_coverage: $(OBJECTS_CORE) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_core_coverage $(CFLAGS) $(OBJECTS_CORE) $(OBJECTS_TESTSUITE) $(LIBS_COVERAGE)
+
+test_crypto: $(OBJECTS_CRYPTO) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_crypto $(CFLAGS) $(OBJECTS_CRYPTO) $(OBJECTS_TESTSUITE) $(LIBS)
+	
+test_crypto_coverage: $(OBJECTS_CRYPTO) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_crypto_coverage $(CFLAGS) $(OBJECTS_CRYPTO) $(OBJECTS_TESTSUITE) $(LIBS_COVERAGE)
+
+test_database: $(OBJECTS_DATABASE) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_database $(CFLAGS) $(OBJECTS_DATABASE) $(OBJECTS_TESTSUITE) $(LIBS)
+	
+test_database_coverage: $(OBJECTS_DATABASE) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_database_coverage $(CFLAGS) $(OBJECTS_DATABASE) $(OBJECTS_TESTSUITE) $(LIBS_COVERAGE)
+
+test_audio: $(OBJECTS_AUDIO) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_audio $(CFLAGS) $(OBJECTS_AUDIO) $(OBJECTS_TESTSUITE) $(LIBS)
+	
+test_audio_coverage: $(OBJECTS_AUDIO) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_audio_coverage $(CFLAGS) $(OBJECTS_AUDIO) $(OBJECTS_TESTSUITE) $(LIBS_COVERAGE)
+
+test_grafix: $(OBJECTS_GRAFIX) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_grafix $(CFLAGS) $(OBJECTS_GRAFIX) $(OBJECTS_TESTSUITE) $(LIBS)
+	
+test_grafix_coverage: $(OBJECTS_GRAFIX) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_grafix_coverage $(CFLAGS) $(OBJECTS_GRAFIX) $(OBJECTS_TESTSUITE) $(LIBS_COVERAGE)
+
+test_inet: $(OBJECTS_INET) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_inet $(CFLAGS) $(OBJECTS_INET) $(OBJECTS_TESTSUITE) $(LIBS)
+	
+test_inet_coverage: $(OBJECTS_INET) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_inet_coverage $(CFLAGS) $(OBJECTS_INET) $(OBJECTS_TESTSUITE) $(LIBS_COVERAGE)
+
+test_ppl6: $(OBJECTS_PPL6COMPAT) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o test_ppl6 $(CFLAGS) $(OBJECTS_PPL6COMPAT) $(OBJECTS_TESTSUITE) -lppl6 $(LIBS)
+
+
+################################################################################
+# LEGACY TESTSUITES
+################################################################################
+
+testsuite: $(OBJECTS_LEGACY) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o testsuite $(CFLAGS) $(OBJECTS_LEGACY) $(OBJECTS_TESTSUITE) $(LIBS)
+	
+testsuite_coverage: $(OBJECTS_LEGACY) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o testsuite_coverage $(CFLAGS) $(OBJECTS_LEGACY) $(OBJECTS_TESTSUITE) $(LIBS_COVERAGE)
+
+
+dbtest: $(OBJECTS_DATABASE) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o dbtest $(CFLAGS) $(OBJECTS_DATABASE) $(OBJECTS_TESTSUITE) $(LIBS)
+	
+dbtest_coverage: $(OBJECTS_CRYPTO) $(OBJECTS_TESTSUITE) ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o dbtest_coverage $(CFLAGS) $(OBJECTS_CRYPTO) $(OBJECTS_TESTSUITE) $(LIBS_COVERAGE)
+
+threadtest: compile/threadtest.o ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o threadtest $(CFLAGS) compile/threadtest.o $(LIBS)
+
+compile/threadtest.o: src/threadtest.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/threadtest.o -c src/threadtest.cpp $(CFLAGS) $(LIB)
+
+stringspeed: compile/stringspeed.o compile/wordlist.o ppl7-tests.h
+	$(CXX) $(CXXFLAGS) -ggdb -o stringspeed $(CFLAGS) compile/stringspeed.o compile/wordlist.o $(LIBS_REL)
+
+compile/stringspeed.o: src/stringspeed.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/stringspeed.o -c src/stringspeed.cpp $(CFLAGS) $(LIB)
+
+	
+toolkit: compile/toolkit.o src/toolkit.h ../release/libppl7.a
+	$(CXX) $(CXXFLAGS) -ggdb -o toolkit $(CFLAGS) compile/toolkit.o $(LIBS)
+
+loggertest: src/loggertest.cpp ../release/libppl7.a
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -ggdb -o loggertest $(CFLAGS) src/loggertest.cpp $(LIBS)
+
+
+compile/gfxreftest.o: src/gfxreftest.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/gfxreftest.o -c src/gfxreftest.cpp $(CFLAGS) $(LIB)
+
+
+gfxreftest: compile/gfxreftest.o ../release/libppl7.a
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -ggdb -o gfxreftest $(CFLAGS) compile/gfxreftest.o $(LIBS)
+
+################################################################################
+# COMMON
+################################################################################
+
+compile/libgtest.a:
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -I${GTEST_DIR}/include -I${GTEST_DIR} -o compile/gtest-all.o -c ${GTEST_DIR}/src/gtest-all.cc
+	ar -rv compile/libgtest.a compile/gtest-all.o
+
+
+compile/main.o: src/main.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) $(CFLAGS) -o compile/main.o -c src/main.cpp
+
+compile/wordlist.o: src/wordlist.cpp
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -Wall $(CXXFLAGS) -o compile/wordlist.o -c -c src/wordlist.cpp $(CFLAGS)
+
+compile/textsnippets.o: src/textsnippets.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/textsnippets.o -c src/textsnippets.cpp $(CFLAGS) $(LIB)
+
+
+################################################################################
+# CORE
+################################################################################
+
+compile/functions.o: src/core/functions.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) $(CFLAGS) -o compile/functions.o -c src/core/functions.cpp
+
+compile/pointer.o: src/core/pointer.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/pointer.o -c src/core/pointer.cpp $(CFLAGS) $(LIB)
+
+compile/datetime.o: src/core/datetime.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/datetime.o -c src/core/datetime.cpp $(CFLAGS) $(LIB)
+
+compile/bytearray.o: src/core/bytearray.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/bytearray.o -c src/core/bytearray.cpp $(CFLAGS) $(LIB)
+
+compile/bytearrayptr.o: src/core/bytearrayptr.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/bytearrayptr.o -c src/core/bytearrayptr.cpp $(CFLAGS) $(LIB)
+
+compile/strings.o: src/core/strings.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/strings.o -c src/core/strings.cpp $(CFLAGS) $(LIB)
+
+compile/stringfunctions.o: src/core/stringfunctions.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/stringfunctions.o -c src/core/stringfunctions.cpp $(CFLAGS) $(LIB)
+
+compile/iconv.o: src/core/iconv.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/iconv.o -c src/core/iconv.cpp $(CFLAGS) $(LIB)
+
+compile/variant.o: src/core/variant.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/variant.o -c src/core/variant.cpp $(CFLAGS) $(LIB)
+
+compile/widestrings.o: src/core/widestrings.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/widestrings.o -c src/core/widestrings.cpp $(CFLAGS) $(LIB)
+
+compile/array.o: src/core/array.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/array.o -c src/core/array.cpp $(CFLAGS) $(LIB)
+
+compile/memoryheap.o: src/core/memoryheap.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/memoryheap.o -c src/core/memoryheap.cpp $(CFLAGS) $(LIB)
+
+compile/memorygroup.o: src/core/memorygroup.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/memorygroup.o -c src/core/memorygroup.cpp $(CFLAGS) $(LIB)
+
+compile/avltree.o: src/core/avltree.cpp Makefile compile/wordlist.o ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/avltree.o -c src/core/avltree.cpp $(CFLAGS) $(LIB)
+
+compile/assocarray.o: src/core/assocarray.cpp Makefile compile/wordlist.o ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/assocarray.o -c src/core/assocarray.cpp $(CFLAGS) $(LIB)
+
+compile/file.o: src/core/file.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/file.o -c src/core/file.cpp $(CFLAGS) $(LIB)
+
+compile/gzfile.o: src/core/gzfile.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/gzfile.o -c src/core/gzfile.cpp $(CFLAGS) $(LIB)
+
+compile/filestatic.o: src/core/filestatic.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/filestatic.o -c src/core/filestatic.cpp $(CFLAGS) $(LIB)
+
+compile/time.o: src/core/time.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/time.o -c src/core/time.cpp $(CFLAGS) $(LIB)
+
+compile/dir.o: src/core/dir.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/dir.o -c src/core/dir.cpp $(CFLAGS) $(LIB)
+
+compile/list.o: src/core/list.cpp Makefile compile/wordlist.o ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/list.o -c src/core/list.cpp $(CFLAGS) $(LIB)
+
+compile/logger.o: src/core/logger.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/logger.o -c src/core/logger.cpp $(CFLAGS) $(LIB)
+
+compile/configparser.o: src/core/configparser.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/configparser.o -c src/core/configparser.cpp $(CFLAGS) $(LIB)
+
+compile/math.o: src/core/math.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/math.o -c src/core/math.cpp $(CFLAGS) $(LIB)
+
+compile/json.o: src/core/json.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/json.o -c src/core/json.cpp $(CFLAGS) $(LIB)
+
+compile/perlhelper.o: src/core/perlhelper.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/perlhelper.o -c src/core/perlhelper.cpp $(CFLAGS) $(LIB)
+
+compile/pythonhelper.o: src/core/pythonhelper.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/pythonhelper.o -c src/core/pythonhelper.cpp $(CFLAGS) $(LIB)
+
+################################################################################
+# INET
+################################################################################
+compile/inet.o: src/inet/inet.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/inet.o -c src/inet/inet.cpp $(CFLAGS) $(LIB)
+
+compile/inet_ipaddress.o: src/inet/ipaddress.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/inet_ipaddress.o -c src/inet/ipaddress.cpp $(CFLAGS) $(LIB)
+
+compile/inet_ipnetwork.o: src/inet/ipnetwork.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/inet_ipnetwork.o -c src/inet/ipnetwork.cpp $(CFLAGS) $(LIB)
+
+compile/inet_sockaddr.o: src/inet/sockaddr.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/inet_sockaddr.o -c src/inet/sockaddr.cpp $(CFLAGS) $(LIB)
+
+compile/resolver.o: src/inet/resolver.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/resolver.o -c src/inet/resolver.cpp $(CFLAGS) $(LIB)
+	
+compile/tcpsocket.o: src/inet/tcpsocket.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/tcpsocket.o -c src/inet/tcpsocket.cpp $(CFLAGS) $(LIB)
+
+compile/wikiparser.o: src/inet/wikiparser.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/wikiparser.o -c src/inet/wikiparser.cpp $(CFLAGS) $(LIB)
+
+################################################################################
+# GRAFIX
+################################################################################
+
+compile/grafix.o: src/grafix/grafix.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix.o -c src/grafix/grafix.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_color.o: src/grafix/grafix_color.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_color.o -c src/grafix/grafix_color.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_drawable.o: src/grafix/grafix_drawable.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_drawable.o -c src/grafix/grafix_drawable.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_font.o: src/grafix/grafix_font.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_font.o -c src/grafix/grafix_font.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_image.o: src/grafix/grafix_image.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_image.o -c src/grafix/grafix_image.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_imagefilter.o: src/grafix/grafix_imagefilter.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_imagefilter.o -c src/grafix/grafix_imagefilter.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_point.o: src/grafix/grafix_point.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_point.o -c src/grafix/grafix_point.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_point3d.o: src/grafix/grafix_point3d.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_point3d.o -c src/grafix/grafix_point3d.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_rect.o: src/grafix/grafix_rect.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_rect.o -c src/grafix/grafix_rect.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_rgbformat.o: src/grafix/grafix_rgbformat.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_rgbformat.o -c src/grafix/grafix_rgbformat.cpp $(CFLAGS) $(LIB)
+
+compile/grafix_size.o: src/grafix/grafix_size.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/grafix_size.o -c src/grafix/grafix_size.cpp $(CFLAGS) $(LIB)
+
+compile/toolkit.o: src/toolkit.cpp Makefile ppl7-tests.h src/toolkit.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/toolkit.o -c src/toolkit.cpp $(CFLAGS) $(LIB)
+	
+################################################################################
+# DATABASE
+################################################################################
+	
+compile/db_postgres.o: src/database/db_postgres.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/db_postgres.o -c src/database/db_postgres.cpp $(CFLAGS) $(LIB)
+
+compile/db_sqlite.o: src/database/db_sqlite.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/db_sqlite.o -c src/database/db_sqlite.cpp $(CFLAGS) $(LIB)
+
+compile/db_mysql.o: src/database/db_mysql.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/db_mysql.o -c src/database/db_mysql.cpp $(CFLAGS) $(LIB)
+	
+
+################################################################################
+# CRYPTO
+################################################################################
+	
+compile/digest.o: src/crypto/digest.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/digest.o -c src/crypto/digest.cpp $(CFLAGS) $(LIB)
+
+compile/crypto.o: src/crypto/crypto.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/crypto.o -c src/crypto/crypto.cpp $(CFLAGS) $(LIB)
+
+################################################################################
+# AUDIO
+################################################################################
+
+compile/audioinfo.o: src/audio/audioinfo.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/audioinfo.o -c src/audio/audioinfo.cpp $(CFLAGS) $(LIB)
+
+compile/id3tag.o: src/audio/id3tag.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/id3tag.o -c src/audio/id3tag.cpp $(CFLAGS) $(LIB)
+
+compile/audio_decoder_aiff.o: src/audio/audio_decoder_aiff.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/audio_decoder_aiff.o -c src/audio/audio_decoder_aiff.cpp $(CFLAGS) $(LIB)
+
+compile/audio_decoder_wave.o: src/audio/audio_decoder_wave.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/audio_decoder_wave.o -c src/audio/audio_decoder_wave.cpp $(CFLAGS) $(LIB)
+
+compile/audio_decoder_mp3.o: src/audio/audio_decoder_mp3.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/audio_decoder_mp3.o -c src/audio/audio_decoder_mp3.cpp $(CFLAGS) $(LIB)
+
+compile/audio_encoder_aiff.o: src/audio/audio_encoder_aiff.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/audio_encoder_aiff.o -c src/audio/audio_encoder_aiff.cpp $(CFLAGS) $(LIB)
+
+compile/audio_encoder_wave.o: src/audio/audio_encoder_wave.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/audio_encoder_wave.o -c src/audio/audio_encoder_wave.cpp $(CFLAGS) $(LIB)
+
+compile/audio_encoder_mp3.o: src/audio/audio_encoder_mp3.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) -o compile/audio_encoder_mp3.o -c src/audio/audio_encoder_mp3.cpp $(CFLAGS) $(LIB)
+
+################################################################################
+# PPL6COMPAT
+################################################################################
+
+compile/ppl6assocarray.o: src/ppl6/assocarray.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) $(CFLAGS) -o compile/ppl6assocarray.o -c src/ppl6/assocarray.cpp
+	
+compile/ppl6strings.o: src/ppl6/strings.cpp Makefile ppl7-tests.h
+	mkdir -p compile
+	$(CXX) $(CXXFLAGS) $(CFLAGS) -o compile/ppl6strings.o -c src/ppl6/strings.cpp
+	
+	
+	

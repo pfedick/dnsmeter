@@ -30,6 +30,13 @@ uninstall:
 clean:
 	-rm -rf build dnsmeter ppl7/release
 
+docker-build: dnsmeter
+	docker build -t dnsmeter:latest .
+	
+docker-start:
+	- @docker stop dnsmeter > /dev/null 2>&1 || echo -n ""
+	- @docker rm dnsmeter
+	docker run --rm -t -i --name dnsmeter dnsmeter:latest
 
 dnsmeter: $(OBJECTS) Makefile ppl7/release/libppl7.a
 	$(CXX) -O -o dnsmeter $(CFLAGS) $(OBJECTS) ppl7/release/libppl7.a $(LIBS)
