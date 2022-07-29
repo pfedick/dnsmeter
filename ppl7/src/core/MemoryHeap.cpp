@@ -33,7 +33,7 @@
  *******************************************************************************/
 
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -288,7 +288,7 @@ void MemoryHeap::increase(size_t num)
 		::free(bl);
 		throw OutOfMemoryException();
 	}
-	bl->bufferend=(ppluint8*)bl->buffer+myElementSize*num;
+	bl->bufferend=(uint8_t*)bl->buffer+myElementSize*num;
 	bl->free=(HEAPELEMENT *)::malloc(sizeof(HEAPELEMENT)*num);
 	if (!bl->free) {
 		::free(bl->buffer);
@@ -297,7 +297,7 @@ void MemoryHeap::increase(size_t num)
 	}
 	bl->elbuffer=bl->free;
 	HEAPELEMENT *t,*prev=NULL;
-	ppluint8 *buffer=(ppluint8*)bl->buffer;
+	uint8_t *buffer=(uint8_t*)bl->buffer;
 	for(size_t i=0;i<num;i++) {
 		t=&bl->free[i];
 		t->previous=prev;
@@ -395,7 +395,7 @@ void MemoryHeap::free(void *mem)
 		if (mem>=bl->buffer && mem<=bl->bufferend) {
 			// Nummer des Blocks errechnen
 			HEAPELEMENT *el=bl->elbuffer;
-			int element=(ppluint32)((ppluint8*)mem-(ppluint8*)bl->buffer)/(int)myElementSize;
+			int element=(uint32_t)((uint8_t*)mem-(uint8_t*)bl->buffer)/(int)myElementSize;
 			if(el[element].ptr!=mem) {
 				// Hier stimmt was nicht!!!!
 				throw HeapCorruptedException();

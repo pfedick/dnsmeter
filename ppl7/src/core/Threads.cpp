@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -46,8 +46,15 @@
 #include <stdarg.h>
 #endif
 
-#ifdef HAVE_PTHREADS
+#ifdef HAVE_PTHREAD_H
 	#include <pthread.h>
+#endif
+#ifdef HAVE_PTHREAD_NP_H
+	#include <pthread_np.h>
+#endif
+
+#ifdef HAVE_SCHED_H
+#include <sched.h>
 #endif
 
 #ifdef HAVE_LIMITS_H
@@ -64,11 +71,11 @@
 #define _WINSOCKAPI_   /* Prevent inclusion of winsock.h in windows.h */
 #include <windows.h>
 #endif
-#include "threads.h"
+#include "threads_ppl7.h"
 
 namespace ppl7 {
 
-static ppluint64 global_thread_id=0;
+static uint64_t global_thread_id=0;
 static Mutex GlobalThreadMutex;
 
 
@@ -192,7 +199,7 @@ THREADDATA * GetThreadData()
 #endif
 }
 
-ppluint64 ThreadID()
+uint64_t ThreadID()
 {
 	THREADDATA *ptr=GetThreadData();
 	return ptr->threadId;
@@ -262,7 +269,7 @@ void SetTLSData(void *data)
 #endif
 
 
-ppluint64 StartThread(void (*start_routine)(void *),void *data)
+uint64_t StartThread(void (*start_routine)(void *),void *data)
 {
 	THREADSTARTUP *ts=(THREADSTARTUP*)malloc(sizeof(THREADSTARTUP));
 	if (!ts) throw OutOfMemoryException();
@@ -444,6 +451,7 @@ Thread::Thread()
 	IsRunning=0;
 	IsSuspended=0;
 	deleteMe=0;
+	runcount=0;
 	#ifdef HAVE_PTHREADS
 		pthread_attr_init(&t->attr);
 	#endif
@@ -471,6 +479,21 @@ Thread::~Thread()
 	VALGRIND_HG_CLEAN_MEMORY(this,sizeof(Thread));
 #endif
 }
+
+void Thread::threadSetName(const char *name)
+{
+	THREADDATA *t=(THREADDATA *)threaddata;
+	if (!t) return;
+	#ifdef HAVE_PTHREADS
+#ifdef HAVE_PTHREAD_SET_NAME_NP
+		pthread_set_name_np(t->thread,name);
+#elif defined HAVE_PTHREAD_SETNAME_NP
+		pthread_setname_np(t->thread,name);
+#endif
+	#endif
+}
+
+
 
 /*! \brief Der Thread wird gestoppt
  *
@@ -589,7 +612,12 @@ void Thread::threadIdle()
 #elif defined HAVE_PTHREADS
 	#ifdef SOLARIS
 	#else
+		// DEPRECATED, use sched_yield instead
+#ifdef HAVE_SCHED_YIELD
+		sched_yield();
+#elif defined HAVE_PTHREAD_YIELD
 		pthread_yield();
+#endif
 	#endif
 #endif
 }
@@ -652,6 +680,7 @@ void Thread::threadResume()
 void Thread::threadStartUp()
 {
 	threadmutex.lock();
+	runcount++;
 	IsRunning=1;
 	IsSuspended=0;
 	threadmutex.unlock();
@@ -775,6 +804,11 @@ int Thread::threadShouldStop()
 	return ret;
 }
 
+size_t Thread::threadRunCount()
+{
+	return runcount;
+}
+
 /*! \brief Prüfen, ob der Thread schlafen soll
  *
  * ThreadWaitSuspended prüft, ob der Thread schlafen (suspend) soll, und wenn
@@ -820,7 +854,7 @@ void Thread::threadSleep(int msec)
  * \return Liefert einen 64-Bit-Wert mit der Thread-ID zurück.
  * \see \ref PPLGroupThreads
  */
-ppluint64 Thread::threadGetID()
+uint64_t Thread::threadGetID()
 {
 	THREADDATA *t=(THREADDATA *)threaddata;
 	if (!t) return 0;
@@ -981,7 +1015,7 @@ int Thread::threadSetStackSize(size_t size)
 		#endif
 		THREADDATA *t=(THREADDATA *)threaddata;
 		if (size==0) size=PTHREAD_STACK_MIN;
-		if (size<PTHREAD_STACK_MIN) {
+		if (size<(size_t)PTHREAD_STACK_MIN) {
 			throw IllegalArgumentException("Stacksize must not be smaller than %u Bytes",PTHREAD_STACK_MIN);
 			return 0;
 		}
@@ -1024,6 +1058,33 @@ size_t Thread::threadGetStackSize()
 		if (pthread_attr_getstacksize(&t->attr,&s)==0) return s;
 	#endif
 	return 0;
+}
+
+void Thread::threadJoin()
+{
+#ifdef WIN32
+	THREADDATA *t=(THREADDATA *)threaddata;
+	DWORD ret=WaitForSingleObject(t->thread,INFINITE);
+	if (ret!=0) {
+		ThreadOperationFailedException();
+	}
+
+	throw UnsupportedFeatureException("Thread::threadJoin");
+#elif defined HAVE_PTHREADS
+	THREADDATA *t=(THREADDATA *)threaddata;
+	int ret=pthread_join(t->thread, NULL);
+	if (ret!=0) {
+		switch (ret) {
+		case EDEADLK: throw DeadlockException();
+		case EINVAL: ThreadOperationFailedException("Thread is not joinable");
+		case ESRCH: ThreadOperationFailedException("Thread not found");
+		default:
+			ppl7::throwExceptionFromErrno(ret, "Thread is not joinable");
+		}
+	}
+#else
+	throw UnsupportedFeatureException("Thread::threadJoin");
+#endif
 }
 
 

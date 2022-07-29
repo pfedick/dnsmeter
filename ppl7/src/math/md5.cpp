@@ -61,7 +61,6 @@
  * This code is the same as the code published by RSA Inc.  It has been
  * edited for clarity and style only.
  */
-#include "prolog.h"
 #include <sys/types.h>
 #include <string.h>
 #include <fcntl.h>
@@ -69,6 +68,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "prolog_ppl7.h"
 #ifdef _WIN32
 #include <io.h>
 #else
@@ -80,7 +81,7 @@ namespace ppl7 {
 
 
 #ifndef u_int32_t
-#define u_int32_t	ppluint32
+#define u_int32_t	uint32_t
 #endif
 
 #define LENGTH 16
@@ -90,8 +91,8 @@ static void MD5Transform (u_int32_t state[4], const unsigned char block[64]);
 
 // MD5 Berechnung
 typedef struct MD5Context {
-		ppluint32 state[4];   /* state (ABCD) */
-		ppluint32 count[2];   /* number of bits, modulo 2^64 (lsb first) */
+		uint32_t state[4];   /* state (ABCD) */
+		uint32_t count[2];   /* number of bits, modulo 2^64 (lsb first) */
 		unsigned char buffer[64]; /* input buffer */
 } MD5_CTX;
 static void   MD5Init (MD5_CTX *);
@@ -490,7 +491,7 @@ String FileObject::md5()
 	char tmp[33];
 	MD5_CTX ctx;
 	MD5Init(&ctx);
-	ppluint64 oldpos=tell();
+	uint64_t oldpos=tell();
 	seek(0);
 	size_t bytes_read;
 	size_t len=1024*1024;
@@ -499,7 +500,7 @@ String FileObject::md5()
 			bytes_read=fread(buffer,1,len);
 			MD5Update(&ctx,(const unsigned char *)buffer,bytes_read);
 		}
-	} catch (const ppl7::EndOfFileException) {
+	} catch (const ppl7::EndOfFileException &) {
 		// ignore
 	}
 	free(buffer);

@@ -32,14 +32,15 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
 #include <stdio.h>
 #include <string.h>
+
+#include "prolog_ppl7.h"
 #include "ppl7.h"
 
 namespace ppl7 {
 
-static ppluint32 crc32_table[256] = {
+static uint32_t crc32_table[256] = {
 	0x00000000,0x77073096,0xee0e612c,0x990951ba,0x076dc419,0x706af48f,
 	0xe963a535,0x9e6495a3,0x0edb8832,0x79dcb8a4,0xe0d5e91e,0x97d2d988,
 	0x09b64c2b,0x7eb17cbd,0xe7b82d07,0x90bf1d91,0x1db71064,0x6ab020f2,
@@ -86,7 +87,7 @@ static ppluint32 crc32_table[256] = {
 };
 
 
-ppluint32 Crc32(const void* buffer, size_t size)
+uint32_t Crc32(const void* buffer, size_t size)
 /*!\ingroup PPLGroupMath
  * \brief Berechnet den polynomischen CRC32-Wert eines Strings
  *
@@ -99,7 +100,7 @@ ppluint32 Crc32(const void* buffer, size_t size)
  * \return Integer mit der Prüfsumme
  */
 {
-      ppluint32  ulCRC(0xffffffff);
+      uint32_t  ulCRC(0xffffffff);
       unsigned char* b=(unsigned char*)buffer;
 	  size_t len=size;
       while(len--)

@@ -32,9 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
-
-
+#include "prolog_ppl7.h"
 #include "ppl7.h"
 
 namespace ppl7 {

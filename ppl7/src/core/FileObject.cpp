@@ -33,13 +33,13 @@
  *******************************************************************************/
 
 
-#include "prolog.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <time.h>
+
+#include "prolog_ppl7.h"
 #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
 #endif
@@ -212,7 +212,7 @@ const String& FileObject::filename() const
  * @return Bei Erfolg liefert die Funktion die Anzahl geschriebener Bytes zurück, im
  * Fehlerfall wird eine Exception geworfen.
  */
-size_t FileObject::write (const void * source, size_t bytes, ppluint64 fileposition)
+size_t FileObject::write (const void * source, size_t bytes, uint64_t fileposition)
 {
 	seek(fileposition);
 	return fwrite(source,1,bytes);
@@ -273,7 +273,7 @@ size_t FileObject::write (const ByteArrayPtr &object, size_t bytes)
  * Wenn  ein Fehler  auftritt  oder  das
  * Dateiende erreicht ist, wird eine Exception geworfen.
  */
-size_t FileObject::read (void * target, size_t bytes, ppluint64 fileposition)
+size_t FileObject::read (void * target, size_t bytes, uint64_t fileposition)
 {
 	seek(fileposition);
 	return fread(target,1,bytes);
@@ -322,7 +322,7 @@ size_t FileObject::read (ByteArray &target, size_t bytes)
 {
 	if (!bytes) throw IllegalArgumentException();
 	target.free();
-	target.malloc(bytes+4);
+	target.malloc(bytes);
 	return fread((void*)target.ptr(),1,bytes);
 }
 
@@ -343,7 +343,7 @@ size_t FileObject::read (ByteArray &target, size_t bytes)
  * \note Die Funktion verwendet einen internen Buffer zum Zwischenspeichern
  * der gelesenen Daten.
  */
-ppluint64 FileObject::copyFrom (FileObject &quellfile, ppluint64 quelloffset, ppluint64 bytes, ppluint64 zieloffset)
+uint64_t FileObject::copyFrom (FileObject &quellfile, uint64_t quelloffset, uint64_t bytes, uint64_t zieloffset)
 {
 	quellfile.seek(quelloffset);
 	seek(zieloffset);
@@ -365,19 +365,19 @@ ppluint64 FileObject::copyFrom (FileObject &quellfile, ppluint64 quelloffset, pp
  * \note Die Funktion verwendet einen internen Buffer zum Zwischenspeichern
  * der gelesenen Daten.
  */
-ppluint64 FileObject::copyFrom (FileObject &quellfile, ppluint64 bytes)
+uint64_t FileObject::copyFrom (FileObject &quellfile, uint64_t bytes)
 {
 	if (buffer==NULL) {
 		buffer=(char *)malloc(COPYBYTES_BUFFERSIZE);
 		if (buffer==NULL) throw OutOfMemoryException();
 	}
 	if (quellfile.size()>quellfile.tell()) {
-		if ((quellfile.tell()+(ppluint64)bytes)>quellfile.size()) {
+		if ((quellfile.tell()+(uint64_t)bytes)>quellfile.size()) {
 			bytes=quellfile.size()-quellfile.tell();
 		}
-		ppluint64 rest=bytes;
+		uint64_t rest=bytes;
 		while (rest>0) {
-			ppluint64 by=rest;
+			uint64_t by=rest;
 			if (by>COPYBYTES_BUFFERSIZE) by=COPYBYTES_BUFFERSIZE;
 			by=quellfile.read (buffer,(size_t)by);
 			write (buffer,(size_t)by);
@@ -590,10 +590,10 @@ const char *FileObject::map()
  */
 char *FileObject::load()
 {
-	ppluint64 s=size();
+	uint64_t s=size();
 	char *b=(char*)malloc((size_t)s+1);
 	if (!b) throw OutOfMemoryException();
-	ppluint64 r=0;
+	uint64_t r=0;
 	try {
 		r=read(b,(size_t)s,0);
 	} catch (...) {
@@ -620,7 +620,7 @@ char *FileObject::load()
 int FileObject::load(ByteArray &object)
 {
 	if (!isOpen()) throw FileNotOpenException();
-	ppluint64 mysize=size();
+	uint64_t mysize=size();
 	seek(0);
 	char *buffer=(char*)malloc((size_t)mysize+1);
 	if (!buffer) throw OutOfMemoryException();
@@ -679,7 +679,7 @@ void FileObject::rewind ()
  * \param[in] position Gewünschte Position innerhalb der Datei
  * \exception diverse
  */
-void FileObject::seek (ppluint64 position)
+void FileObject::seek (uint64_t position)
 {
 	throw UnimplementedVirtualFunctionException();
 }
@@ -706,7 +706,7 @@ void FileObject::seek (ppluint64 position)
  * ist in diesem Fall undefiniert und sollte mittels FileObject::ftell verifiziert
  * werden.
  */
-ppluint64 FileObject::seek (pplint64 offset, SeekOrigin origin)
+uint64_t FileObject::seek (int64_t offset, SeekOrigin origin)
 {
 	throw UnimplementedVirtualFunctionException();
 }
@@ -719,7 +719,7 @@ ppluint64 FileObject::seek (pplint64 offset, SeekOrigin origin)
  * @return Position des Zeigers innerhalb der Datei. Im Fehlerfall wird eine
  * Exception geworfen
  */
-ppluint64 FileObject::tell()
+uint64_t FileObject::tell()
 {
 	throw UnimplementedVirtualFunctionException();
 }
@@ -923,7 +923,7 @@ bool FileObject::eof() const
  * \return Größe der Datei in Bytes. Falls Fehler auftreten, wird eine Exception geworfen.
  *
  */
-ppluint64 FileObject::size() const
+uint64_t FileObject::size() const
 {
 	throw UnimplementedVirtualFunctionException();
 }
@@ -994,7 +994,7 @@ void FileObject::sync()
  * @param length Position, an der die Datei abgeschnitten werden soll.
  * \return Kein Rückgabewert, im Fehlerfall wird eine Exception geworfen.
  */
-void FileObject::truncate(ppluint64 length)
+void FileObject::truncate(uint64_t length)
 {
 	throw UnimplementedVirtualFunctionException();
 }
@@ -1098,7 +1098,7 @@ void FileObject::setMapReadAhead(size_t bytes)
  * @return Bei Erfolg gibt die Funktion einen Pointer auf den Speicherbereich zurück,
  * in dem sich die Datei befindet, im Fehlerfall wird eine Exception geworfen.
  */
-const char *FileObject::map(ppluint64 position, size_t size)
+const char *FileObject::map(uint64_t position, size_t size)
 {
 	throw UnimplementedVirtualFunctionException();
 }
@@ -1123,7 +1123,7 @@ const char *FileObject::map(ppluint64 position, size_t size)
  * @return Bei Erfolg gibt die Funktion einen Pointer auf den Speicherbereich zurück,
  * in dem sich die Datei befindet, im Fehlerfall wird eine Exception geworfen.
  */
-char *FileObject::mapRW(ppluint64 position, size_t size)
+char *FileObject::mapRW(uint64_t position, size_t size)
 {
 	throw UnimplementedVirtualFunctionException();
 }

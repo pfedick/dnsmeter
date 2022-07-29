@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -212,6 +212,11 @@ void IPAddress::set(IP_FAMILY family, void *addr, size_t addr_len)
 IPAddress::IP_FAMILY IPAddress::family() const
 {
 	return _family;
+}
+
+int IPAddress::version() const
+{
+	return (int)_family;
 }
 
 const void *IPAddress::addr() const

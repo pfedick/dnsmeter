@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -271,6 +271,13 @@ void SockAddr::setAddr(const IPAddress &ip)
 	} else {
 		throw InvalidIpAddressException();
 	}
+}
+
+int SockAddr::version() const
+{
+	if (!saddr) throw InvalidIpAddressException("No IP-Address stored");
+	if (((struct sockaddr_in*)saddr)->sin_family==AF_INET) return 4;
+	return 6;
 }
 
 void SockAddr::setAddr(const IPAddress &ip, int port)

@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -202,6 +202,20 @@ size_t ByteArrayPtr::size() const
 const void *ByteArrayPtr::adr() const
 {
 	return ptradr;
+}
+
+const char*	ByteArrayPtr::map(size_t position, size_t size)
+{
+	if (position+size>=ptrsize) throw ppl7::OverflowException("ByteArrayPtr::map position (%zu) + size (%zu) exceeds size of ByteArray (%zu > %zu)",
+			position,size,position+size,ptrsize);
+	return (const char*)ptradr+position;
+}
+
+void ByteArrayPtr::truncate(size_t position)
+{
+	if (position>ptrsize) throw ppl7::OverflowException("ByteArrayPtr::truncate position exceeds size of ByteArray (%zu > %zu)",
+			position,ptrsize);
+	ptrsize=position;
 }
 
 /*!\brief Adresse des Speicherblocks auslesen
@@ -383,7 +397,7 @@ const char* ByteArrayPtr::toCharPtr() const
  *
  * @return CRC32-Prüfsumme
  */
-ppluint32 ByteArrayPtr::crc32() const
+uint32_t ByteArrayPtr::crc32() const
 {
 	if (ptrsize==0) throw EmptyDataException();
 	return Crc32(ptradr,ptrsize);

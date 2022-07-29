@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -351,7 +351,7 @@ String ToQuotedPrintable (const String &source)
  * @return Liefert den Wert \p net in System-spezifischer Byte-Reihenfolge
  * zurück
  */
-ppluint32 Ntohl(ppluint32 net)
+uint32_t Ntohl(uint32_t net)
 {
 	return ntohl(net);
 }
@@ -368,7 +368,7 @@ ppluint32 Ntohl(ppluint32 net)
  * @return Liefert den Wert \p host in Netzwerk-Byteorder (Big Endian)
  * zurück
  */
-ppluint32 Htonl(ppluint32 host)
+uint32_t Htonl(uint32_t host)
 {
 	return htonl(host);
 }
@@ -384,7 +384,7 @@ ppluint32 Htonl(ppluint32 host)
  * @return Liefert den Wert \p net in System-spezifischer Byte-Reihenfolge
  * zurück
  */
-ppluint16 Ntohs(ppluint16 net)
+uint16_t Ntohs(uint16_t net)
 {
 	return ntohs(net);
 }
@@ -401,7 +401,7 @@ ppluint16 Ntohs(ppluint16 net)
  * @return Liefert den Wert \p host in Netzwerk-Byteorder (Big Endian)
  * zurück
  */
-ppluint16 Htons(ppluint16 host)
+uint16_t Htons(uint16_t host)
 {
 	return htons(host);
 }

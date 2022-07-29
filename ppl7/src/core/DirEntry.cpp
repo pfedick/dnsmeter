@@ -33,7 +33,7 @@
  *******************************************************************************/
 
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
@@ -117,7 +117,7 @@ namespace ppl7 {
 /*!\var DirEntry::Size
  * \brief Größe der Datei in Bytes
  *
- * Größe der Datei in Bytes als vorzeichenloser 64-Bit-Wert (ppluint64).
+ * Größe der Datei in Bytes als vorzeichenloser 64-Bit-Wert (uint64_t).
  */
 
 /*!\var DirEntry::Attrib

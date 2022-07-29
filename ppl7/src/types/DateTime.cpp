@@ -32,10 +32,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "prolog_ppl7.h"
 
 /*
        The glibc version of struct tm has additional fields
@@ -173,7 +173,7 @@ DateTime::DateTime(const DateTime &other)
  *
  * @param t 64-Bit Integer mit den Sekunden seit 1970.
  */
-DateTime::DateTime(ppluint64 t)
+DateTime::DateTime(uint64_t t)
 {
 	setTime_t(t);
 }
@@ -532,7 +532,7 @@ void DateTime::set(const PPLTIME &t)
  *
  * @param t 64-Bit Integer mit den Sekunden seit 1970.
  */
-void DateTime::setTime_t(ppluint64 t)
+void DateTime::setTime_t(uint64_t t)
 {
 	struct tm tt;
 	if (t==0) {
@@ -565,7 +565,7 @@ void DateTime::setTime_t(ppluint64 t)
  * @param t 64-Bit Integer mit den Sekunden seit 1970.
  * \see http://de.wikipedia.org/wiki/Unixzeit
  */
-void DateTime::setEpoch(ppluint64 t)
+void DateTime::setEpoch(uint64_t t)
 {
 	struct tm tt;
 	if (t==0) {
@@ -597,7 +597,7 @@ void DateTime::setEpoch(ppluint64 t)
  *
  * @param i 64-Bit Integer
  */
-void DateTime::setLongInt(ppluint64 i)
+void DateTime::setLongInt(uint64_t i)
 {
 	us=i%1000000;
 	i=i/1000000;
@@ -610,7 +610,7 @@ void DateTime::setLongInt(ppluint64 i)
 	dd=(i%31)+1;
 	i=i/31;
 	mm=(i%12)+1;
-	yy=(ppluint16)i/12;
+	yy=(uint16_t)i/12;
 }
 
 
@@ -992,9 +992,9 @@ String DateTime::strftime(const String &format) const
  *
  * @return Sekunden seit 1970 oder 0, wenn das Datum sich nicht umrechnen läßt, z.B. wenn das Jahr vor 1970 liegt.
  */
-ppluint64 DateTime::time_t() const
+uint64_t DateTime::time_t() const
 {
-	if (yy<1900) return 0;
+	if (yy<1970) return 0;
 	struct tm t;
 	t.tm_sec=ss;
 	t.tm_min=ii;
@@ -1003,7 +1003,7 @@ ppluint64 DateTime::time_t() const
 	t.tm_mon=mm-1;
 	t.tm_year=yy-1900;
 	t.tm_isdst=-1;
-	return (ppluint64)mktime(&t);
+	return (uint64_t)mktime(&t);
 }
 
 /*!\brief Datum in Unix-Timestamp umrechnen
@@ -1016,7 +1016,7 @@ ppluint64 DateTime::time_t() const
  *
  * \see http://de.wikipedia.org/wiki/Unixzeit
  */
-ppluint64 DateTime::epoch() const
+uint64_t DateTime::epoch() const
 {
 	if (yy<1900) return 0;
 	struct tm t;
@@ -1027,7 +1027,7 @@ ppluint64 DateTime::epoch() const
 	t.tm_mon=mm-1;
 	t.tm_year=yy-1900;
 	t.tm_isdst=-1;
-	return (ppluint64)mktime(&t);
+	return (uint64_t)mktime(&t);
 }
 
 /*!\brief Datum als 64-Bit-Integer auslesen
@@ -1038,9 +1038,9 @@ ppluint64 DateTime::epoch() const
  *
  * @return 64-Bit-Integer mit dem Timestamp
  */
-ppluint64 DateTime::longInt() const
+uint64_t DateTime::longInt() const
 {
-	ppluint64 r=yy*12+(mm-1);
+	uint64_t r=yy*12+(mm-1);
 	r=r*31+(dd-1);
 	r=r*24+hh;
 	r=r*60+ii;
@@ -1333,10 +1333,10 @@ DateTime DateTime::currentTime()
  * @param[in] other Zu vergleichender Zeitwert
  * @return Differenz in Sekunden
  */
-pplint64 DateTime::diffSeconds(const DateTime &other) const
+int64_t DateTime::diffSeconds(const DateTime &other) const
 {
-	pplint64 mySecs=(pplint64)time_t();
-	pplint64 otherSecs=(pplint64)other.time_t();
+	int64_t mySecs=(int64_t)time_t();
+	int64_t otherSecs=(int64_t)other.time_t();
 	return otherSecs-mySecs;
 }
 
@@ -1353,9 +1353,9 @@ pplint64 DateTime::diffSeconds(const DateTime &other) const
  */
 int DateTime::compareSeconds(const DateTime &other, int tolerance) const
 {
-	pplint64 mySecs=(pplint64)time_t();
-	pplint64 otherSecs=(pplint64)other.time_t();
-	pplint64 diff=otherSecs-mySecs;
+	int64_t mySecs=(int64_t)time_t();
+	int64_t otherSecs=(int64_t)other.time_t();
+	int64_t diff=otherSecs-mySecs;
 	if (diff<0) diff=mySecs-otherSecs;
 	if (diff<=tolerance) return 1;
 	return 0;
@@ -1546,8 +1546,8 @@ bool DateTime::operator!=(const DateTime &other) const
 	if (us!=other.us) return true;
 	return false;
 	/*
-	ppluint64 v1=longInt();
-	ppluint64 v2=other.longInt();
+	uint64_t v1=longInt();
+	uint64_t v2=other.longInt();
 	if (v1!=v2) return true;
 	return false;
 	*/

@@ -97,7 +97,7 @@ void DNSSenderThread::setDNSSECRate(int rate)
 }
 
 
-void DNSSenderThread::setQueryRate(ppluint64 qps)
+void DNSSenderThread::setQueryRate(uint64_t qps)
 {
 	queryrate=qps;
 }
@@ -242,13 +242,13 @@ void DNSSenderThread::runWithRateLimit()
 	if (Timeslice < 0.002f) Timeslice=0.002f;
 	//Timeslice=0.01;
 
-	ppluint64 total_timeslices=round((double)runtime / Timeslice);
-	ppluint64 timeslices_per_second=(ppluint64)round((1.0f / Timeslice));
-	ppluint64 queries_rest=runtime * queryrate;
+	uint64_t total_timeslices=round((double)runtime / Timeslice);
+	uint64_t timeslices_per_second=(uint64_t)round((1.0f / Timeslice));
+	uint64_t queries_rest=runtime * queryrate;
 	ppl7::SockAddr addr=Socket.getSockAddr();
 	//verbose=true;
 	if (verbose) {
-		printf("runtime: %d s, timeslice: %0.4f s, total: %llu, per second: %llu, Qpts: %llu, Target: %s:%d\n",
+		printf("runtime: %d s, timeslice: %0.4f s, total: %lu, per second: %lu, Qpts: %lu, Target: %s:%d\n",
 			runtime, Timeslice, total_timeslices, timeslices_per_second,
 			queries_rest / total_timeslices,
 			(const char*)addr.toIPAddress().toString(), addr.port());
@@ -262,20 +262,20 @@ void DNSSenderThread::runWithRateLimit()
 	double total_idle=0.0;
 
 	for (int zr=0;zr < runtime;zr++) {
-		ppluint64 queries_per_second_rest=queryrate;
-		for (ppluint64 z=0;z < timeslices_per_second;z++) {
+		uint64_t queries_per_second_rest=queryrate;
+		for (uint64_t z=0;z < timeslices_per_second;z++) {
 			next_timeslice+=Timeslice;
-			ppluint64 timeslices_rest=timeslices_per_second - z;
-			ppluint64 queries_per_timeslice=queries_per_second_rest / timeslices_rest;
+			uint64_t timeslices_rest=timeslices_per_second - z;
+			uint64_t queries_per_timeslice=queries_per_second_rest / timeslices_rest;
 			if (timeslices_rest == 1) {
 				if (queries_per_second_rest != queries_per_timeslice) {
-					printf("Adjusting qpt from %llu to %llu for last slice!\n", queries_per_timeslice, queries_per_second_rest);
+					printf("Adjusting qpt from %lu to %lu for last slice!\n", queries_per_timeslice, queries_per_second_rest);
 					queries_per_timeslice=queries_per_second_rest;
 				}
 			}
 			//printf ("zr=%d, z=%llu, ts rest=%llu, qpts=%llu, qps_rest=%llu, now=%0.8f\n",
 			//		zr, z,timeslices_rest,queries_per_timeslice,queries_per_second_rest,now);
-			for (ppluint64 i=0;i < queries_per_timeslice;i++) {
+			for (uint64_t i=0;i < queries_per_timeslice;i++) {
 				sendPacket();
 			}
 			queries_per_second_rest-=queries_per_timeslice;
@@ -312,27 +312,27 @@ void DNSSenderThread::waitForTimeout()
 	}
 }
 
-ppluint64 DNSSenderThread::getPacketsSend() const
+uint64_t DNSSenderThread::getPacketsSend() const
 {
 	return counter_packets_send;
 }
 
-ppluint64 DNSSenderThread::getBytesSend() const
+uint64_t DNSSenderThread::getBytesSend() const
 {
 	return counter_bytes_send;
 }
 
-ppluint64 DNSSenderThread::getErrors() const
+uint64_t DNSSenderThread::getErrors() const
 {
 	return errors;
 }
 
-ppluint64 DNSSenderThread::getCounter0Bytes() const
+uint64_t DNSSenderThread::getCounter0Bytes() const
 {
 	return counter_0bytes;
 }
 
-ppluint64 DNSSenderThread::getCounterErrorCode(int err) const
+uint64_t DNSSenderThread::getCounterErrorCode(int err) const
 {
 	if (err < 255) return counter_errorcodes[err];
 	return 0;

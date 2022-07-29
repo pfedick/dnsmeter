@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_WIDEC_H
 #include <widec.h>
 #endif
@@ -92,12 +92,12 @@ static const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$
 **
 ** encode 3 8-bit binary bytes as 4 '6-bit' characters
 */
-static void encodeblock( unsigned char in[3], unsigned char out[4], int len )
+static void encodeblock(unsigned char in[3], unsigned char out[4], int len)
 {
-    out[0] = cb64[ in[0] >> 2 ];
-    out[1] = cb64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4) ];
-    out[2] = (unsigned char) (len > 1 ? cb64[ ((in[1] & 0x0f) << 2) | ((in[2] & 0xc0) >> 6) ] : '=');
-    out[3] = (unsigned char) (len > 2 ? cb64[ in[2] & 0x3f ] : '=');
+	out[0] = cb64[in[0] >> 2];
+	out[1] = cb64[((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4)];
+	out[2] = (unsigned char)(len > 1 ? cb64[((in[1] & 0x0f) << 2) | ((in[2] & 0xc0) >> 6)] : '=');
+	out[3] = (unsigned char)(len > 2 ? cb64[in[2] & 0x3f] : '=');
 }
 
 /*
@@ -105,28 +105,28 @@ static void encodeblock( unsigned char in[3], unsigned char out[4], int len )
 **
 ** base64 encode a stream adding padding and line breaks as per spec.
 */
-String ToBase64(const ByteArrayPtr &bin)
+String ToBase64(const ByteArrayPtr& bin)
 {
 	String res;
-    unsigned char in[3], out[4];
-    size_t p=0, filelen=bin.size();
+	unsigned char in[3], out[4];
+	size_t p=0, filelen=bin.size();
 
-    while( p<filelen ) {
-        int len = 0;
-        for(int i = 0; i < 3; i++ ) {
-        	if (p<filelen) {
-        		in[i] = (unsigned char) bin.get(p++);
-                len++;
-            }
-        }
-        if( len ) {
-            encodeblock( in, out, len );
-            for(int i = 0; i < 4; i++ ) {
-            	res.appendf("%c",out[i]);
-            }
-        }
-    }
-    return res;
+	while (p < filelen) {
+		int len = 0;
+		for (int i = 0; i < 3; i++) {
+			if (p < filelen) {
+				in[i] = (unsigned char)bin.get(p++);
+				len++;
+			}
+		}
+		if (len) {
+			encodeblock(in, out, len);
+			for (int i = 0; i < 4; i++) {
+				res.appendf("%c", out[i]);
+			}
+		}
+	}
+	return res;
 }
 
 /*
@@ -134,11 +134,11 @@ String ToBase64(const ByteArrayPtr &bin)
 **
 ** decode 4 '6-bit' characters into 3 8-bit binary bytes
 */
-static void decodeblock( unsigned char in[4], unsigned char out[3] )
+static void decodeblock(unsigned char in[4], unsigned char out[3])
 {
-    out[ 0 ] = (unsigned char ) (in[0] << 2 | in[1] >> 4);
-    out[ 1 ] = (unsigned char ) (in[1] << 4 | in[2] >> 2);
-    out[ 2 ] = (unsigned char ) (((in[2] << 6) & 0xc0) | in[3]);
+	out[0] = (unsigned char)(in[0] << 2 | in[1] >> 4);
+	out[1] = (unsigned char)(in[1] << 4 | in[2] >> 2);
+	out[2] = (unsigned char)(((in[2] << 6) & 0xc0) | in[3]);
 }
 
 /*
@@ -146,42 +146,41 @@ static void decodeblock( unsigned char in[4], unsigned char out[3] )
 **
 ** decode a base64 encoded stream discarding padding, line breaks and noise
 */
-ByteArray FromBase64(const String &str)
+ByteArray FromBase64(const String& str)
 {
 	ByteArray res;
-    unsigned char in[4], out[3], v;
-    int i, len;
-    size_t p=0, filelen=str.len();
-    while( p<filelen) {
-        for( len = 0, i = 0; i < 4 && p<filelen; i++ ) {
-            v = 0;
-            while( p<filelen && v == 0 ) {
-                v = str.get(p++);
-                v = ((v < 43 || v > 122) ? 0 : cd64[ v - 43 ]);
-                if( v ) {
-                    v = ((v == '$') ? 0 : v - 61);
-                }
-            }
-            if( p<filelen+1 ) {
-                if( v ) {
-                	len++;
-                    in[ i ] = (unsigned char) (v - 1);
-                }
-            }
-            else {
-                in[i] = 0;
-            }
-        }
-        if( len) {
-            decodeblock( in, out );
-            res.append(out,len-1);
-            len=0;
-        }
-    }
-    return res;
+	unsigned char in[4], out[3], v;
+	int i, len;
+	size_t p=0, filelen=str.len();
+	while (p < filelen) {
+		for (len = 0, i = 0; i < 4 && p < filelen; i++) {
+			v = 0;
+			while (p < filelen && v == 0) {
+				v = str.get(p++);
+				v = ((v < 43 || v > 122) ? 0 : cd64[v - 43]);
+				if (v) {
+					v = ((v == '$') ? 0 : v - 61);
+				}
+			}
+			if (p < filelen + 1) {
+				if (v) {
+					len++;
+					in[i] = (unsigned char)(v - 1);
+				}
+			} else {
+				in[i] = 0;
+			}
+		}
+		if (len) {
+			decodeblock(in, out);
+			res.append(out, len - 1);
+			len=0;
+		}
+	}
+	return res;
 }
 
-String StripSlashes(const String &str)
+String StripSlashes(const String& str)
 {
 	String ret=str;
 	ret.stripSlashes();
@@ -196,40 +195,40 @@ String StripSlashes(const String &str)
  * @param str Eingabe-String
  * @return Neuer String
  */
-String Trim(const String &str)
+String Trim(const String& str)
 {
 	String ret=str;
 	ret.trim();
 	return ret;
 }
 
-String UpperCase(const String &str)
+String UpperCase(const String& str)
 {
 	String ret=str;
 	ret.upperCase();
 	return ret;
 }
 
-String LowerCase(const String &str)
+String LowerCase(const String& str)
 {
 	String ret=str;
 	ret.lowerCase();
 	return ret;
 }
 
-int StrCmp(const String &s1, const String &s2)
+int StrCmp(const String& s1, const String& s2)
 {
 	int cmp=s1.strcmp(s2);
-	if (cmp<0) return -1;
-	if (cmp>0) return 1;
+	if (cmp < 0) return -1;
+	if (cmp > 0) return 1;
 	return 0;
 }
 
-int StrCaseCmp(const String &s1, const String &s2)
+int StrCaseCmp(const String& s1, const String& s2)
 {
 	int cmp=s1.strCaseCmp(s2);
-	if (cmp<0) return -1;
-	if (cmp>0) return 1;
+	if (cmp < 0) return -1;
+	if (cmp > 0) return 1;
 	return 0;
 }
 
@@ -261,36 +260,36 @@ ssize_t Instrcase (const String &haystack, const String &needle, size_t start);
  * wird -1 zurückgegeben.
  *
  */
-ssize_t Instr (const char * haystack, const char * needle, size_t start)
+ssize_t Instr(const char* haystack, const char* needle, size_t start)
 {
 	if (!haystack) return -1;
 	if (!needle) return -1;
-	if (start<strlen(haystack)) {
-		const char *_t=strstr((haystack+start),needle);
-		if (_t!=NULL) {
-			return ((ssize_t)(_t-haystack));
+	if (start < strlen(haystack)) {
+		const char* _t=strstr((haystack + start), needle);
+		if (_t != NULL) {
+			return ((ssize_t)(_t - haystack));
 		}
 	}
 	return (-1);
 }
 
 #ifndef HAVE_STRCASESTR
-static const char *mystrcasestr(const char *haystack, const char *needle)
+static const char* mystrcasestr(const char* haystack, const char* needle)
 {
-    char c;
-    if ((c = *needle++) != 0) {
-        c = tolower((unsigned char)c);
-        size_t len = strlen(needle);
-        do {
-        	char sc;
-            do {
-                if ((sc = *haystack++) == 0)
-                    return (NULL);
-            } while ((char)tolower((unsigned char)sc) != c);
-        } while (strncasecmp(haystack, needle, len) != 0);
-        haystack--;
-    }
-    return ((char *)haystack);
+	char c;
+	if ((c = *needle++) != 0) {
+		c = tolower((unsigned char)c);
+		size_t len = strlen(needle);
+		do {
+			char sc;
+			do {
+				if ((sc = *haystack++) == 0)
+					return (NULL);
+			} while ((char)tolower((unsigned char)sc) != c);
+		} while (strncasecmp(haystack, needle, len) != 0);
+		haystack--;
+	}
+	return ((char*)haystack);
 }
 #endif
 
@@ -300,19 +299,19 @@ static const char *mystrcasestr(const char *haystack, const char *needle)
  *
  * \copydoc Instr(const char * haystack, const char * needle, size_t start)
  */
-ssize_t Instrcase (const char * haystack, const char * needle, size_t start)
+ssize_t Instrcase(const char* haystack, const char* needle, size_t start)
 {
 	if (!haystack) return -1;
 	if (!needle) return -1;
-	if (start<strlen(haystack)) {
-		const char * _t;
+	if (start < strlen(haystack)) {
+		const char* _t;
 #ifdef HAVE_STRCASESTR
-		_t=strcasestr((haystack+start),needle);
+		_t=strcasestr((haystack + start), needle);
 #else
-		_t=mystrcasestr((haystack+start),needle);
+		_t=mystrcasestr((haystack + start), needle);
 #endif
-		if (_t!=NULL) {
-			return ((long)(_t-haystack));
+		if (_t != NULL) {
+			return ((long)(_t - haystack));
 		}
 	}
 	return (-1);
@@ -323,15 +322,15 @@ ssize_t Instrcase (const char * haystack, const char * needle, size_t start)
  *
  * \copydoc Instr(const char * haystack, const char * needle, size_t start)
  */
-ssize_t Instr (const wchar_t * haystack, const wchar_t * needle, size_t start)
+ssize_t Instr(const wchar_t* haystack, const wchar_t* needle, size_t start)
 {
 	if (!haystack) return -1;
 	if (!needle) return -1;
-	if (start<wcslen(haystack)) {
-		const wchar_t * _t;
-		_t=wcsstr((haystack+start),needle);
-		if (_t!=NULL) {
-			return ((ssize_t)(_t-haystack));
+	if (start < wcslen(haystack)) {
+		const wchar_t* _t;
+		_t=wcsstr((haystack + start), needle);
+		if (_t != NULL) {
+			return ((ssize_t)(_t - haystack));
 		}
 	}
 	return (-1);
@@ -342,43 +341,47 @@ ssize_t Instr (const wchar_t * haystack, const wchar_t * needle, size_t start)
  *
  * \copydoc Instr(const char * haystack, const char * needle, size_t start)
  */
-ssize_t Instrcase (const wchar_t * haystack, const wchar_t * needle, size_t start)
+ssize_t Instrcase(const wchar_t* haystack, const wchar_t* needle, size_t start)
 {
 	if (!haystack) return -1;
 	if (!needle) return -1;
-	wchar_t * myHaystack=wcsdup(haystack);
+	wchar_t* myHaystack=wcsdup(haystack);
 	if (!myHaystack) throw OutOfMemoryException();
 
-	wchar_t * myNeedle=wcsdup(needle);
-	if (!myNeedle) throw OutOfMemoryException();
+	wchar_t* myNeedle=wcsdup(needle);
+	if (!myNeedle) {
+		free(myHaystack);
+		throw OutOfMemoryException();
+	}
 
 	size_t len=wcslen(myHaystack);
-	if (start<len) {
+	if (start < len) {
 		// String in Kleinbuchstaben umwandeln
 		wchar_t wc;
-		for (size_t i=0;i<len;i++) {
+		for (size_t i=0;i < len;i++) {
 			wc=myHaystack[i];
 			wc=towlower(wc);
-			if (wc!=(wchar_t)WEOF) {
+			if (wc != (wchar_t)WEOF) {
 				myHaystack[i]=wc;
 			}
 		}
 		// Needle in Kleinbuchstaben umwandeln
 		len=wcslen(myNeedle);
-		for (size_t i=0;i<len;i++) {
+		for (size_t i=0;i < len;i++) {
 			wc=myNeedle[i];
 			wc=towlower(wc);
-			if (wc!=(wchar_t)WEOF) {
+			if (wc != (wchar_t)WEOF) {
 				myNeedle[i]=wc;
 			}
 		}
 
-		const wchar_t * _t;
-		_t=wcsstr((myHaystack+start),myNeedle);
-		if (_t!=NULL) {
+		const wchar_t* _t;
+		_t=wcsstr((myHaystack + start), myNeedle);
+		if (_t != NULL) {
+			ssize_t p=(ssize_t)(_t - myHaystack);
 			free(myHaystack);
 			free(myNeedle);
-			return ((ssize_t)(_t-myHaystack));
+			return p;
 		}
 	}
 	free(myHaystack);
@@ -391,9 +394,9 @@ ssize_t Instrcase (const wchar_t * haystack, const wchar_t * needle, size_t star
  *
  * \copydoc Instr(const char * haystack, const char * needle, size_t start)
  */
-ssize_t Instr (const String &haystack, const String &needle, size_t start)
+ssize_t Instr(const String& haystack, const String& needle, size_t start)
 {
-	return haystack.instr(needle,start);
+	return haystack.instr(needle, start);
 }
 
 /*!\brief Sucht nach Zeichen in einem String und ignoriert Gross-/Kleinschreibung
@@ -401,49 +404,49 @@ ssize_t Instr (const String &haystack, const String &needle, size_t start)
  *
  * \copydoc Instr(const char * haystack, const char * needle, size_t start)
  */
-ssize_t InstrCase (const String &haystack, const String &needle, size_t start)
+ssize_t InstrCase(const String& haystack, const String& needle, size_t start)
 {
-	return haystack.instrCase(needle,start);
+	return haystack.instrCase(needle, start);
 }
 
-String Left(const String &str, size_t num)
+String Left(const String& str, size_t num)
 {
 	return str.left(num);
 }
 
-String Right(const String &str, size_t num)
+String Right(const String& str, size_t num)
 {
 	return str.right(num);
 }
 
-String Mid(const String &str, size_t start, size_t num)
+String Mid(const String& str, size_t start, size_t num)
 {
-	return str.mid(start,num);
+	return str.mid(start, num);
 }
 
-String SubStr(const String &str, size_t start, size_t num)
+String SubStr(const String& str, size_t start, size_t num)
 {
-	return str.substr(start,num);
+	return str.substr(start, num);
 }
 
-String ToString(const char *fmt, ...)
+String ToString(const char* fmt, ...)
 {
 	String str;
 	va_list args;
 	va_start(args, fmt);
-	str.vasprintf(fmt,args);
+	str.vasprintf(fmt, args);
 	va_end(args);
 	return str;
 }
 
-String Replace(const String &string, const String &search, const String &replace)
+String Replace(const String& string, const String& search, const String& replace)
 {
 	String Tmp=string;
-	Tmp.replace(search,replace);
+	Tmp.replace(search, replace);
 	return Tmp;
 }
 
-bool IsTrue(const String &str)
+bool IsTrue(const String& str)
 {
 	return str.isTrue();
 }
@@ -466,7 +469,7 @@ bool IsTrue(const String &str)
  * \note
  * \copydoc pcrenote.dox
  */
-bool PregMatch(const String &expression, const String &subject)
+bool PregMatch(const String& expression, const String& subject)
 {
 	return subject.pregMatch(expression);
 }
@@ -491,9 +494,9 @@ bool PregMatch(const String &expression, const String &subject)
  * \note
  * \copydoc pcrenote.dox
  */
-bool PregMatch(const String &expression, const String &subject, Array &matches, size_t maxmatches)
+bool PregMatch(const String& expression, const String& subject, Array& matches, size_t maxmatches)
 {
-	return subject.pregMatch(expression,matches, maxmatches);
+	return subject.pregMatch(expression, matches, maxmatches);
 }
 
 
@@ -514,7 +517,7 @@ bool PregMatch(const String &expression, const String &subject, Array &matches, 
  * @param[in] div String, der als Trenner verwendet wird
  * @return Array mit den Bestandteilen des zerlegten Strings
  */
-Array StrTok(const String &string, const String &div)
+Array StrTok(const String& string, const String& div)
 {
 	Array ret;
 	StrTok(ret, string, div);
@@ -538,50 +541,50 @@ Array StrTok(const String &string, const String &div)
  * @param[in] string String, der zerlegt werden soll
  * @param[in] div String, der als Trenner verwendet wird. Default=Newline
  */
-void StrTok(Array &result, const String &string, const String &div)
+void StrTok(Array& result, const String& string, const String& div)
 {
 	result.clear();
 	if (string.isEmpty()) return;
 	String Line;
 	Array a;
-	if (div.isEmpty()) a.explode(string,"\n");
-	else a.explode(string,div);
+	if (div.isEmpty()) a.explode(string, "\n");
+	else a.explode(string, div);
 	//printf ("StrTok: a.size=%ti\n",a.size());
-	for (size_t i=0;i<a.size();i++) {
+	for (size_t i=0;i < a.size();i++) {
 		Line=a[i];
 		if (Line.notEmpty()) result.add(Line);
 	}
 }
 
 
-String EscapeHTMLTags(const String &html)
+String EscapeHTMLTags(const String& html)
 {
 	String s;
 	s=html;
-	s.replace("&","&amp;");
-	s.replace("<","&lt;");
-	s.replace(">","&gt;");
+	s.replace("&", "&amp;");
+	s.replace("<", "&lt;");
+	s.replace(">", "&gt;");
 	return s;
 }
 
-String UnescapeHTMLTags(const String &html)
+String UnescapeHTMLTags(const String& html)
 {
 	String s;
 	s=html;
-	s.replace("&amp;","&");
-	s.replace("&lt;","<");
-	s.replace("&gt;",">");
+	s.replace("&amp;", "&");
+	s.replace("&lt;", "<");
+	s.replace("&gt;", ">");
 	return s;
 }
 
-ByteArray Hex2ByteArray(const String &hex)
+ByteArray Hex2ByteArray(const String& hex)
 {
 	ByteArray b;
 	b.fromHex(hex);
 	return b;
 }
 
-String ToHex(const ByteArrayPtr &bin)
+String ToHex(const ByteArrayPtr& bin)
 {
 	return bin.toHex();
 }
@@ -609,50 +612,45 @@ Hallo+Welt!+1%2B1%3D2
  * \see
  * Mit UrlDecode kann der Kodierte String wieder dekodiert werden
  */
-String UrlEncode(const String &text)
+String UrlEncode(const String& text)
 {
-	const char *source=text.getPtr();
+	const char* source=text.getPtr();
 	String ret;
-	static const char *digits = "0123456789ABCDEF";
+	static const char* digits = "0123456789ABCDEF";
 	while (*source)
 	{
 		unsigned char ch = (unsigned char)*source;
 		if (*source == ' ') {
 			ret+=L"+";
-		}
-		else if (
-				(ch>='a' && ch<='z')
-				|| (ch>='A' && ch<='Z')
-				|| (ch>='0' && ch<='9')
-				|| (strchr("-_.!~*'()", ch))
-				) {
+		} else if (
+			(ch >= 'a' && ch <= 'z')
+			|| (ch >= 'A' && ch <= 'Z')
+			|| (ch >= '0' && ch <= '9')
+			|| (strchr("-_.!~*'()", ch))
+			) {
 			ret+=ch;
-		}
-		else {
+		} else {
 			ret+="%";
 			ret+= digits[(ch >> 4) & 0x0F];
-			ret+= digits[       ch & 0x0F];
+			ret+= digits[ch & 0x0F];
 		}
 		source++;
 	}
 	return ret;
 }
 
-static char HexPairValue(const char * code) {
+static char HexPairValue(const char* code) {
 	char value = 0;
-	const char * pch = code;
+	const char* pch = code;
 	for (;;) {
 		int digit = *pch++;
 		if (digit >= '0' && digit <= '9') {
 			value += digit - '0';
-		}
-		else if (digit >= 'A' && digit <= 'F') {
+		} else if (digit >= 'A' && digit <= 'F') {
 			value += digit - 'A' + 10;
-		}
-		else if (digit >= 'a' && digit <= 'f') {
+		} else if (digit >= 'a' && digit <= 'f') {
 			value += digit - 'a' + 10;
-		}
-		else {
+		} else {
 			return -1;
 		}
 		if (pch == code + 2)
@@ -682,66 +680,62 @@ Hallo Welt! 1+1=2";
  * \see
  * Mit UrlEncode kann ein unkodierter String kodiert werden.
  */
-String UrlDecode(const String &text)
+String UrlDecode(const String& text)
 {
-	const char *source=text.getPtr();
+	const char* source=text.getPtr();
 	String ret;
 
 	while (*source) {
 		switch (*source) {
-			case '+':
-				ret+=" ";
-				break;
-			case '%':
-				if (source[1] && source[2]) {
-					char value = HexPairValue(source + 1);
-					if (value >= 0) {
-						ret+=value;
-						source += 2;
-					}
-					else {
-						ret+=L"?";
-					}
+		case '+':
+			ret+=" ";
+			break;
+		case '%':
+			if (source[1] && source[2]) {
+				char value = HexPairValue(source + 1);
+				if (value >= 0) {
+					ret+=value;
+					source += 2;
+				} else {
+					ret+=L"?";
 				}
-				else {
-					ret+="?";
-				}
-				break;
-			default:
-				ret+=*source;
-				break;
+			} else {
+				ret+="?";
+			}
+			break;
+		default:
+			ret+=*source;
+			break;
 		}
 		source++;
 	}
 	return ret;
 }
 
-String Transcode(const char * str, size_t size, const String &fromEncoding, const String &toEncoding)
+String Transcode(const char* str, size_t size, const String& fromEncoding, const String& toEncoding)
 {
 #ifndef HAVE_ICONV
 	throw UnsupportedFeatureException("Iconv");
 #else
-	ppl7::Iconv iconv(fromEncoding,toEncoding);
-	ppl7::ByteArrayPtr source(str,size);
+	ppl7::Iconv iconv(fromEncoding, toEncoding);
+	ppl7::ByteArrayPtr source(str, size);
 	ppl7::ByteArray target;
-	iconv.transcode(source,target);
-	return String((const char*)target.ptr(),target.size());
+	iconv.transcode(source, target);
+	return String((const char*)target.ptr(), target.size());
 #endif
 }
 
-String Transcode(const String &str, const String &fromEncoding, const String &toEncoding)
+String Transcode(const String& str, const String& fromEncoding, const String& toEncoding)
 {
 #ifndef HAVE_ICONV
 	throw UnsupportedFeatureException("Iconv");
 #else
-	ppl7::Iconv iconv(fromEncoding,toEncoding);
+	ppl7::Iconv iconv(fromEncoding, toEncoding);
 	String to;
-	iconv.transcode(str,to);
+	iconv.transcode(str, to);
 	return to;
 #endif
 
 }
 
 } // EOF namespace ppl7
-
-

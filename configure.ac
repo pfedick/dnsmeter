@@ -11,9 +11,10 @@ AC_CONFIG_HEADERS([include/config.h])
 
 # PPL7
 AC_CONFIG_SRCDIR([ppl7/include/ppl7.h])
-AC_CONFIG_SRCDIR([ppl7/include/config.h.in])
+AC_CONFIG_SRCDIR([ppl7/include/config_ppl7.h.in])
+
 AC_CONFIG_FILES([ppl7/Makefile])
-AC_CONFIG_HEADERS([ppl7/include/config.h])
+AC_CONFIG_HEADERS([ppl7/include/config_ppl7.h])
 AC_CONFIG_HEADERS([ppl7/include/ppl7-config.h])
 
 
@@ -63,12 +64,12 @@ case "$host_os" in
   		;;
 	*)
 		AX_PTHREAD([report_have_pthreads="yes, pthreads"]
-			AC_DEFINE(HAVE_PTHREADS,1, [Define to 1 if we have pthreads])			
+			AC_DEFINE(HAVE_PTHREADS,1, [Define to 1 if we have pthreads])
 		)
 		;;
 esac
 
- 
+
 AC_C_BIGENDIAN(
 	report_byteorder="BIG ENDIAN"
 	AC_DEFINE(__BIG_ENDIAN__),
@@ -119,7 +120,7 @@ elif test $ac_cv_sizeof_voidp -eq 8; then
 	AC_DEFINE(ppliptr,ppluint64)
 else
 	AC_MSG_ERROR(size of void* is not supported)
-	
+
 fi
 
 AC_CHECK_SIZEOF(fpos_t)
@@ -159,7 +160,7 @@ AX_CHECK_GNU_MAKE(,
 )
 if test x$_cv_gnu_make_command = x ; then
    AC_MSG_ERROR(No gmake found)
-else 
+else
    MAKECMD=$_cv_gnu_make_command
 fi
 
@@ -296,19 +297,19 @@ AX_PATH_LIB_PCRE(
             report_have_pcre="yes"
             ,
             )
-            
+
 # LIBPCAP exists?
 AX_PATH_LIB_PCAP(
             AC_DEFINE(HAVE_LIBPCAP, 1, [ Define if you have libpcap. ])
             report_have_libpcap="yes"
             ,
-            )            
+            )
 
 case $target in
 	x86_64*|amd64*)
 		AC_DEFINE(HAVE_AMD64,1,)
 		;;
-esac		
+esac
 
 
 SRCDIR=`pwd`
@@ -470,13 +471,13 @@ AC_MSG_RESULT([
 ******************************************************************************
 ** Configuration summary for $PACKAGE_NAME Version $PACKAGE_VERSION
 ** Target: $target_os        CPU: $target_cpu
-** 
+**
 ** Byteorder: $report_byteorder
 **   Size of char         $ac_cv_sizeof_char     Size of float        $ac_cv_sizeof_float
 **   Size of short        $ac_cv_sizeof_short     Size of double       $ac_cv_sizeof_double
 **   Size of int          $ac_cv_sizeof_int     Size of void*        $ac_cv_sizeof_voidp
 **   Size of long         $ac_cv_sizeof_long     Size of wchar_t      $ac_cv_sizeof_wchar_t
-**   Size of long long    $ac_cv_sizeof_long_long     
+**   Size of long long    $ac_cv_sizeof_long_long
 **   Size of size_t       $ac_cv_sizeof_size_t
 ******************************************************************************
 ** Features:
@@ -514,7 +515,3 @@ then
 	AC_MSG_ERROR(Cannot build because of missing dependencies:
 $missing)
 fi
-
-
-
-

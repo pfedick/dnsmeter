@@ -32,10 +32,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "prolog_ppl7.h"
 
 /*
        The glibc version of struct tm has additional fields
@@ -136,18 +136,18 @@ int datum (char *str1)
  * \param t ist ein Pointer auf eine Struktur vom Typ PPLTIME oder NULL.
  * \returns Bei Erfolg wird die Zeit seit 1.1.1970, 00:00 Uhr in Sekunden zurückgegeben,
  * sowie die Struktur PPLTIME gefüllt, sofert der Parameter \a t nicht NULL ist.
- * Tritt ein Fehler auf, wird ((ppluint64)-1) zurückgegeben und errno entsprechend gesetzt.
+ * Tritt ein Fehler auf, wird ((uint64_t)-1) zurückgegeben und errno entsprechend gesetzt.
  *
  * \see ppl6::GetTime()
- * \see ppl6::GetTime(PPLTIME *t, ppluint64 now)
+ * \see ppl6::GetTime(PPLTIME *t, uint64_t now)
  *
  */
-ppluint64 GetTime(PPLTIME *t)
+uint64_t GetTime(PPLTIME *t)
 {
 	time_t now;
 	time(&now);
 	if (t) GetTime(t,now);
-	return (ppluint64) now;
+	return (uint64_t) now;
 }
 
 /*!\ingroup PPLGroupDateTime
@@ -159,17 +159,17 @@ ppluint64 GetTime(PPLTIME *t)
  * \param t Referenz aif eine Struktur vom Typ PPLTIME.
  * \returns Bei Erfolg wird die Zeit seit 1.1.1970, 00:00 Uhr in Sekunden zurückgegeben,
  * sowie die Struktur PPLTIME gefüllt.
- * Tritt ein Fehler auf, wird ((ppluint64)-1) zurückgegeben und errno entsprechend gesetzt.
+ * Tritt ein Fehler auf, wird ((uint64_t)-1) zurückgegeben und errno entsprechend gesetzt.
  *
  */
-ppluint64 GetTime(PPLTIME &t)
+uint64_t GetTime(PPLTIME &t)
 {
 	time_t now;
 	time(&now);
 	return GetTime(t,now);
 }
 
-/*! \fn ppl6::GetTime (PPLTIME *t, ppluint64 now)
+/*! \fn ppl6::GetTime (PPLTIME *t, uint64_t now)
  * \ingroup PPLGroupDateTime
  * \brief Wandelt Unix-Zeit in die Struktur PPLTIME um
  *
@@ -285,7 +285,7 @@ ppl_time_t GetTime()
 
 
 
-int USleep(ppluint64 microseconds)
+int USleep(uint64_t microseconds)
 /*!\ingroup PPLGroupDateTime
  */
 
@@ -301,7 +301,7 @@ int USleep(ppluint64 microseconds)
 
 }
 
-int MSleep(ppluint64 milliseconds)
+int MSleep(uint64_t milliseconds)
 /*!\ingroup PPLGroupDateTime
  */
 {		// 1 sec = 1000 milliseconds
@@ -315,7 +315,7 @@ int MSleep(ppluint64 milliseconds)
 	return 0;
 }
 
-int SSleep(ppluint64 seconds)
+int SSleep(uint64_t seconds)
 /*!\ingroup PPLGroupDateTime
  */
 {
@@ -353,7 +353,7 @@ double GetMicrotime()
 	#endif
 }
 
-ppluint64 GetMilliSeconds()
+uint64_t GetMilliSeconds()
 /*!\ingroup PPLGroupDateTime
  * \brief Aktuelle Zeit in Millisekunden
  *
@@ -365,21 +365,21 @@ ppluint64 GetMilliSeconds()
  *
  */
 {
-	ppluint64 t=0;
+	uint64_t t=0;
 	#ifdef _WIN32
-	static ppluint64 time_frequency=0;
+	static uint64_t time_frequency=0;
 	LARGE_INTEGER gettime;
 	if (time_frequency==0) {
 		QueryPerformanceFrequency(&gettime);
-		time_frequency=(ppluint64)gettime.QuadPart;
+		time_frequency=(uint64_t)gettime.QuadPart;
 	}
 	QueryPerformanceCounter(&gettime);
-	t=(ppluint64)gettime.QuadPart*1000/time_frequency;
+	t=(uint64_t)gettime.QuadPart*1000/time_frequency;
 	return t;
 	#else
 		struct timeval tp;
 		if (gettimeofday(&tp,NULL)==0) {
-			t=(ppluint64)tp.tv_sec*1000+(ppluint64)(tp.tv_usec/1000);
+			t=(uint64_t)tp.tv_sec*1000+(uint64_t)(tp.tv_usec/1000);
 		}
 		return t;
 	#endif
@@ -461,7 +461,7 @@ ppl_time_t MkTime(const String &iso8601date, PPLTIME *t)
 
 	time_t LTime=::mktime(&Time);
 	if (LTime==(time_t)-1) throw InvalidDateException(iso8601date);
-	if (t) GetTime(t,(ppluint64)LTime);
+	if (t) GetTime(t,(uint64_t)LTime);
 	return (ppl_time_t) LTime;
 }
 
@@ -718,7 +718,7 @@ void datumsauswertung (pplchar * d, pplchar * dat)
  * \par Syntax-Formatstring
  * \copydoc strftime.dox
  */
-const char *MkDate (CString &buffer, const char *format, ppluint64 sec)
+const char *MkDate (CString &buffer, const char *format, uint64_t sec)
 {
 	if (!format) {
 		SetError(194,"const char *format");
@@ -748,11 +748,11 @@ CString Long2Date(const char *format, int value)
 	value=value/100;
 	int month=value%100;
 	int year=value/100;
-	ppluint64 t=MkTime(year,month,day);
+	uint64_t t=MkTime(year,month,day);
 	return MkDate(format,t);
 }
 
-char *MkDate (char *buffer, int size, const char *format, ppluint64 sec)
+char *MkDate (char *buffer, int size, const char *format, uint64_t sec)
 /*!\brief Datum/Zeit formatieren
  * \ingroup PPLGroupDateTime
  *

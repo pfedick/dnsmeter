@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifndef _ISOC99_SOURCE
 #define _ISOC99_SOURCE
 #endif
@@ -84,8 +84,11 @@
 namespace ppl7 {
 
 static size_t InitialBuffersize=128;
+#ifdef WIN32
+static String __GlobalStringEncoding("UTF-8");
+#endif
 
-static char*empty_string=(char*)"";
+static char* empty_string=(char*)"";
 
 /*!\brief Zeichenkodierung festlegen
  *
@@ -99,18 +102,25 @@ static char*empty_string=(char*)"";
  * Die Funktion ist nicht Thread-sicher und sollte daher nur einmal am Anfang des
  * Programms aufgerufen werden.
  */
-void String::setGlobalEncoding(const char *encoding)
+void String::setGlobalEncoding(const char* encoding)
 {
 	if (!encoding) throw NullPointerException();
-	char *ret=setlocale(LC_CTYPE,encoding);
+#ifdef WIN32
+	__GlobalStringEncoding.set(encoding);
+#else
+	char* ret=setlocale(LC_CTYPE, encoding);
 	if (!ret) throw UnsupportedCharacterEncodingException();
+#endif
 }
 
-const char *String::getGlobalEncoding()
+const char* String::getGlobalEncoding()
 {
-	const char *ret=setlocale(LC_CTYPE,NULL);
-	//printf ("%s\n",ret);
+#ifdef WIN32
+	return (const char*)__GlobalStringEncoding;
+#else
+	const char* ret=setlocale(LC_CTYPE, NULL);
 	return ret;
+#endif
 }
 
 /*!\class String
@@ -151,7 +161,7 @@ String::String() throw()
  * @exception UnsupportedCharacterEncodingException
  * @exception CharacterEncodingException
  */
-String::String(const char *str)
+String::String(const char* str)
 {
 	ptr=empty_string;
 	stringlen=0;
@@ -169,12 +179,12 @@ String::String(const char *str)
  * @param size Maximale Anzahl Zeichen, die übernommen werden sollen
  * @exception OutOfMemoryException
  */
-String::String(const char *str, size_t size)
+String::String(const char* str, size_t size)
 {
 	ptr=empty_string;
 	stringlen=0;
 	s=0;
-	set(str,size);
+	set(str, size);
 }
 
 /*!\brief Konstruktor aus String-Pointer
@@ -185,7 +195,7 @@ String::String(const char *str, size_t size)
  * @param str Pointer auf einen anderen String
  * @exception OutOfMemoryException
  */
-String::String(const String *str)
+String::String(const String* str)
 {
 	ptr=empty_string;
 	stringlen=0;
@@ -201,7 +211,15 @@ String::String(const String *str)
  * @param str Referenz auf einen anderen String
  * @exception OutOfMemoryException
  */
-String::String(const String &str)
+String::String(const String& str)
+{
+	ptr=empty_string;
+	stringlen=0;
+	s=0;
+	set(str);
+}
+
+String::String(const ByteArrayPtr& str)
 {
 	ptr=empty_string;
 	stringlen=0;
@@ -220,12 +238,12 @@ String::String(const String &str)
  * @exception UnsupportedCharacterEncodingException
  * @exception CharacterEncodingException
  */
-String::String(const std::string &str)
+String::String(const std::string& str)
 {
 	ptr=empty_string;
 	stringlen=0;
 	s=0;
-	set(str.data(),str.size());
+	set(str.data(), str.size());
 }
 
 /*!\brief Konstruktor aus Standard-Template Wide-String
@@ -236,15 +254,15 @@ String::String(const std::string &str)
  * @param str Referenz auf Wide-String der STL
  * @exception OutOfMemoryException
  */
-String::String(const std::wstring &str)
+String::String(const std::wstring& str)
 {
 	ptr=empty_string;
 	stringlen=0;
 	s=0;
-	set(str.data(),str.size());
+	set(str.data(), str.size());
 }
 
-String::String(const WideString *str)
+String::String(const WideString* str)
 {
 	ptr=empty_string;
 	stringlen=0;
@@ -252,12 +270,12 @@ String::String(const WideString *str)
 	set(str);
 }
 
-String::String(const WideString &str)
+String::String(const WideString& str)
 {
 	ptr=empty_string;
 	stringlen=0;
 	s=0;
-	set(str,str.size());
+	set(str, str.size());
 }
 
 /*!\brief Destruktor
@@ -268,7 +286,7 @@ String::String(const WideString &str)
  */
 String::~String() throw()
 {
-	if (ptr!=empty_string) free(ptr);
+	if (ptr != empty_string) free(ptr);
 }
 
 /*!\brief String leeren
@@ -279,7 +297,7 @@ String::~String() throw()
  */
 void String::clear() throw()
 {
-	if (ptr!=empty_string) free(ptr);
+	if (ptr != empty_string) free(ptr);
 	ptr=empty_string;
 	stringlen=0;
 	s=0;
@@ -293,10 +311,10 @@ void String::clear() throw()
  *
  * @return Anzahl Zeichen
  */
-size_t String::capacity ( ) const
+size_t String::capacity() const
 {
 	if (!s) return 0;
-	return (s/sizeof(char))-1;
+	return (s / sizeof(char)) - 1;
 }
 
 /*!\brief Reserviert Speicher für den String
@@ -316,11 +334,11 @@ size_t String::capacity ( ) const
  */
 void String::reserve(size_t size)
 {
-	size_t bytes=(size+1)*sizeof(char);
-	if (s>=bytes) return; // Nothing to do
-	char *p;
-	if (ptr==empty_string) p=(char*)malloc(bytes);
-	else p=(char*)realloc(ptr,bytes);
+	size_t bytes=(size + 1) * sizeof(char);
+	if (s >= bytes) return; // Nothing to do
+	char* p;
+	if (ptr == empty_string) p=(char*)malloc(bytes);
+	else p=(char*)realloc(ptr, bytes);
 	if (!p) throw OutOfMemoryException();
 	ptr=p;
 	s=bytes;
@@ -388,7 +406,7 @@ size_t String::size() const
  */
 bool String::isEmpty() const
 {
-	if (stringlen==0) return true;
+	if (stringlen == 0) return true;
 	return false;
 }
 
@@ -402,7 +420,7 @@ bool String::isEmpty() const
  */
 bool String::notEmpty() const
 {
-	if (stringlen==0) return false;
+	if (stringlen == 0) return false;
 	return true;
 }
 
@@ -417,19 +435,20 @@ bool String::notEmpty() const
  */
 bool String::isNumeric() const
 {
-	if (!stringlen) return false ;
+	if (!stringlen) return false;
 	size_t dotcount=0;
-	for (size_t i=0;i<stringlen;i++) {
+	for (size_t i=0;i < stringlen;i++) {
 		int c=((char*)ptr)[i];
-		if (c<'0' || c>'9') {
-			if (c!='.' && c!=',' && c!='-') return false ;
-			if (c=='-' && i>0) return false;
-			if (c=='.' || c==',') {
+		if (c < '0' || c>'9') {
+			if (c != '.' && c != ',' && c != '-') return false;
+			if (c == '-' && i > 0) return false;
+			if (c == '.' || c == ',') {
 				dotcount++;
-				if (dotcount>1) return false;
+				if (dotcount > 1) return false;
 			}
 		}
 	}
+	if (ptr[stringlen - 1] == '.') return false;
 	return(true);
 }
 
@@ -445,10 +464,10 @@ bool String::isNumeric() const
 bool String::isInteger() const
 {
 	if (!stringlen) return false;
-	for (size_t i=0;i<stringlen;i++) {
+	for (size_t i=0;i < stringlen;i++) {
 		int c=((char*)ptr)[i];
-		if (c<'0' || c>'9') {
-			if (c=='-' && i==0) continue;		// Minus am Anfang ist erlaubt
+		if (c < '0' || c>'9') {
+			if (c == '-' && i == 0) continue;		// Minus am Anfang ist erlaubt
 			return false;
 		}
 	}
@@ -471,12 +490,12 @@ bool String::isInteger() const
 bool String::isTrue() const
 {
 	if (!stringlen) return false;
-	if (atol(ptr)!=0) return true;
-	if (strCaseCmp("true")==0) return true;
-	if (strCaseCmp("wahr")==0) return true;
-	if (strCaseCmp("ja")==0) return true;
-	if (strCaseCmp("yes")==0) return true;
-	if (strCaseCmp("t")==0) return true;
+	if (atol(ptr) != 0) return true;
+	if (strCaseCmp("true") == 0) return true;
+	if (strCaseCmp("wahr") == 0) return true;
+	if (strCaseCmp("ja") == 0) return true;
+	if (strCaseCmp("yes") == 0) return true;
+	if (strCaseCmp("t") == 0) return true;
 	return false;
 }
 
@@ -520,25 +539,25 @@ bool String::isFalse() const
  * Multibyte-Characters zählen als ein Zeichen.
  *
  */
-String & String::set(const char *str, size_t size)
+String& String::set(const char* str, size_t size)
 {
 	if (!str) {
 		clear();
 		return *this;
 	}
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=::strlen(str);
-	if (inbytes==0) {
+	if (inbytes == 0) {
 		clear();
 		return *this;
 	}
-	size_t outbytes=inbytes*sizeof(char)+1;
-	if (outbytes>=s) {
-		if (ptr!=empty_string) free(ptr);
+	size_t outbytes=inbytes * sizeof(char) + 1;
+	if (outbytes >= s) {
+		if (ptr != empty_string) free(ptr);
 		stringlen=0;
 		s=InitialBuffersize;
-		if (s<=outbytes) s=((outbytes/InitialBuffersize)+1)*InitialBuffersize+1;
+		if (s <= outbytes) s=((outbytes / InitialBuffersize) + 1) * InitialBuffersize + 1;
 		ptr=(char*)malloc(s);
 		if (!ptr) {
 			s=0;
@@ -548,7 +567,7 @@ String & String::set(const char *str, size_t size)
 #ifdef HAVE_STRNCPY_S
 	strncpy_s((char*)ptr, s, str, inbytes);
 #else
-	strncpy((char*)ptr,str,inbytes);
+	strncpy((char*)ptr, str, inbytes);
 #endif
 	stringlen=inbytes;
 	((char*)ptr)[stringlen]=0;
@@ -567,15 +586,28 @@ String & String::set(const char *str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-String & String::set(const wchar_t *str, size_t size)
+String& String::set(const wchar_t* str, size_t size)
 {
-	if (str==NULL || size==0) {
+	if (str == NULL || size == 0) {
 		clear();
 		return *this;
 	}
-	wchar_t *tmpbuffer=NULL;
-	size_t inbytes;
-	if (size!=(size_t)-1) {
+	size_t inchars;
+	if (size != (size_t)-1) inchars=size;
+	else inchars=wcslen(str);
+	size_t inbytes=inchars * sizeof(wchar_t);
+
+
+	String GlobalEncoding=String::getGlobalEncoding();
+#ifdef WIN32
+	if (GlobalEncoding.instr(".1252") > 0) {
+		GlobalEncoding="WINDOWS-1252";
+	}
+#endif
+
+#ifndef WIN32
+	wchar_t* tmpbuffer=NULL;
+	if (size != (size_t)-1) {
 		size_t buffersize = (size + 1) * sizeof(wchar_t);
 		tmpbuffer=(wchar_t*)malloc(buffersize);
 		if (!tmpbuffer) throw OutOfMemoryException();
@@ -583,19 +615,19 @@ String & String::set(const wchar_t *str, size_t size)
 		wcsncpy_s(tmpbuffer, buffersize, str, size);
 		str = tmpbuffer;
 #else
-		str=wcsncpy(tmpbuffer,str,size);
+		str=wcsncpy(tmpbuffer, str, size);
 #endif
 		tmpbuffer[size]=0;
 		inbytes=size;
 	} else {
 		inbytes=wcslen(str);
 	}
-	size_t outbytes=inbytes*sizeof(wchar_t)+4;
-	if (outbytes>=s) {
-		if (ptr!=empty_string) free(ptr);
+	size_t outbytes=inbytes * sizeof(wchar_t) + 4;
+	if (outbytes >= s) {
+		if (ptr != empty_string) free(ptr);
 		stringlen=0;
 		s=InitialBuffersize;
-		if (s<=outbytes) s=((outbytes/InitialBuffersize)+1)*InitialBuffersize+4;
+		if (s <= outbytes) s=((outbytes / InitialBuffersize) + 1) * InitialBuffersize + 4;
 		ptr=(char*)malloc(s);
 		if (!ptr) {
 			s=0;
@@ -604,28 +636,27 @@ String & String::set(const wchar_t *str, size_t size)
 		}
 	}
 #ifdef HAVE_WCSTOMBS_S
-	// ptr=char* ziel
-	// str=wchar_t *quelle
-	// s=Size von ziel
-	/*errno_t wcstombs_s(  
-   size_t *pReturnValue,  
-   char *mbstr,  
-   size_t sizeInBytes,  
-   const wchar_t *wcstr,  
-   size_t count   
-); 
-	*/
 	wcstombs_s(&stringlen, ptr, s, str, s);
 
 #else
 	stringlen=wcstombs(ptr, str, s);
 #endif
 	free(tmpbuffer);
-	if (stringlen==(size_t)-1) {
+	if (stringlen == (size_t)-1) {
 		stringlen=0;
 		throw CharacterEncodingException();
 	}
 	return *this;
+#endif
+#ifdef HAVE_ICONV
+	Iconv iconv(ICONV_UNICODE, GlobalEncoding);
+	ByteArray buffer(inbytes + 4);
+	iconv.transcode(ByteArrayPtr(str, inbytes), buffer);
+	set((const char*)buffer.ptr(), buffer.size());
+	return *this;
+#else
+	throw UnsupportedFeatureException();
+#endif
 }
 
 /*!\brief String anhand eines String-Pointers setzen
@@ -641,17 +672,17 @@ String & String::set(const wchar_t *str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-String & String::set(const String *str, size_t size)
+String& String::set(const String* str, size_t size)
 {
 	if (!str) {
 		clear();
 		return *this;
 	}
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str->stringlen;
-	if (inbytes>str->stringlen) inbytes=str->stringlen;
-	return set(str->ptr,inbytes);
+	if (inbytes > str->stringlen) inbytes=str->stringlen;
+	return set(str->ptr, inbytes);
 }
 
 /*!\brief Wert eines anderen Strings übernehmen
@@ -666,35 +697,44 @@ String & String::set(const String *str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-String & String::set(const String &str, size_t size)
+String& String::set(const String& str, size_t size)
 {
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str.stringlen;
-	if (inbytes>str.stringlen) inbytes=str.stringlen;
-	return set(str.ptr,inbytes);
+	if (inbytes > str.stringlen) inbytes=str.stringlen;
+	return set(str.ptr, inbytes);
 }
 
-String & String::set(const WideString *str, size_t size)
+String& String::set(const ByteArrayPtr& str, size_t size)
+{
+	size_t inbytes;
+	if (size != (size_t)-1) inbytes=size;
+	else inbytes=str.size();
+	if (inbytes > str.size()) inbytes=str.size();
+	return set((const char*)str.adr(), inbytes);
+}
+
+String& String::set(const WideString* str, size_t size)
 {
 	if (!str) {
 		clear();
 		return *this;
 	}
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str->size();
-	if (inbytes>str->size()) inbytes=str->size();
-	return set(str->getPtr(),inbytes);
+	if (inbytes > str->size()) inbytes=str->size();
+	return set(str->getPtr(), inbytes);
 }
 
-String & String::set(const WideString &str, size_t size)
+String& String::set(const WideString& str, size_t size)
 {
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str.size();
-	if (inbytes>str.size()) inbytes=str.size();
-	return set(str.getPtr(),inbytes);
+	if (inbytes > str.size()) inbytes=str.size();
+	return set(str.getPtr(), inbytes);
 }
 
 /*!\brief Wert eines Strings der STL übernehmen
@@ -709,13 +749,13 @@ String & String::set(const WideString &str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-String & String::set(const std::string &str, size_t size)
+String& String::set(const std::string& str, size_t size)
 {
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str.length();
-	if (inbytes>str.length()) inbytes=str.length();
-	return set((const char*)str.c_str(),inbytes);
+	if (inbytes > str.length()) inbytes=str.length();
+	return set((const char*)str.c_str(), inbytes);
 }
 
 /*!\brief Wert eines Wide-Strings der STL übernehmen
@@ -730,13 +770,13 @@ String & String::set(const std::string &str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-String & String::set(const std::wstring &str, size_t size)
+String& String::set(const std::wstring& str, size_t size)
 {
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str.length();
-	if (inbytes>str.length()) inbytes=str.length();
-	return set(str.c_str(),inbytes);
+	if (inbytes > str.length()) inbytes=str.length();
+	return set(str.c_str(), inbytes);
 }
 
 
@@ -752,9 +792,9 @@ String & String::set(const std::wstring &str, size_t size)
  * \throw OutOfBoundsEception: Wird geworfen, wenn \p position größer ist, als die
  * Länge des Strings
  */
-String & String::set(size_t position, char c)
+String& String::set(size_t position, char c)
 {
-	if (position>=stringlen) throw OutOfBoundsEception();
+	if (position >= stringlen) throw OutOfBoundsEception();
 	ptr[position]=c;
 	return *this;
 }
@@ -783,20 +823,21 @@ int main(int argc, char **argv)
  *
  * \copydoc sprintf.dox
  */
-String & String::setf(const char *fmt, ...)
+String& String::setf(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	char *buff=NULL;
+	char* buff=NULL;
 #ifdef HAVE_VASPRINTF
-	if (::vasprintf (&buff, (char*)fmt, args)>0 && buff!=NULL) {
+	if (::vasprintf(&buff, (char*)fmt, args) >= 0 && buff != NULL) {
 #else
-	if (compat::vasprintf (&buff, (char*)fmt, args)>0 && buff!=NULL) {
+	if (compat::vasprintf(&buff, (char*)fmt, args) >= 0 && buff != NULL) {
 #endif
 		try {
 			set(buff);
 			free(buff);
-		} catch(...) {
+		}
+		catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -804,25 +845,25 @@ String & String::setf(const char *fmt, ...)
 		return *this;
 	}
 	va_end(args);
-    free(buff);
-    throw Exception("String::setf");
-}
+	free(buff);
+	throw Exception("String::setf");
+	}
 
-/*!\brief Einzelnes ASCII-Zeichen übernehmen
- *
- * \desc
- * Ein einzelnes ASCII-Zeichen \p c wird in den String übernommen.
- *
- * @param c ASCII-Wert des gewünschten Zeichens
- *
- * @return Referenz auf den String
- */
-String & String::set(char c)
+	/*!\brief Einzelnes ASCII-Zeichen übernehmen
+	 *
+	 * \desc
+	 * Ein einzelnes ASCII-Zeichen \p c wird in den String übernommen.
+	 *
+	 * @param c ASCII-Wert des gewünschten Zeichens
+	 *
+	 * @return Referenz auf den String
+	 */
+String& String::set(char c)
 {
 	char buffer[2];
 	buffer[0]=c;
 	buffer[1]=0;
-	return set(buffer,1);
+	return set(buffer, 1);
 }
 
 /*! \brief Erzeugt einen formatierten String
@@ -848,57 +889,58 @@ void MyFunction(const char *fmt, ...)
  *
  * \copydoc sprintf.dox
  */
-String & String::vasprintf(const char *fmt, va_list args)
+String& String::vasprintf(const char* fmt, va_list args)
 {
-	char *buff=NULL;
+	char* buff=NULL;
 #ifdef HAVE_VASPRINTF
-	if (::vasprintf (&buff, (char*)fmt, args)>0 && buff!=NULL) {
+	if (::vasprintf(&buff, (char*)fmt, args) >= 0 && buff != NULL) {
 #else
-	if (compat::vasprintf (&buff, (char*)fmt, args)>0 && buff!=NULL) {
+	if (compat::vasprintf(&buff, (char*)fmt, args) >= 0 && buff != NULL) {
 #endif
 		try {
 			set(buff);
 			free(buff);
-		} catch(...) {
+		}
+		catch (...) {
 			free(buff);
 			throw;
 		}
 		return *this;
 	}
-    free(buff);
-    throw Exception();
-}
+	free(buff);
+	throw Exception();
+	}
 
 
-/*!\brief String-Speicher übernehmen
- *
- * \desc
- * Mit dieser Funktion wird der Klasse die Verwaltung des Speicherbereich mit der Adresse \p adr und der
- * Größe \p size übergeben. Der Speicher muss zuvor mit "malloc" bzw. "calloc" allokiert worden sein
- * und darf von der Anwendung selbst nicht mehr freigegeben werden.
- *
- * @param[in] adr Startadresse des Speicherbereichs
- * @param[in] size Größe des Speicherbereichs in Bytes
- * @param[in] stringlen Optionaler Parameter, der die Länge des Strings innerhalb des übergebenen
- * Speicherbereichs angibt. Darf maximal \b size-1 groß sein. Ist der Wert nicht angegeben, wird die
- * Länge des Strings mit \b strlen berechnet
- *
- * \note Der String muss mit einem Null-Byte enden. Um dies sicherzustellen überschreibt die Methode
- * das letzte Byte des übergebenen Speicherbereichs mit 0.
- *
- * \return Referenz auf den String
- *
- */
-String & String::useadr(void *adr, size_t size, size_t stringlen)
+	/*!\brief String-Speicher übernehmen
+	 *
+	 * \desc
+	 * Mit dieser Funktion wird der Klasse die Verwaltung des Speicherbereich mit der Adresse \p adr und der
+	 * Größe \p size übergeben. Der Speicher muss zuvor mit "malloc" bzw. "calloc" allokiert worden sein
+	 * und darf von der Anwendung selbst nicht mehr freigegeben werden.
+	 *
+	 * @param[in] adr Startadresse des Speicherbereichs
+	 * @param[in] size Größe des Speicherbereichs in Bytes
+	 * @param[in] stringlen Optionaler Parameter, der die Länge des Strings innerhalb des übergebenen
+	 * Speicherbereichs angibt. Darf maximal \b size-1 groß sein. Ist der Wert nicht angegeben, wird die
+	 * Länge des Strings mit \b strlen berechnet
+	 *
+	 * \note Der String muss mit einem Null-Byte enden. Um dies sicherzustellen überschreibt die Methode
+	 * das letzte Byte des übergebenen Speicherbereichs mit 0.
+	 *
+	 * \return Referenz auf den String
+	 *
+	 */
+String& String::useadr(void* adr, size_t size, size_t stringlen)
 {
-	if (adr==NULL || size==0) throw IllegalArgumentException("adr and size must not be 0");
-	if (ptr!=empty_string) free(ptr);
+	if (adr == NULL || size == 0) throw IllegalArgumentException("adr and size must not be 0");
+	if (ptr != empty_string) free(ptr);
 	ptr=(char*)adr;
 	s=size;
-	ptr[s-1]=0;
+	ptr[s - 1]=0;
 	this->stringlen=stringlen;
-	if (stringlen==(size_t)-1) stringlen=strlen(ptr);
-	if (stringlen>=size) stringlen=size-1;
+	if (stringlen == (size_t)-1) stringlen=strlen(ptr);
+	if (stringlen >= size) stringlen=size - 1;
 	return *this;
 }
 
@@ -914,11 +956,11 @@ String & String::useadr(void *adr, size_t size, size_t stringlen)
  *
  * \exception OutOfMemoryException
  */
-String & String::append(const wchar_t *str, size_t size)
+String& String::append(const wchar_t* str, size_t size)
 {
 	String a;
-	a.set(str,size);
-	return append((const char*)a,a.size());
+	a.set(str, size);
+	return append((const char*)a, a.size());
 }
 
 /*!\brief Fügt einen C-String an das Ende des bestehenden an
@@ -939,27 +981,26 @@ String & String::append(const wchar_t *str, size_t size)
  * \exception CharacterEncodingException
  *
  */
-String & String::append(const char *str, size_t size)
+String& String::append(const char* str, size_t size)
 {
-	if (str==NULL || size==0) return *this;
-	if (ptr==empty_string) {
-		return set(str,size);
+	if (str == NULL || size == 0) return *this;
+	if (ptr == empty_string) {
+		return set(str, size);
 	}
 	size_t inchars;
-	if (size!=(size_t)-1) {
+	if (size != (size_t)-1) {
 		inchars=size;
-		if (inchars>strlen(str)) inchars=strlen(str);
-	}
-	else inchars=strlen(str);
-	size_t outbytes=(inchars+stringlen)*sizeof(char)+1;
-	if (outbytes>=s) {
-		size_t newbuffersize=((outbytes/InitialBuffersize)+1)*InitialBuffersize+16;
-		char *t=(char*)realloc(ptr,newbuffersize);
+		if (inchars > strlen(str)) inchars=strlen(str);
+	} else inchars=strlen(str);
+	size_t outbytes=(inchars + stringlen) * sizeof(char) + 1;
+	if (outbytes >= s) {
+		size_t newbuffersize=((outbytes / InitialBuffersize) + 1) * InitialBuffersize + 16;
+		char* t=(char*)realloc(ptr, newbuffersize);
 		if (!t) throw OutOfMemoryException();
 		ptr=t;
 		s=newbuffersize;
 	}
-	memcpy(((char*)ptr)+stringlen,str,inchars);
+	memcpy(((char*)ptr) + stringlen, str, inchars);
 	stringlen+=inchars;
 	ptr[stringlen]=0;
 	return *this;
@@ -979,10 +1020,10 @@ String & String::append(const char *str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::append(const String *str, size_t size)
+String& String::append(const String * str, size_t size)
 {
 	if (!str) return *this;
-	return append(str->ptr,size);
+	return append(str->ptr, size);
 }
 
 /*!\brief Fügt einen String an das Ende des bestehenden an
@@ -997,9 +1038,9 @@ String & String::append(const String *str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::append(const String &str, size_t size)
+String& String::append(const String & str, size_t size)
 {
-	return append(str.ptr,size);
+	return append(str.ptr, size);
 }
 
 /*!\brief Fügt einen std::string an das Ende des bestehenden an
@@ -1014,10 +1055,10 @@ String & String::append(const String &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::append(const std::string &str, size_t size)
+String& String::append(const std::string & str, size_t size)
 {
-	if (size==(size_t)-1) return append(str.data(),str.size());
-	return append(str.data(),size);
+	if (size == (size_t)-1) return append(str.data(), str.size());
+	return append(str.data(), size);
 }
 
 /*!\brief Fügt einen std::wstring an das Ende des bestehenden an
@@ -1032,10 +1073,10 @@ String & String::append(const std::string &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::append(const std::wstring &str, size_t size)
+String& String::append(const std::wstring & str, size_t size)
 {
-	if (size==(size_t)-1) return append(str.data(),str.size());
-	return append(str.data(),size);
+	if (size == (size_t)-1) return append(str.data(), str.size());
+	return append(str.data(), size);
 }
 
 
@@ -1062,22 +1103,23 @@ int main(int argc, char **argv)
  *
  * \copydoc sprintf.dox
  */
-String & String::appendf(const char *fmt, ...)
+String& String::appendf(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	char *buff=NULL;
+	char* buff=NULL;
 #ifdef HAVE_VASPRINTF
-	if (::vasprintf (&buff, (const char*)fmt, args)>0 && buff!=NULL) {
+	if (::vasprintf(&buff, (const char*)fmt, args) >= 0 && buff != NULL) {
 #else
-	if (compat::vasprintf (&buff, (const char*)fmt, args)>0 && buff!=NULL) {
+	if (compat::vasprintf(&buff, (const char*)fmt, args) >= 0 && buff != NULL) {
 #endif
 		try {
 			String a;
 			a.set(buff);
 			free(buff);
-			append(a.ptr,a.stringlen);
-		} catch(...) {
+			append(a.ptr, a.stringlen);
+		}
+		catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -1085,25 +1127,25 @@ String & String::appendf(const char *fmt, ...)
 		return *this;
 	}
 	va_end(args);
-    free(buff);
-    throw Exception();
-}
+	free(buff);
+	throw Exception();
+	}
 
-/*!\brief Einzelnes ASCII-Zeichen anhängen
- *
- * \desc
- * Ein einzelnes ASCII-Zeichen \p c wird in an den String angehangen.
- *
- * @param c ASCII-Wert des gewünschten Zeichens
- *
- * @return Referenz auf den String
- */
-String & String::append(char c)
+	/*!\brief Einzelnes ASCII-Zeichen anhängen
+	 *
+	 * \desc
+	 * Ein einzelnes ASCII-Zeichen \p c wird in an den String angehangen.
+	 *
+	 * @param c ASCII-Wert des gewünschten Zeichens
+	 *
+	 * @return Referenz auf den String
+	 */
+String& String::append(char c)
 {
 	char buffer[2];
 	buffer[0]=c;
 	buffer[1]=0;
-	return append(buffer,1);
+	return append(buffer, 1);
 }
 
 
@@ -1119,11 +1161,11 @@ String & String::append(char c)
  *
  * \exception OutOfMemoryException
  */
-String & String::prepend(const wchar_t *str, size_t size)
+String& String::prepend(const wchar_t* str, size_t size)
 {
 	String a;
-	a.set(str,size);
-	return prepend((const char*)a.ptr,size);
+	a.set(str, size);
+	return prepend((const char*)a.ptr, size);
 }
 
 /*!\brief Fügt einen String am Anfang des bestehenden Strings ein
@@ -1138,16 +1180,16 @@ String & String::prepend(const wchar_t *str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::prepend(const String *str, size_t size)
+String& String::prepend(const String * str, size_t size)
 {
 	if (!str) return *this;
-	if (ptr==empty_string) {
-		set(str,size);
+	if (ptr == empty_string) {
+		set(str, size);
 		return *this;
 	}
 	String a;
-	a.set(str,size);
-	return prepend(a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend(a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen String am Anfang des bestehenden Strings ein
@@ -1162,15 +1204,15 @@ String & String::prepend(const String *str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::prepend(const String &str, size_t size)
+String& String::prepend(const String & str, size_t size)
 {
-	if (ptr==empty_string) {
-		set(str,size);
+	if (ptr == empty_string) {
+		set(str, size);
 		return *this;
 	}
 	String a;
-	a.set(str,size);
-	return prepend(a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend(a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen std::string der STL am Anfang des bestehenden Strings ein
@@ -1185,15 +1227,15 @@ String & String::prepend(const String &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::prepend(const std::string &str, size_t size)
+String& String::prepend(const std::string & str, size_t size)
 {
-	if (ptr==empty_string) {
-		set(str,size);
+	if (ptr == empty_string) {
+		set(str, size);
 		return *this;
 	}
 	String a;
-	a.set(str,size);
-	return prepend(a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend(a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen std::wstring der STL am Anfang des bestehenden Strings ein
@@ -1208,15 +1250,15 @@ String & String::prepend(const std::string &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::prepend(const std::wstring &str, size_t size)
+String& String::prepend(const std::wstring & str, size_t size)
 {
-	if (ptr==empty_string) {
-		set(str,size);
+	if (ptr == empty_string) {
+		set(str, size);
 		return *this;
 	}
 	String a;
-	a.set(str,size);
-	return prepend(a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend(a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen C-String am Anfang des bestehenden Strings ein
@@ -1231,31 +1273,30 @@ String & String::prepend(const std::wstring &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-String & String::prepend(const char *str, size_t size)
+String& String::prepend(const char* str, size_t size)
 {
-	if (str==NULL || size==0) return *this;
-	if (ptr==empty_string) {
-		set(str,size);
+	if (str == NULL || size == 0) return *this;
+	if (ptr == empty_string) {
+		set(str, size);
 		return *this;
 	}
 	size_t inchars;
-	if (size!=(size_t)-1) {
+	if (size != (size_t)-1) {
 		inchars=size;
-		if (inchars>strlen(str)) inchars=strlen(str);
-	}
-	else inchars=strlen(str);
-	size_t outbytes=(inchars+stringlen)*sizeof(char)+1;
-	if (outbytes>=s) {
-		size_t newbuffersize=((outbytes/InitialBuffersize)+1)*InitialBuffersize+16;
-		char *t=(char*)realloc(ptr,newbuffersize);
+		if (inchars > strlen(str)) inchars=strlen(str);
+	} else inchars=strlen(str);
+	size_t outbytes=(inchars + stringlen) * sizeof(char) + 1;
+	if (outbytes >= s) {
+		size_t newbuffersize=((outbytes / InitialBuffersize) + 1) * InitialBuffersize + 16;
+		char* t=(char*)realloc(ptr, newbuffersize);
 		if (!t) throw OutOfMemoryException();
 		ptr=t;
 		s=newbuffersize;
 	}
 	// Bestehenden Speicherblock nach hinten moven
-	memmove(((char*)ptr)+inchars,ptr,stringlen);
+	memmove(((char*)ptr) + inchars, ptr, stringlen);
 	// Neuen Speicherblock davor kopieren
-	memcpy(ptr,str,inchars);
+	memcpy(ptr, str, inchars);
 	stringlen+=inchars;
 	ptr[stringlen]=0;
 	return *this;
@@ -1282,22 +1323,23 @@ int main(int argc, char **argv)
  *
  * \copydoc sprintf.dox
  */
-String & String::prependf(const char *fmt, ...)
+String& String::prependf(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	char *buff=NULL;
+	char* buff=NULL;
 #ifdef HAVE_VASPRINTF
-	if (::vasprintf (&buff, (const char*)fmt, args)>0 && buff!=NULL) {
+	if (::vasprintf(&buff, (const char*)fmt, args) >= 0 && buff != NULL) {
 #else
-	if (compat::vasprintf (&buff, (const char*)fmt, args)>0 && buff!=NULL) {
+	if (compat::vasprintf(&buff, (const char*)fmt, args) >= 0 && buff != NULL) {
 #endif
 		try {
 			String a;
 			a.set(buff);
 			free(buff);
-			prepend(a.ptr,a.stringlen);
-		} catch(...) {
+			prepend(a.ptr, a.stringlen);
+		}
+		catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -1305,26 +1347,26 @@ String & String::prependf(const char *fmt, ...)
 		return *this;
 	}
 	va_end(args);
-    free(buff);
-    throw Exception();
-}
+	free(buff);
+	throw Exception();
+	}
 
-/*!\brief Einzelnes ASCII-Zeichen am Anfang einfügen
- *
- * \desc
- * Ein einzelnes ASCII-Zeichen \p c wird in am Anfang des Strings eingefügt.
- * Die nachfolgenden Zeichen des Strings verschieben sich nach rechts.
- *
- * @param c ASCII-Wert des gewünschten Zeichens
- *
- * @return Referenz auf den String
- */
-String & String::prepend(char c)
+	/*!\brief Einzelnes ASCII-Zeichen am Anfang einfügen
+	 *
+	 * \desc
+	 * Ein einzelnes ASCII-Zeichen \p c wird in am Anfang des Strings eingefügt.
+	 * Die nachfolgenden Zeichen des Strings verschieben sich nach rechts.
+	 *
+	 * @param c ASCII-Wert des gewünschten Zeichens
+	 *
+	 * @return Referenz auf den String
+	 */
+String& String::prepend(char c)
 {
 	char buffer[2];
 	buffer[0]=c;
 	buffer[1]=0;
-	return prepend(buffer,1);
+	return prepend(buffer, 1);
 }
 
 /*!\brief String in eine beliebige lokale Kodierung umwandeln
@@ -1341,37 +1383,37 @@ String & String::prepend(char c)
  * Für diese Funktion wird "Iconv" benötigt. Ist keine Iconv-Bibliothek auf dem
  * System vorhanden, wird eine UnsupportedFeatureException geworfen.
  */
-ByteArray String::toEncoding(const char *encoding) const
+ByteArray String::toEncoding(const char* encoding) const
 {
 #ifndef HAVE_ICONV
 	throw UnsupportedFeatureException();
 #else
-	iconv_t iconv_handle=iconv_open(encoding,"");
-	if ((iconv_t)(-1)==iconv_handle) {
+	iconv_t iconv_handle=iconv_open(encoding, "");
+	if ((iconv_t)(-1) == iconv_handle) {
 		throw UnsupportedCharacterEncodingException();
 	}
 
-	size_t buffersize=(stringlen+4)*sizeof(wchar_t);
-	char *buffer=(char*)malloc(buffersize);
+	size_t buffersize=(stringlen + 4) * sizeof(wchar_t);
+	char* buffer=(char*)malloc(buffersize);
 	if (!buffer) {
 		iconv_close(iconv_handle);
 		throw OutOfMemoryException();
 	}
 	size_t outbytes=buffersize;
-	char *b=buffer;
-	char *inbuffer=(char*)ptr;
+	char* b=buffer;
+	char* inbuffer=(char*)ptr;
 	size_t inbytes=stringlen;
 
-	size_t res=iconv((iconv_t)iconv_handle, (ICONV_CONST char **)&inbuffer, &inbytes,
-			(char**)&b, &outbytes);
+	size_t res=iconv((iconv_t)iconv_handle, (ICONV_CONST char**) & inbuffer, &inbytes,
+		(char**)&b, &outbytes);
 	iconv_close(iconv_handle);
-	if (res==(size_t)(-1)) {
+	if (res == (size_t)(-1)) {
 		free(buffer);
 		throw CharacterEncodingException();
 	}
 	//b[0]=0;
 	//HexDump(buffer,buffersize-outbytes+4);
-	ByteArray ret(buffer,buffersize-outbytes);
+	ByteArray ret(buffer, buffersize - outbytes);
 	//ret.hexDump();
 	free(buffer);
 	return ret;
@@ -1387,11 +1429,11 @@ ByteArray String::toEncoding(const char *encoding) const
  */
 ByteArray String::toUtf8() const
 {
-	const char * l=setlocale(LC_CTYPE,NULL);
+	const char* l=setlocale(LC_CTYPE, NULL);
 	//printf ("Locale: %s\n",l);
 	// de_DE.UTF-8
-	if (strcasestr(l,"utf-8")) {
-		return ByteArray(ptr,stringlen);
+	if (strcasestr(l, "utf-8")) {
+		return ByteArray(ptr, stringlen);
 	}
 	return toEncoding("UTF-8");
 }
@@ -1400,16 +1442,16 @@ ByteArray String::toUCS4() const
 {
 	ByteArray ret;
 	if (stringlen) {
-		ppluint32 *ucs4=(ppluint32*)malloc(stringlen*4+4);
+		uint32_t* ucs4=(uint32_t*)malloc(stringlen * 4 + 4);
 		if (!ucs4) throw OutOfMemoryException();
-		for (size_t i=0;i<stringlen;i++) ucs4[i]=(ppluint32)ptr[i];
+		for (size_t i=0;i < stringlen;i++) ucs4[i]=(uint32_t)ptr[i];
 		ucs4[stringlen]=0;
-		ret.useadr(ucs4,stringlen*4);
+		ret.useadr(ucs4, stringlen * 4);
 	}
 	return ret;
 }
 
-String &String::fromUCS4(const ppluint32 *str, size_t size)
+String& String::fromUCS4(const uint32_t * str, size_t size)
 {
 	clear();
 	/*TODO: Muss noch implementiert werden
@@ -1423,12 +1465,12 @@ String &String::fromUCS4(const ppluint32 *str, size_t size)
 		append(c);
 	}
 	*/
-	return *this ;
+	return *this;
 }
 
-String &String::fromUCS4(const ByteArrayPtr &bin)
+String& String::fromUCS4(const ByteArrayPtr & bin)
 {
-	return fromUCS4((ppluint32*)bin.ptr(),bin.size());
+	return fromUCS4((uint32_t*)bin.ptr(), bin.size());
 }
 
 
@@ -1448,8 +1490,8 @@ String &String::fromUCS4(const ByteArrayPtr &bin)
  */
 char String::get(ssize_t pos) const
 {
-	if (pos>=0 && stringlen>(size_t)pos) return ((char*)ptr)[pos];
-	if (pos<0 && (size_t)(0-pos)<stringlen) return ((char*)ptr)[stringlen+pos];
+	if (pos >= 0 && stringlen > (size_t)pos) return ((char*)ptr)[pos];
+	if (pos < 0 && (size_t)(0 - pos) < stringlen) return ((char*)ptr)[stringlen + pos];
 	throw OutOfBoundsEception();
 }
 
@@ -1470,8 +1512,8 @@ char String::get(ssize_t pos) const
  */
 char String::operator[](ssize_t pos) const
 {
-	if (pos>=0 && stringlen>(size_t)pos) return ((char*)ptr)[pos];
-	if (pos<0 && (size_t)(0-pos)<=stringlen) return ((char*)ptr)[stringlen+pos];
+	if (pos >= 0 && stringlen > (size_t)pos) return ((char*)ptr)[pos];
+	if (pos < 0 && (size_t)(0 - pos) <= stringlen) return ((char*)ptr)[stringlen + pos];
 	throw OutOfBoundsEception();
 }
 
@@ -1491,9 +1533,9 @@ char String::operator[](ssize_t pos) const
  */
 void String::print(bool withNewline) const throw()
 {
-	if (stringlen>0) {
-		if (withNewline) printf("%s\n",(char*)ptr);
-		else printf("%s",(char*)ptr);
+	if (stringlen > 0) {
+		if (withNewline) printf("%s\n", (char*)ptr);
+		else printf("%s", (char*)ptr);
 	} else if (withNewline) {
 		printf("\n");
 	}
@@ -1524,8 +1566,8 @@ void String::printnl() const throw()
  */
 void String::hexDump() const
 {
-	PrintDebug ("HEXDUMP of String %p: %zi Bytes starting at Address %p:\n",this,stringlen*sizeof(char),ptr);
-	if (stringlen) HexDump(ptr,stringlen*sizeof(char),true);
+	PrintDebug("HEXDUMP of String %p: %zi Bytes starting at Address %p:\n", this, stringlen * sizeof(char), ptr);
+	if (stringlen) HexDump(ptr, stringlen * sizeof(char), true);
 }
 
 /*!\brief String übernehmen
@@ -1565,7 +1607,7 @@ String& String::operator=(const wchar_t* str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-String& String::operator=(const String *str)
+String& String::operator=(const String * str)
 {
 	return set(str);
 }
@@ -1579,7 +1621,12 @@ String& String::operator=(const String *str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-String& String::operator=(const String &str)
+String& String::operator=(const String & str)
+{
+	return set(str);
+}
+
+String& String::operator=(const WideString & str)
 {
 	return set(str);
 }
@@ -1593,7 +1640,7 @@ String& String::operator=(const String &str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-String& String::operator=(const std::string &str)
+String& String::operator=(const std::string & str)
 {
 	return set(str);
 }
@@ -1607,7 +1654,7 @@ String& String::operator=(const std::string &str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-String& String::operator=(const std::wstring &str)
+String& String::operator=(const std::wstring & str)
 {
 	return set(str);
 }
@@ -1662,7 +1709,7 @@ String& String::operator+=(const wchar_t* str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-String& String::operator+=(const String& str)
+String& String::operator+=(const String & str)
 {
 	return append(str);
 }
@@ -1676,7 +1723,7 @@ String& String::operator+=(const String& str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-String& String::operator+=(const std::string &str)
+String& String::operator+=(const std::string & str)
 {
 	return append(str);
 }
@@ -1690,7 +1737,7 @@ String& String::operator+=(const std::string &str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-String& String::operator+=(const std::wstring &str)
+String& String::operator+=(const std::wstring & str)
 {
 	return append(str);
 }
@@ -1725,16 +1772,16 @@ String& String::operator+=(char c)
  *
  * \see strCaseCmp Vergleich zweier Strings unter Ignorierung der Gross-/Kleinschreibung
  */
-int String::strcmp(const String &str, size_t size) const
+int String::strcmp(const String & str, size_t size) const
 {
-	if (size!=(size_t)-1) return ::strncmp(ptr,str.ptr,size);
-	return ::strcmp(ptr,str.ptr);
+	if (size != (size_t)-1) return ::strncmp(ptr, str.ptr, size);
+	return ::strcmp(ptr, str.ptr);
 }
 
-int String::strcmp(const char *str, size_t size) const
+int String::strcmp(const char* str, size_t size) const
 {
-	if (size!=(size_t)-1) return ::strncmp(ptr,str,size);
-	return ::strcmp(ptr,str);
+	if (size != (size_t)-1) return ::strncmp(ptr, str, size);
+	return ::strcmp(ptr, str);
 }
 
 
@@ -1756,16 +1803,16 @@ int String::strcmp(const char *str, size_t size) const
  *
  * \see strcmp Vergleich zweier Strings unter Berücksichtigung der Gross-/Kleinschreibung
  */
-int String::strCaseCmp(const String &str, size_t size) const
+int String::strCaseCmp(const String & str, size_t size) const
 {
-	if (size!=(size_t)-1) return strncasecmp(ptr,str.ptr,size);
-	return strcasecmp(ptr,str.ptr);
+	if (size != (size_t)-1) return strncasecmp(ptr, str.ptr, size);
+	return strcasecmp(ptr, str.ptr);
 }
 
-int String::strCaseCmp(const char *str, size_t size) const
+int String::strCaseCmp(const char* str, size_t size) const
 {
-	if (size!=(size_t)-1) return strncasecmp(ptr,str,size);
-	return strcasecmp(ptr,str);
+	if (size != (size_t)-1) return strncasecmp(ptr, str, size);
+	return strcasecmp(ptr, str);
 }
 
 
@@ -1779,9 +1826,9 @@ int String::strCaseCmp(const char *str, size_t size) const
  */
 String String::left(size_t len) const
 {
-	if(stringlen > 0) {
-		if(len > stringlen) len = stringlen;
-		return String(ptr,len);
+	if (stringlen > 0) {
+		if (len > stringlen) len = stringlen;
+		return String(ptr, len);
 	}
 	return String();
 }
@@ -1796,9 +1843,9 @@ String String::left(size_t len) const
   */
 String String::right(size_t len) const
 {
-	if(stringlen > 0) {
-		if(len > stringlen) len = stringlen;
-		return String(ptr+stringlen-len,len);
+	if (stringlen > 0) {
+		if (len > stringlen) len = stringlen;
+		return String(ptr + stringlen - len, len);
 	}
 	return String();
 }
@@ -1816,10 +1863,10 @@ String String::right(size_t len) const
  */
 String String::mid(size_t start, size_t len) const
 {
-	if (len==(size_t)-1) len=stringlen;
-	if (start<stringlen && stringlen>0 && len>0) {
-		if (start+len>stringlen) len=stringlen-start;
-		return String(ptr+start,len);
+	if (len == (size_t)-1) len=stringlen;
+	if (start < stringlen && stringlen>0 && len > 0) {
+		if (start + len > stringlen) len=stringlen - start;
+		return String(ptr + start, len);
 	}
 	return String();
 }
@@ -1837,10 +1884,10 @@ String String::mid(size_t start, size_t len) const
  */
 String String::substr(size_t start, size_t len) const
 {
-	if (len==(size_t)-1) len=stringlen;
-	if (start<stringlen && stringlen>0 && len>0) {
-		if (start+len>stringlen) len=stringlen-start;
-		return String(ptr+start,len);
+	if (len == (size_t)-1) len=stringlen;
+	if (start < stringlen && stringlen>0 && len > 0) {
+		if (start + len > stringlen) len=stringlen - start;
+		return String(ptr + start, len);
 	}
 	return String();
 }
@@ -1869,9 +1916,9 @@ String String::substr(size_t start, size_t len) const
  */
 void String::lowerCase()
 {
-	if (stringlen==0) return;
+	if (stringlen == 0) return;
 	// Wir wandeln den String zunächst nach Unicode um
-	wchar_t *buffer=(wchar_t*)malloc((stringlen+1)*sizeof(wchar_t));
+	wchar_t* buffer=(wchar_t*)malloc((stringlen + 1) * sizeof(wchar_t));
 	if (!buffer) throw OutOfMemoryException();
 	size_t l;
 #ifdef HAVE_MBSTOWCS_S
@@ -1879,20 +1926,20 @@ void String::lowerCase()
 #else
 	l = mbstowcs(buffer, ptr, stringlen);
 #endif
-	if (l==(size_t)-1) {
+	if (l == (size_t)-1) {
 		free(buffer);
 		throw CharacterEncodingException();
 	}
 	// Umwandeln
-	for (size_t i=0;i<l;i++) {
+	for (size_t i=0;i < l;i++) {
 		wchar_t wc=buffer[i];
 		wchar_t c=towlower(wc);
-		if (c!=(wchar_t)WEOF) {
+		if (c != (wchar_t)WEOF) {
 			buffer[i]=c;
 		}
 	}
 	// Zurück im String speichern
-	set(buffer,l);
+	set(buffer, l);
 	free(buffer);
 }
 
@@ -1916,30 +1963,30 @@ void String::lowerCase()
  */
 void String::upperCase()
 {
-	if (stringlen==0) return;
+	if (stringlen == 0) return;
 	// Wir wandeln den String zunächst nach Unicode um
-	wchar_t *buffer=(wchar_t*)malloc((stringlen+1)*sizeof(wchar_t));
+	wchar_t* buffer=(wchar_t*)malloc((stringlen + 1) * sizeof(wchar_t));
 	if (!buffer) throw OutOfMemoryException();
 	size_t l;
 #ifdef HAVE_MBSTOWCS_S
 	mbstowcs_s(&l, buffer, stringlen, ptr, stringlen);
 #else
-	l=mbstowcs(buffer, ptr,stringlen);
+	l=mbstowcs(buffer, ptr, stringlen);
 #endif
-	if (l==(size_t)-1) {
+	if (l == (size_t)-1) {
 		free(buffer);
 		throw CharacterEncodingException();
 	}
 	// Umwandeln
-	for (size_t i=0;i<l;i++) {
+	for (size_t i=0;i < l;i++) {
 		wchar_t wc=buffer[i];
 		wchar_t c=towupper(wc);
-		if (c!=(wchar_t)WEOF) {
+		if (c != (wchar_t)WEOF) {
 			buffer[i]=c;
 		}
 	}
 	// Zurück im String speichern
-	set(buffer,l);
+	set(buffer, l);
 	free(buffer);
 }
 
@@ -1951,57 +1998,57 @@ void String::upperCase()
  */
 void String::upperCaseWords()
 {
-	if (stringlen==0) return;
+	if (stringlen == 0) return;
 
 	// Wir wandeln den String zunächst nach Unicode um
-	wchar_t *buffer=(wchar_t*)malloc((stringlen+1)*sizeof(wchar_t));
+	wchar_t* buffer=(wchar_t*)malloc((stringlen + 1) * sizeof(wchar_t));
 	if (!buffer) throw OutOfMemoryException();
 	size_t l;
 #ifdef HAVE_MBSTOWCS_S
 	mbstowcs_s(&l, buffer, stringlen, ptr, stringlen);
 #else
-	l=mbstowcs(buffer, ptr,stringlen);
+	l=mbstowcs(buffer, ptr, stringlen);
 #endif
-	if (l==(size_t)-1) {
+	if (l == (size_t)-1) {
 		free(buffer);
 		throw CharacterEncodingException();
 	}
 	bool wordstart=true;
-	for (size_t i=0;i<l;i++) {
+	for (size_t i=0;i < l;i++) {
 		wchar_t wc=buffer[i];
 		if (wordstart) {
 			wchar_t c=towupper(wc);
-			if (c!=(wchar_t)WEOF) {
+			if (c != (wchar_t)WEOF) {
 				buffer[i]=c;
 			}
 		}
-		if (wc<48 || (wc>57 && wc<65) || (wc>90 && wc<97) || (wc>122 && wc<127) ) {
+		if (wc < 48 || (wc > 57 && wc < 65) || (wc > 90 && wc < 97) || (wc > 122 && wc < 127)) {
 			wordstart=true;
 		} else {
 			wordstart=false;
 		}
 	}
-	set(buffer,l);
+	set(buffer, l);
 	free(buffer);
 }
 
 //! \brief Schneidet Leerzeichen, Tabs, Returns und Linefeeds am Anfang und Ende des Strings ab
 void String::trim()
 {
-	if (stringlen>0) {
-		size_t i,start,ende,s;
+	if (stringlen > 0) {
+		size_t i, start, ende, s;
 		start=0; s=0;
 		ende=stringlen;
-		for (i=0;i<stringlen;i++) {
-			if (ptr[i]==13 || ptr[i]==10 || ptr[i]==32 || ptr[i]=='\t') {
-				if (s==0) start=i+1;
+		for (i=0;i < stringlen;i++) {
+			if (ptr[i] == 13 || ptr[i] == 10 || ptr[i] == 32 || ptr[i] == '\t') {
+				if (s == 0) start=i + 1;
 			} else {
 				s=1; ende=i;
 			}
 		}
-		ptr[ende+1]=0;
-		if (start>0)
-			memmove(ptr,ptr+start,(ende-start+2)*sizeof(char));
+		ptr[ende + 1]=0;
+		if (start > 0)
+			memmove(ptr, ptr + start, (ende - start + 2) * sizeof(char));
 		stringlen=strlen(ptr);
 		ptr[stringlen]=0;
 	}
@@ -2046,19 +2093,19 @@ String String::toUpperCaseWords() const
 //! \brief Schneidet Leerzeichen, Tabs Returns und Linefeeds am Anfang des Strings ab
 void String::trimLeft()
 {
-	if (stringlen>0) {
-		size_t i,start,s;
+	if (stringlen > 0) {
+		size_t i, start, s;
 		start=0; s=0;
 		//ende=stringlen;
-		for (i=0;i<stringlen;i++) {
-			if (ptr[i]==13 || ptr[i]==10 || ptr[i]==32 || ptr[i]=='\t') {
-				if (s==0) start=i+1;
+		for (i=0;i < stringlen;i++) {
+			if (ptr[i] == 13 || ptr[i] == 10 || ptr[i] == 32 || ptr[i] == '\t') {
+				if (s == 0) start=i + 1;
 			} else {
 				s=1; // ende=i;
 			}
 		}
-		if (start>0)
-			memmove(ptr,ptr+start,(stringlen-start+1)*sizeof(char));
+		if (start > 0)
+			memmove(ptr, ptr + start, (stringlen - start + 1) * sizeof(char));
 		stringlen=strlen(ptr);
 		ptr[stringlen]=0;
 	}
@@ -2067,12 +2114,12 @@ void String::trimLeft()
 //! \brief Schneidet Leerzeichen, Tabs Returns und Linefeeds am Ende des Strings ab
 void String::trimRight()
 {
-	if (stringlen>0) {
-		size_t i,ende;
+	if (stringlen > 0) {
+		size_t i, ende;
 		ende=0;
-		for (i=stringlen;i>0;i--) {
-			char w=ptr[i-1];
-			if (w!=13 && w!=10 && w!=32 && w!='\t') {
+		for (i=stringlen;i > 0;i--) {
+			char w=ptr[i - 1];
+			if (w != 13 && w != 10 && w != 32 && w != '\t') {
 				ende=i;
 				break;
 			}
@@ -2084,16 +2131,16 @@ void String::trimRight()
 }
 
 //! \brief Schneidet die definierten Zeichen am Anfang des Strings ab
-void String::trimLeft(const String &chars)
+void String::trimLeft(const String & chars)
 {
-	if (stringlen>0 && chars.stringlen>0) {
-		size_t i,start,s,z;
+	if (stringlen > 0 && chars.stringlen > 0) {
+		size_t i, start, s, z;
 		start=0; s=0;
-		for (i=0;i<stringlen;i++) {
+		for (i=0;i < stringlen;i++) {
 			int match=0;
-			for (z=0;z<chars.stringlen;z++) {
-				if (ptr[i]==chars.ptr[z]) {
-					if (s==0) start=i+1;
+			for (z=0;z < chars.stringlen;z++) {
+				if (ptr[i] == chars.ptr[z]) {
+					if (s == 0) start=i + 1;
 					match=1;
 					break;
 				}
@@ -2102,24 +2149,24 @@ void String::trimLeft(const String &chars)
 				s=1;
 			}
 		}
-		if (start>0) {
-			memmove(ptr,ptr+start,(stringlen-start+1)*sizeof(char));
+		if (start > 0) {
+			memmove(ptr, ptr + start, (stringlen - start + 1) * sizeof(char));
 			stringlen=strlen(ptr);
 		}
 	}
 }
 
 //! \brief Schneidet die definierten Zeichen am Ende des Strings ab
-void String::trimRight(const String &chars)
+void String::trimRight(const String & chars)
 {
-	if (stringlen>0 && chars.stringlen>0) {
-		size_t i,ende,z;
+	if (stringlen > 0 && chars.stringlen > 0) {
+		size_t i, ende, z;
 		ende=0;
-		for (i=stringlen;i>0;i--) {
-			char w=ptr[i-1];
+		for (i=stringlen;i > 0;i--) {
+			char w=ptr[i - 1];
 			int match=0;
-			for (z=0;z<chars.stringlen;z++) {
-				if (w==chars.ptr[z]) {
+			for (z=0;z < chars.stringlen;z++) {
+				if (w == chars.ptr[z]) {
 					//if (s==0) start=i+1;
 					match=1;
 					break;
@@ -2136,7 +2183,7 @@ void String::trimRight(const String &chars)
 }
 
 //! \brief Schneidet die definierten Zeichen am Anfang und Ende des Strings ab
-void String::trim(const String &chars)
+void String::trim(const String & chars)
 {
 	trimLeft(chars);
 	trimRight(chars);
@@ -2152,8 +2199,8 @@ void String::trim(const String &chars)
  */
 void String::chopRight(size_t num)
 {
-	if (stringlen>0) {
-		if (stringlen<num) num=stringlen;
+	if (stringlen > 0) {
+		if (stringlen < num) num=stringlen;
 		stringlen-=num;
 		ptr[stringlen]=0;
 	}
@@ -2172,8 +2219,8 @@ void String::chopRight(size_t num)
  */
 void String::chop(size_t num)
 {
-	if (stringlen>0) {
-		if (stringlen<num) num=stringlen;
+	if (stringlen > 0) {
+		if (stringlen < num) num=stringlen;
 		stringlen-=num;
 		ptr[stringlen]=0;
 	}
@@ -2189,9 +2236,9 @@ void String::chop(size_t num)
  */
 void String::chopLeft(size_t num)
 {
-	if (stringlen>0) {
-		if (stringlen<num) num=stringlen;
-		memmove(ptr,ptr+num,(stringlen-num)*sizeof(char));
+	if (stringlen > 0) {
+		if (stringlen < num) num=stringlen;
+		memmove(ptr, ptr + num, (stringlen - num) * sizeof(char));
 		stringlen-=num;
 		ptr[stringlen]=0;
 	}
@@ -2216,8 +2263,8 @@ void String::chomp()
  */
 void String::cut(size_t pos)
 {
-	if (stringlen==0) return;
-	if (pos>stringlen) return;
+	if (stringlen == 0) return;
+	if (pos > stringlen) return;
 	ptr[pos]=0;
 	stringlen=pos;
 }
@@ -2228,12 +2275,12 @@ void String::cut(size_t pos)
  * \param[in] letter Buchstabe oder Buchstabenkombination, an der der String abgeschnitten werden
  * soll. Zeigt der Pointer auf NULL oder ist der String leer, passiert nichts.
  */
-void String::cut(const String &letter)
+void String::cut(const String & letter)
 {
-	if (stringlen==0) return;
+	if (stringlen == 0) return;
 	if (letter.isEmpty()) return;
-	ssize_t p=instr(letter,0);
-	if (p>=0) {
+	ssize_t p=instr(letter, 0);
+	if (p >= 0) {
 		ptr[p]=0;
 		stringlen=p;
 	}
@@ -2243,8 +2290,8 @@ void String::cut(const String &letter)
 String String::strchr(char c) const
 {
 	String ret;
-	if (stringlen>0) {
-		char *p=::strchr(ptr, c);
+	if (stringlen > 0) {
+		char* p=::strchr(ptr, c);
 		if (p) ret.set(p);
 	}
 	return ret;
@@ -2253,8 +2300,8 @@ String String::strchr(char c) const
 String String::strrchr(char c) const
 {
 	String ret;
-	if (stringlen>0) {
-		char *p=::strrchr(ptr, c);
+	if (stringlen > 0) {
+		char* p=::strrchr(ptr, c);
 		if (p) ret.set(p);
 	}
 	return ret;
@@ -2277,12 +2324,12 @@ String String::strrchr(char c) const
  * Ein Sonderfall besteht, wenn \p needle leer ist. In diesem Fall wird
  * der komplette String zurückgegeben.
  */
-String String::strstr(const String &needle) const
+String String::strstr(const String & needle) const
 {
 	String ret;
-	if (stringlen>0) {
-		if (needle.len()==0) return *this;
-		char *p=::strstr(ptr, needle.ptr);
+	if (stringlen > 0) {
+		if (needle.len() == 0) return *this;
+		char* p=::strstr(ptr, needle.ptr);
 		if (p) ret.set(p);
 	}
 	return ret;
@@ -2301,12 +2348,12 @@ String String::strstr(const String &needle) const
  * oder -1 wenn er nicht gefunden wurde. Ist \p needle ein leerer String, liefert die
  * Funktion immer 0 zurück.
  */
-ssize_t String::find(const String &needle, ssize_t start) const
+ssize_t String::find(const String & needle, ssize_t start) const
 {
-	if (stringlen==0) return -1;
-	if (needle.stringlen==0) return 0;
-	if (start>0 && (size_t)start>=stringlen) return -1;
-	if (start<0 && ((size_t)((ssize_t)stringlen+start))>=stringlen) return -1;
+	if (stringlen == 0) return -1;
+	if (needle.stringlen == 0) return 0;
+	if (start > 0 && (size_t)start >= stringlen) return -1;
+	if (start < 0 && ((size_t)((ssize_t)stringlen + start)) >= stringlen) return -1;
 
 
 	//Position to return
@@ -2314,10 +2361,10 @@ ssize_t String::find(const String &needle, ssize_t start) const
 	//Length of the string to search for
 	size_t lstr = needle.stringlen;
 	//Current position to search from and position of found string
-	char *found = NULL, *tmp = NULL;
+	char* found = NULL, * tmp = NULL;
 
 	//Search forward
-	if(start >= 0) {
+	if (start >= 0) {
 		//Search first occurence, starting at the given position...
 		found = ::strstr(ptr + start, needle.ptr);
 		//...and calculate the position to return if str was found
@@ -2332,11 +2379,11 @@ ssize_t String::find(const String &needle, ssize_t start) const
 		/* Beginning at the start of the contained string, start searching for
 			   every occurence of the str and make it the position last found as long
 			   as the found string doesn't exceed the defined end of the search */
-		while((found = ::strstr((tmp == NULL ? ptr : tmp + 1), needle.ptr)) != NULL && found - ptr + lstr <= stringlen + start)
+		while ((found = ::strstr((tmp == NULL ? ptr : tmp + 1), needle.ptr)) != NULL && found - ptr + lstr <= stringlen + start)
 			tmp = found;
 
 		//Calculate the position to return if str was found
-		if(tmp != NULL) {
+		if (tmp != NULL) {
 			p = tmp - ptr;
 		}
 	}
@@ -2359,13 +2406,13 @@ ssize_t String::find(const String &needle, ssize_t start) const
  * oder -1 wenn er nicht gefunden wurde. Ist \p needle ein leerer String, liefert die
  * Funktion immer 0 zurück.
  */
-ssize_t String::findCase(const String &needle, ssize_t start) const
+ssize_t String::findCase(const String & needle, ssize_t start) const
 {
 	String CaseNeedle(needle);
-	String CaseSearch(ptr,stringlen);
+	String CaseSearch(ptr, stringlen);
 	CaseNeedle.lowerCase();
 	CaseSearch.lowerCase();
-	return CaseSearch.find(CaseNeedle,start);
+	return CaseSearch.find(CaseNeedle, start);
 }
 
 /*! \brief Sucht nach einem String
@@ -2381,15 +2428,15 @@ ssize_t String::findCase(const String &needle, ssize_t start) const
  * oder -1 wenn er nicht gefunden wurde. Ist \p needle ein leerer String, liefert die
  * Funktion immer 0 zurück.
  */
-ssize_t String::instr(const String &needle, size_t start) const
+ssize_t String::instr(const String & needle, size_t start) const
 {
-	if (stringlen==0) return -1;
-	if (needle.stringlen==0) return 0;
-	if (start>=stringlen) return -1;
-	const char * p;
-	p=::strstr((ptr+start),needle.ptr);
-	if (p!=NULL) {
-		return ((ssize_t)(p-ptr));
+	if (stringlen == 0) return -1;
+	if (needle.stringlen == 0) return 0;
+	if (start >= stringlen) return -1;
+	const char* p;
+	p=::strstr((ptr + start), needle.ptr);
+	if (p != NULL) {
+		return ((ssize_t)(p - ptr));
 	}
 	return -1;
 }
@@ -2408,41 +2455,41 @@ ssize_t String::instr(const String &needle, size_t start) const
  * oder -1 wenn er nicht gefunden wurde. Ist \p needle ein leerer String, liefert die
  * Funktion immer 0 zurück.
  */
-ssize_t String::instrCase(const String &needle, size_t start) const
+ssize_t String::instrCase(const String & needle, size_t start) const
 {
 	String CaseNeedle(needle);
-	String CaseSearch(ptr,stringlen);
+	String CaseSearch(ptr, stringlen);
 	CaseNeedle.lowerCase();
 	CaseSearch.lowerCase();
-	return CaseSearch.instr(CaseNeedle,start);
+	return CaseSearch.instr(CaseNeedle, start);
 }
 
 
-bool String::has(const String &needle, bool ignoreCase) const
+bool String::has(const String & needle, bool ignoreCase) const
 {
 	if (ignoreCase) {
-		String CaseSearch(ptr,stringlen);
+		String CaseSearch(ptr, stringlen);
 		String CaseNeedle(needle);
 		CaseNeedle.lowerCase();
 		CaseSearch.lowerCase();
-		return CaseSearch.has(CaseNeedle,false);
+		return CaseSearch.has(CaseNeedle, false);
 	}
-	if (stringlen==0) return false;
-	if (needle.stringlen==0) return false;
-	const char * p;
-	p=::strstr(ptr,needle.ptr);
-	if (p!=NULL) return true;
+	if (stringlen == 0) return false;
+	if (needle.stringlen == 0) return false;
+	const char* p;
+	p=::strstr(ptr, needle.ptr);
+	if (p != NULL) return true;
 	return false;
 
 }
 
-String &String::stripSlashes()
+String& String::stripSlashes()
 {
-	if (stringlen==0) return *this;
+	if (stringlen == 0) return *this;
 	size_t p=0, np=0;
 	char a, lastchar=0;
 	while ((a=ptr[p])) {
-		if (lastchar!='\\' && p>0) {
+		if (lastchar != '\\' && p > 0) {
 			ptr[np]=lastchar;
 			np++;
 		}
@@ -2454,7 +2501,7 @@ String &String::stripSlashes()
 		np++;
 	}
 	ptr[np]=0;
-	if (stringlen!=np) {
+	if (stringlen != np) {
 		stringlen=np;
 	}
 	return *this;
@@ -2471,26 +2518,26 @@ String &String::stripSlashes()
  */
 String& String::repeat(size_t num)
 {
-	if (stringlen==0) return *this;
-	if (num==0) {
+	if (stringlen == 0) return *this;
+	if (num == 0) {
 		clear();
 		return *this;
 	}
-	size_t newsize=(stringlen*num+16)*sizeof(char);
-	char *buf=(char*)malloc(newsize);
+	size_t newsize=(stringlen * num + 16) * sizeof(char);
+	char* buf=(char*)malloc(newsize);
 	if (!buf) throw OutOfMemoryException();
-	char *tmp=buf;
-	for (size_t i=0;i<num;i++) {
+	char* tmp=buf;
+	for (size_t i=0;i < num;i++) {
 #ifdef HAVE_STRNCPY_S
 		strncpy_s(tmp, newsize, ptr, stringlen);
 #else
-		strncpy(tmp,ptr,stringlen);
+		strncpy(tmp, ptr, stringlen);
 #endif
 		tmp+=stringlen;
 	}
 	free(ptr);
 	ptr=buf;
-	stringlen=stringlen*num;
+	stringlen=stringlen * num;
 	ptr[stringlen]=0;
 	s=newsize;
 	return *this;
@@ -2512,11 +2559,11 @@ String& String::repeat(char code, size_t num)
 		clear();
 		return *this;
 	}
-	size_t newsize=(num+16)*sizeof(char);
-	char *buf=(char*)malloc(newsize);
+	size_t newsize=(num + 16) * sizeof(char);
+	char* buf=(char*)malloc(newsize);
 	if (!buf) throw OutOfMemoryException();
-	for (size_t i=0;i<num;i++) buf[i]=code;
-	if (ptr!=empty_string) free(ptr);
+	for (size_t i=0;i < num;i++) buf[i]=code;
+	if (ptr != empty_string) free(ptr);
 	ptr=buf;
 	stringlen=num;
 	ptr[stringlen]=0;
@@ -2534,29 +2581,29 @@ String& String::repeat(char code, size_t num)
  * @param num Anzahl wiederholungen
  * @return Referenz auf den String
  */
-String& String::repeat(const String& str, size_t num)
+String& String::repeat(const String & str, size_t num)
 {
-	if (str.stringlen==0 || num==0) {
+	if (str.stringlen == 0 || num == 0) {
 		clear();
 		return *this;
 	}
-	size_t newsize=(str.stringlen*num+16)*sizeof(char);
-	char *buf=(char*)malloc(newsize);
+	size_t newsize=(str.stringlen * num + 16) * sizeof(char);
+	char* buf=(char*)malloc(newsize);
 	if (!buf) throw OutOfMemoryException();
-	char *tmp=buf;
+	char* tmp=buf;
 #ifdef HAVE_STRNCPY_S
 	size_t buffer_left = newsize;
 #endif
-	for (size_t i=0;i<num;i++) {
+	for (size_t i=0;i < num;i++) {
 #ifdef HAVE_STRNCPY_S
 		strncpy_s((char*)tmp, buffer_left, str.ptr, str.stringlen);
 		buffer_left -= str.stringlen;
 #else
-		strncpy(tmp,str.ptr,str.stringlen);
+		strncpy(tmp, str.ptr, str.stringlen);
 #endif
 		tmp+=str.stringlen;
 	}
-	if (ptr!=empty_string) free(ptr);
+	if (ptr != empty_string) free(ptr);
 	ptr=buf;
 	stringlen=num;
 	ptr[stringlen]=0;
@@ -2577,21 +2624,21 @@ String& String::repeat(const String& str, size_t num)
 String String::repeated(size_t count) const
 {
 	String ret;
-	for (size_t i=0;i<count;i++) ret.append(ptr,stringlen);
+	for (size_t i=0;i < count;i++) ret.append(ptr, stringlen);
 	return ret;
 }
 
 
-String& String::replace(const String &search, const String &replacement)
+String& String::replace(const String & search, const String & replacement)
 //! \brief Ersetzt einen Teilstring durch einen anderen
 {
-	if (stringlen==0 || search.stringlen==0) return *this;
+	if (stringlen == 0 || search.stringlen == 0) return *this;
 	size_t start = 0, slen = search.stringlen;
 	ssize_t end;
 	// collect the result
 	String ms;
 	//Do while str is found in the contained string
-	while((end = find(search, start)) >= 0) {
+	while ((end = find(search, start)) >= 0) {
 		//The result is built from the parts that don't match str and the replacement string
 		ms += mid(start, end - start);
 		ms += replacement;
@@ -2604,7 +2651,7 @@ String& String::replace(const String &search, const String &replacement)
 	return set(ms);
 }
 
-String &String::pregEscape()
+String& String::pregEscape()
 /*! \brief Fügt dem String Escape-Zeichen zu, zur Verwendung in einem Match
  *
  * \desc
@@ -2614,16 +2661,16 @@ String &String::pregEscape()
  * Folgende Zeichen werden escaped: - + \ * /
  */
 {
-	if (stringlen==0) return *this;
+	if (stringlen == 0) return *this;
 	String t;
 	String compare="-+\\*/";
 	String letter;
-	for (size_t i=0;i<stringlen;i++) {
+	for (size_t i=0;i < stringlen;i++) {
 		letter.set(ptr[i]);
-		if (compare.instr(letter,0)>=0) t+="\\";
+		if (compare.instr(letter, 0) >= 0) t+="\\";
 		t+=letter;
 	}
-	if (strcmp(t)!=0) set(t);
+	if (strcmp(t) != 0) set(t);
 	return *this;
 }
 
@@ -2640,49 +2687,49 @@ Der String wird intern zuerst nach UTF-8 kodiert, bevor die pcre-Funktionen aufg
 
 \copydoc pcrenote.dox
 */
-bool String::pregMatch(const String &expression) const
+bool String::pregMatch(const String & expression) const
 {
-	#ifndef HAVE_PCRE
-		throw UnsupportedFeatureException("PCRE");
-	#else
-		if (stringlen==0 || expression.stringlen==0) return false;
-		ByteArray expr=expression;
-		int flags=PCRE_UTF8|PCRE_NO_UTF8_CHECK;
-		flags=0;
-		// letzten Slash in regex finden
+#ifndef HAVE_PCRE
+	throw UnsupportedFeatureException("PCRE");
+#else
+	if (stringlen == 0 || expression.stringlen == 0) return false;
+	ByteArray expr=expression;
+	int flags=PCRE_UTF8 | PCRE_NO_UTF8_CHECK;
+	flags=0;
+	// letzten Slash in regex finden
 
-		const char *options=::strrchr((const char*)expr,'/');
-		if (options) {
-			expr.set(options-(const char*)expr,0);
-			options++;
-			if (::strchr(options,'i')) flags|=PCRE_CASELESS;
-			if (::strchr(options,'m')) flags|=PCRE_MULTILINE;
-			if (::strchr(options,'x')) flags|=PCRE_EXTENDED;
-			if (::strchr(options,'s')) flags|=PCRE_DOTALL;
-			if (::strchr(options,'a')) flags|=PCRE_ANCHORED;
-			if (::strchr(options,'u')) flags|=PCRE_UNGREEDY;
-		}
-		/*
-		printf ("String Dump:\n");
-		utf8.hexDump();
-		printf ("Expression Dump:\n");
-		expr.hexDump();
-		*/
-		const char *perr;
-		int re,erroffset, ovector[32];
-		int perrorcode;
-		pcre *reg;
-		//printf ("expr=>>%s<<, flags=%i\n",((const char*)expr+1),flags);
-		reg=pcre_compile2(((const char*)expr+1),flags,&perrorcode,&perr, &erroffset, NULL);
-		if (!reg) throw IllegalRegularExpressionException();
-		memset(ovector,0,30*sizeof(int));
-		//printf ("text=>>%s<<, size=%zi\n",(const char*)utf8,utf8.size());
-		if ((re=pcre_exec(reg, NULL, (const char*) ptr,stringlen,0, 0, ovector, 30))>=0) {
-			pcre_free(reg);
-			return true;
-		}
+	const char* options=::strrchr((const char*)expr, '/');
+	if (options) {
+		expr.set(options - (const char*)expr, 0);
+		options++;
+		if (::strchr(options, 'i')) flags|=PCRE_CASELESS;
+		if (::strchr(options, 'm')) flags|=PCRE_MULTILINE;
+		if (::strchr(options, 'x')) flags|=PCRE_EXTENDED;
+		if (::strchr(options, 's')) flags|=PCRE_DOTALL;
+		if (::strchr(options, 'a')) flags|=PCRE_ANCHORED;
+		if (::strchr(options, 'u')) flags|=PCRE_UNGREEDY;
+	}
+	/*
+	printf ("String Dump:\n");
+	utf8.hexDump();
+	printf ("Expression Dump:\n");
+	expr.hexDump();
+	*/
+	const char* perr;
+	int re, erroffset, ovector[32];
+	int perrorcode;
+	pcre* reg;
+	//printf ("expr=>>%s<<, flags=%i\n",((const char*)expr+1),flags);
+	reg=pcre_compile2(((const char*)expr + 1), flags, &perrorcode, &perr, &erroffset, NULL);
+	if (!reg) throw IllegalRegularExpressionException();
+	memset(ovector, 0, 30 * sizeof(int));
+	//printf ("text=>>%s<<, size=%zi\n",(const char*)utf8,utf8.size());
+	if ((re=pcre_exec(reg, NULL, (const char*)ptr, stringlen, 0, 0, ovector, 30)) >= 0) {
 		pcre_free(reg);
-		return false;
+		return true;
+	}
+	pcre_free(reg);
+	return false;
 #endif
 }
 
@@ -2702,61 +2749,61 @@ Der String wird intern zuerst nach UTF-8 kodiert, bevor die pcre-Funktionen aufg
 
 \copydoc pcrenote.dox
 */
-bool String::pregMatch(const String &expression, Array &matches, size_t maxmatches) const
+bool String::pregMatch(const String & expression, Array & matches, size_t maxmatches) const
 {
-	#ifndef HAVE_PCRE
-		throw UnsupportedFeatureException("PCRE");
-	#else
-		matches.clear();
-		if (stringlen==0 || expression.stringlen==0) return false;
-		ByteArray expr=expression;
-		int flags=PCRE_UTF8|PCRE_NO_UTF8_CHECK;
-		// letzten Slash in regex finden
-		const char *options=::strrchr((const char*)expr,'/');
-		if (options) {
-			expr.set(options-(const char*)expr,0);
-			options++;
-			if (::strchr(options,'i')) flags|=PCRE_CASELESS;
-			if (::strchr(options,'m')) flags|=PCRE_MULTILINE;
-			if (::strchr(options,'x')) flags|=PCRE_EXTENDED;
-			if (::strchr(options,'s')) flags|=PCRE_DOTALL;
-			if (::strchr(options,'a')) flags|=PCRE_ANCHORED;
-			if (::strchr(options,'u')) flags|=PCRE_UNGREEDY;
-		}
-		const char *perr;
-		if (maxmatches<16) maxmatches=16;
-		int re,erroffset;
-		int ovectorsize=(maxmatches+1)*2;
-		int *ovector=(int*)malloc(ovectorsize*sizeof(int));
-		if (!ovector) throw OutOfMemoryException();
-		int perrorcode;
-		pcre *reg;
-		//printf ("r=%s, flags=%i\n",r,flags);
-		reg=pcre_compile2(((const char*)expr+1),flags,&perrorcode,&perr, &erroffset, NULL);
-		if (!reg) {
-			free(ovector);
-			throw IllegalRegularExpressionException();
-		}
-		memset(ovector,0,ovectorsize*sizeof(int));
-		if ((re=pcre_exec(reg, NULL, (const char*) ptr,stringlen,0, 0, ovector, ovectorsize))>=0) {
-			if (re>0) maxmatches=re;
-			else maxmatches=maxmatches*2/3;
-			for (size_t i=0;i<maxmatches;i++) {
-				const char *tmp=NULL;
-				pcre_get_substring((const char*)ptr,ovector,ovectorsize,i,(const char**)&tmp);
-				if (tmp) {
-					//printf("tmp[%i]=%s\n",i,tmp);
-					matches.add(tmp);
-					pcre_free_substring(tmp);
-				}
+#ifndef HAVE_PCRE
+	throw UnsupportedFeatureException("PCRE");
+#else
+	matches.clear();
+	if (stringlen == 0 || expression.stringlen == 0) return false;
+	ByteArray expr=expression;
+	int flags=PCRE_UTF8 | PCRE_NO_UTF8_CHECK;
+	// letzten Slash in regex finden
+	const char* options=::strrchr((const char*)expr, '/');
+	if (options) {
+		expr.set(options - (const char*)expr, 0);
+		options++;
+		if (::strchr(options, 'i')) flags|=PCRE_CASELESS;
+		if (::strchr(options, 'm')) flags|=PCRE_MULTILINE;
+		if (::strchr(options, 'x')) flags|=PCRE_EXTENDED;
+		if (::strchr(options, 's')) flags|=PCRE_DOTALL;
+		if (::strchr(options, 'a')) flags|=PCRE_ANCHORED;
+		if (::strchr(options, 'u')) flags|=PCRE_UNGREEDY;
+	}
+	const char* perr;
+	if (maxmatches < 16) maxmatches=16;
+	int re, erroffset;
+	int ovectorsize=(maxmatches + 1) * 2;
+	int* ovector=(int*)malloc(ovectorsize * sizeof(int));
+	if (!ovector) throw OutOfMemoryException();
+	int perrorcode;
+	pcre* reg;
+	//printf ("r=%s, flags=%i\n",r,flags);
+	reg=pcre_compile2(((const char*)expr + 1), flags, &perrorcode, &perr, &erroffset, NULL);
+	if (!reg) {
+		free(ovector);
+		throw IllegalRegularExpressionException();
+	}
+	memset(ovector, 0, ovectorsize * sizeof(int));
+	if ((re=pcre_exec(reg, NULL, (const char*)ptr, stringlen, 0, 0, ovector, ovectorsize)) >= 0) {
+		if (re > 0) maxmatches=re;
+		else maxmatches=maxmatches * 2 / 3;
+		for (size_t i=0;i < maxmatches;i++) {
+			const char* tmp=NULL;
+			pcre_get_substring((const char*)ptr, ovector, ovectorsize, i, (const char**)&tmp);
+			if (tmp) {
+				//printf("tmp[%i]=%s\n",i,tmp);
+				matches.add(tmp);
+				pcre_free_substring(tmp);
 			}
-			pcre_free(reg);
-			free(ovector);
-			return true;
 		}
 		pcre_free(reg);
 		free(ovector);
-		return false;
+		return true;
+	}
+	pcre_free(reg);
+	free(ovector);
+	return false;
 #endif
 }
 
@@ -2775,71 +2822,71 @@ mit 5 angegeben, werden nur die ersten 5 Matches ersetzt.
 
 \copydoc pcrenote.dox
  */
-String & String::pregReplace(const String &expression, const String &replacement, int max)
+String& String::pregReplace(const String & expression, const String & replacement, int max)
 {
 #ifndef HAVE_PCRE
 	throw UnsupportedFeatureException("PCRE");
 #else
-	if (stringlen==0 || expression.stringlen==0) return *this;
+	if (stringlen == 0 || expression.stringlen == 0) return *this;
 
 	String pattern;
 	int ret=0;
-	char *r=::strdup(expression.ptr+1);
-	int flags=PCRE_UTF8|PCRE_NO_UTF8_CHECK;
-	char *tmp;
+	char* r=::strdup(expression.ptr + 1);
+	int flags=PCRE_UTF8 | PCRE_NO_UTF8_CHECK;
+	char* tmp;
 	// letzten Slash in regex finden
-	char *options=::strrchr(r,'/');
+	char* options=::strrchr(r, '/');
 	if (options) {
 		options[0]=0;
 		options++;
-		if (::strchr(options,'i')) flags|=PCRE_CASELESS;
-		if (::strchr(options,'m')) flags|=PCRE_MULTILINE;
-		if (::strchr(options,'x')) flags|=PCRE_EXTENDED;
-		if (::strchr(options,'s')) flags|=PCRE_DOTALL;
-		if (::strchr(options,'a')) flags|=PCRE_ANCHORED;
-		if (::strchr(options,'u')) flags|=PCRE_UNGREEDY;
+		if (::strchr(options, 'i')) flags|=PCRE_CASELESS;
+		if (::strchr(options, 'm')) flags|=PCRE_MULTILINE;
+		if (::strchr(options, 'x')) flags|=PCRE_EXTENDED;
+		if (::strchr(options, 's')) flags|=PCRE_DOTALL;
+		if (::strchr(options, 'a')) flags|=PCRE_ANCHORED;
+		if (::strchr(options, 'u')) flags|=PCRE_UNGREEDY;
 	}
 
 	pattern+=r;
-	const char *perr;
-	int re,erroffset, ovector[30];
+	const char* perr;
+	int re, erroffset, ovector[30];
 	int perrorcode;
-	pcre *reg;
+	pcre* reg;
 	//printf ("r=%s, flags=%i\n",r,flags);
 	String neu;
 	String Replace;
 	char rep[5];
 
 CString__PregReplace_Restart:
-    reg=pcre_compile2(r,flags,&perrorcode,&perr, &erroffset, NULL);
+	reg=pcre_compile2(r, flags, &perrorcode, &perr, &erroffset, NULL);
 	if (reg) {
 		String rest=ptr;
 		while (1) {		// Endlosschleife, bis nichts mehr matched
-			memset(ovector,0,30*sizeof(int));
-			if ((re=pcre_exec(reg, NULL, (const char*) rest,rest.size(),0, 0, ovector, 30))>=0) {
+			memset(ovector, 0, 30 * sizeof(int));
+			if ((re=pcre_exec(reg, NULL, (const char*)rest, rest.size(), 0, 0, ovector, 30)) >= 0) {
 				ret++;
 				Replace=replacement;
-				for (int i=0;i<14;i++) {
+				for (int i=0;i < 14;i++) {
 					tmp=NULL;
-					pcre_get_substring((const char*)rest,ovector,30,i,(const char**)&tmp);
+					pcre_get_substring((const char*)rest, ovector, 30, i, (const char**)&tmp);
 					if (tmp) {
 						//printf("tmp[%i]=%s\n",i,tmp);
-						sprintf(rep,"$%i",i);
-						Replace.replace(rep,tmp);
+						sprintf(rep, "$%i", i);
+						Replace.replace(rep, tmp);
 						//matches->Set(i,tmp);
 						pcre_free_substring(tmp);
 					}
 				}
 				// Erstes Byte steht in ovector[0], letztes in ovecor[1]
-				neu.append(rest,ovector[0]);
+				neu.append(rest, ovector[0]);
 				neu+=Replace;
 				rest.chopLeft(ovector[1]);		// rest abschneiden
 				//printf ("Match %i\nNeu: %s\nRest (%i): %s\n",ret,(char*)neu,rest.Len(),(char*)rest);
-				if (max>0 && ret>=max) {
+				if (max > 0 && ret >= max) {
 					neu+=rest;
 					break;
 				}
-			} else if ((flags&PCRE_UTF8)==PCRE_UTF8 && (re==PCRE_ERROR_BADUTF8 || re==PCRE_ERROR_BADUTF8_OFFSET)) {
+			} else if ((flags & PCRE_UTF8) == PCRE_UTF8 && (re == PCRE_ERROR_BADUTF8 || re == PCRE_ERROR_BADUTF8_OFFSET)) {
 				// Wir haben ungültiges UTF_8
 				// Vielleicht matched es ohne UTF-8-Flag
 				flags-=PCRE_UTF8;
@@ -2860,6 +2907,51 @@ CString__PregReplace_Restart:
 #endif
 }
 
+/*! \brief Schiebt den String nach links
+ *
+ * Der String wird um die mit \c size angegebenen Zeichen nach links verschoben und rechts mit dem durch \c c angegebenen
+ * Zeichen aufgefüllt.
+ * \param c Das Zeichen, mit dem der String auf der rechten Seite aufgefüllt werden soll. Wird der Wert 0 verwendet, findet keine
+ * Auffüllung statt, d.h. der String verkürzt sich einfach.
+ * \param size Die Anzahl Zeichen, um die der String nach links verschoben werden soll. Ist \c size größer als die Länge
+ * des Strings, wird der String komplett geleert und ist anschließend so groß wie size, sofern c>0 war.
+ */
+void String::shl(char c, size_t size)
+{
+	if (!stringlen) return;
+	if (!size) return;
+	if (size > stringlen) size=stringlen;
+	String t=mid(size);
+	if (c) {
+		String a;
+		a.repeat(c, size);
+		t+=a;
+	}
+	set(t);
+}
+
+
+/*! \brief Schiebt den String nach rechts
+ *
+ * Der String wird um die mit \c size angegebenen Zeichen nach rechts verschoben und links mit dem durch \c c angegebenen
+ * Zeichen aufgefüllt.
+ * \param c Das Zeichen, mit dem der String auf der linken Seite aufgefüllt werden soll. \c c muß größer 0 sein.
+ * \param size Die Anzahl Zeichen, um die der String nach rechts verschoben werden soll. Ist \c size größer als die Länge
+ * des Strings, wird der String komplett geleert und ist anschließend so groß wie size.
+ */
+void String::shr(char c, size_t size)
+{
+	if (!stringlen) return;
+	if (!size) return;
+	if (!c) return;
+	if (size > stringlen) size=stringlen;
+	String t;
+	t.repeat(c, size);
+	t+=left(stringlen - size);
+	t.cut(size);
+	set(t);
+}
+
 
 
 /*!\brief Kleiner als
@@ -2871,9 +2963,9 @@ CString__PregReplace_Restart:
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator<(const String &str) const
+bool String::operator<(const String & str) const
 {
-	if (::strcmp(ptr,str.ptr)<0) return true;
+	if (::strcmp(ptr, str.ptr) < 0) return true;
 	return false;
 }
 
@@ -2886,9 +2978,9 @@ bool String::operator<(const String &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator<=(const String &str) const
+bool String::operator<=(const String & str) const
 {
-	if (strcmp(str)<=0) return true;
+	if (strcmp(str) <= 0) return true;
 	return false;
 }
 
@@ -2901,9 +2993,9 @@ bool String::operator<=(const String &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator==(const String &str) const
+bool String::operator==(const String & str) const
 {
-	if (strcmp(str)==0) return true;
+	if (strcmp(str) == 0) return true;
 	return false;
 }
 
@@ -2916,9 +3008,9 @@ bool String::operator==(const String &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator!=(const String &str) const
+bool String::operator!=(const String & str) const
 {
-	if (strcmp(str)==0) return false;
+	if (strcmp(str) == 0) return false;
 	return true;
 
 }
@@ -2932,9 +3024,9 @@ bool String::operator!=(const String &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator>=(const String &str) const
+bool String::operator>=(const String & str) const
 {
-	if (strcmp(str)>=0) return true;
+	if (strcmp(str) >= 0) return true;
 	return false;
 }
 
@@ -2947,9 +3039,9 @@ bool String::operator>=(const String &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator>(const String &str) const
+bool String::operator>(const String & str) const
 {
-	if (strcmp(str)>0) return true;
+	if (strcmp(str) > 0) return true;
 	return false;
 }
 
@@ -2963,9 +3055,9 @@ bool String::operator>(const String &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator<(const char *str) const
+bool String::operator<(const char* str) const
 {
-	if (strcmp(str)<0) return true;
+	if (strcmp(str) < 0) return true;
 	return false;
 }
 
@@ -2978,9 +3070,9 @@ bool String::operator<(const char *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator<=(const char *str) const
+bool String::operator<=(const char* str) const
 {
-	if (strcmp(str)<=0) return true;
+	if (strcmp(str) <= 0) return true;
 	return false;
 }
 
@@ -2993,9 +3085,9 @@ bool String::operator<=(const char *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator==(const char *str) const
+bool String::operator==(const char* str) const
 {
-	if (strcmp(str)==0) return true;
+	if (strcmp(str) == 0) return true;
 	return false;
 }
 
@@ -3008,9 +3100,9 @@ bool String::operator==(const char *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator!=(const char *str) const
+bool String::operator!=(const char* str) const
 {
-	if (strcmp(str)==0) return false;
+	if (strcmp(str) == 0) return false;
 	return true;
 
 }
@@ -3024,9 +3116,9 @@ bool String::operator!=(const char *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator>=(const char *str) const
+bool String::operator>=(const char* str) const
 {
-	if (strcmp(str)>=0) return true;
+	if (strcmp(str) >= 0) return true;
 	return false;
 }
 
@@ -3039,9 +3131,9 @@ bool String::operator>=(const char *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool String::operator>(const char *str) const
+bool String::operator>(const char* str) const
 {
-	if (strcmp(str)>0) return true;
+	if (strcmp(str) > 0) return true;
 	return false;
 }
 
@@ -3072,7 +3164,7 @@ void PrintString(const ppl7::String &text)
  * - const char * String::toChar() const
  * - String::operator const char *() const
  */
-const char * String::getPtr() const
+const char* String::getPtr() const
 {
 	return (const char*)ptr;
 }
@@ -3081,7 +3173,7 @@ const char * String::getPtr() const
  *
  * \copydetails String::getPtr
  */
-const char * String::c_str() const
+const char* String::c_str() const
 {
 	return (const char*)ptr;
 }
@@ -3090,7 +3182,7 @@ const char * String::c_str() const
  *
  * \copydetails String::getPtr
  */
-const char * String::toChar() const
+const char* String::toChar() const
 {
 	return (const char*)ptr;
 }
@@ -3099,7 +3191,7 @@ const char * String::toChar() const
  *
  * \copydetails String::getPtr
  */
-String::operator const char *() const
+String::operator const char* () const
 {
 	return (const char*)ptr;
 }
@@ -3108,7 +3200,7 @@ String::operator const char *() const
  *
  * \copydetails String::getPtr
  */
-String::operator const unsigned char *() const
+String::operator const unsigned char* () const
 {
 	return (const unsigned char*)ptr;
 }
@@ -3124,14 +3216,14 @@ String::operator bool() const
 String::operator int() const
 {
 	if (!stringlen) return 0;
-	return strtol(ptr,NULL,0);
+	return strtol(ptr, NULL, 0);
 
 }
 
 String::operator unsigned int() const
 {
 	if (!stringlen) return 0;
-	return strtoul(ptr,NULL,0);
+	return strtoul(ptr, NULL, 0);
 }
 
 String::operator long() const
@@ -3167,22 +3259,22 @@ String::operator double() const
 
 String::operator std::string() const
 {
-	return std::string((const char*)ptr,stringlen);
+	return std::string((const char*)ptr, stringlen);
 }
 
 String::operator std::wstring() const
 {
-	if (stringlen==0) return(std::wstring());
-	size_t buffersize=(stringlen+1)*sizeof(wchar_t);
-	wchar_t * w=(wchar_t*)malloc(buffersize);
+	if (stringlen == 0) return(std::wstring());
+	size_t buffersize=(stringlen + 1) * sizeof(wchar_t);
+	wchar_t* w=(wchar_t*)malloc(buffersize);
 	if (!w) throw OutOfMemoryException();
 #ifdef HAVE_MBSTOWCS
 	size_t wlen=mbstowcs(w, ptr, buffersize);
-	if (wlen==(size_t) -1) {
+	if (wlen == (size_t)-1) {
 		free(w);
 		throw CharacterEncodingException();
 	}
-	std::wstring ret(w,wlen);
+	std::wstring ret(w, wlen);
 	free(w);
 	return(ret);
 	/*
@@ -3215,36 +3307,36 @@ String::operator std::wstring() const
 int String::toInt() const
 {
 	if (!stringlen) return 0;
-	return strtol(ptr,NULL,10);
+	return strtol(ptr, NULL, 10);
 }
 
 unsigned int String::toUnsignedInt() const
 {
 	if (!stringlen) return 0;
-	return strtoul(ptr,NULL,10);
+	return strtoul(ptr, NULL, 10);
 }
 
-pplint64 String::toInt64() const
+int64_t String::toInt64() const
 {
 	if (!stringlen) return 0;
 #ifdef HAVE_STRTOLL
-	return (pplint64) strtoll(ptr,NULL,10);
+	return (int64_t)strtoll(ptr, NULL, 10);
 #elif defined WIN32
-	return (pplint64) _strtoi64(ptr,NULL,10);
+	return (int64_t)_strtoi64(ptr, NULL, 10);
 #else
 	throw TypeConversionException();
 #endif
 }
 
-ppluint64 String::toUnsignedInt64() const
+uint64_t String::toUnsignedInt64() const
 {
 	if (!stringlen) return 0;
 #ifdef HAVE_STRTOULL
-	return (ppluint64) strtoull(ptr,NULL,10);
+	return (uint64_t)strtoull(ptr, NULL, 10);
 #elif defined HAVE_STRTOLL
-	return (ppluint64) strtoll(ptr,NULL,10);
+	return (uint64_t)strtoll(ptr, NULL, 10);
 #elif defined WIN32
-	return (ppluint64) _strtoi64(ptr,NULL,10);
+	return (uint64_t)_strtoi64(ptr, NULL, 10);
 #else
 	throw TypeConversionException();
 #endif
@@ -3260,13 +3352,13 @@ bool String::toBool() const
 long String::toLong() const
 {
 	if (!stringlen) return 0;
-	return strtol(ptr,NULL,10);
+	return strtol(ptr, NULL, 10);
 }
 
 unsigned long String::toUnsignedLong() const
 {
 	if (!stringlen) return 0;
-	return strtoul(ptr,NULL,10);
+	return strtoul(ptr, NULL, 10);
 }
 
 
@@ -3274,9 +3366,9 @@ long long String::toLongLong() const
 {
 	if (!stringlen) return 0;
 #ifdef HAVE_STRTOLL
-	return (long long) strtoll(ptr,NULL,10);
+	return (long long)strtoll(ptr, NULL, 10);
 #elif defined WIN32
-	return (long long) _strtoi64(ptr,NULL,10);
+	return (long long)_strtoi64(ptr, NULL, 10);
 #else
 	throw TypeConversionException();
 #endif
@@ -3286,11 +3378,11 @@ unsigned long long String::toUnsignedLongLong() const
 {
 	if (!stringlen) return 0;
 #ifdef HAVE_STRTOULL
-	return (unsigned long long) strtoull(ptr,NULL,10);
+	return (unsigned long long) strtoull(ptr, NULL, 10);
 #elif defined HAVE_STRTOLL
-	return (unsigned long long) strtoll(ptr,NULL,10);
+	return (unsigned long long) strtoll(ptr, NULL, 10);
 #elif defined WIN32
-	return (unsigned long long) _strtoi64(ptr,NULL,10);
+	return (unsigned long long) _strtoi64(ptr, NULL, 10);
 #else
 	throw TypeConversionException();
 #endif
@@ -3320,7 +3412,7 @@ double String::toDouble() const
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const String &str1, const String& str2)
+String operator+(const String & str1, const String & str2)
 {
 	String s=str1;
 	s.append(str2);
@@ -3338,7 +3430,7 @@ String operator+(const String &str1, const String& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const char *str1, const String& str2)
+String operator+(const char* str1, const String & str2)
 {
 	String s=str1;
 	s.append(str2);
@@ -3356,7 +3448,7 @@ String operator+(const char *str1, const String& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const String &str1, const char *str2)
+String operator+(const String & str1, const char* str2)
 {
 	String s=str1;
 	s.append(str2);
@@ -3374,7 +3466,7 @@ String operator+(const String &str1, const char *str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const wchar_t *str1, const String& str2)
+String operator+(const wchar_t* str1, const String & str2)
 {
 	String s;
 	s.set(str1);
@@ -3393,7 +3485,7 @@ String operator+(const wchar_t *str1, const String& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const String &str1, const wchar_t *str2)
+String operator+(const String & str1, const wchar_t* str2)
 {
 	String s=str1;
 	s.append(str2);
@@ -3411,7 +3503,7 @@ String operator+(const String &str1, const wchar_t *str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const std::string &str1, const String& str2)
+String operator+(const std::string & str1, const String & str2)
 {
 	String s=str1;
 	s.append(str2);
@@ -3429,7 +3521,7 @@ String operator+(const std::string &str1, const String& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const String &str1, const std::string &str2)
+String operator+(const String & str1, const std::string & str2)
 {
 	String s=str1;
 	s.append(str2);
@@ -3447,7 +3539,7 @@ String operator+(const String &str1, const std::string &str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const std::wstring &str1, const String& str2)
+String operator+(const std::wstring & str1, const String & str2)
 {
 	String s=str1;
 	s.append(str2);
@@ -3465,7 +3557,7 @@ String operator+(const std::wstring &str1, const String& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-String operator+(const String &str1, const std::wstring &str2)
+String operator+(const String & str1, const std::wstring & str2)
 {
 	String s=str1;
 	s.append(str2);
@@ -3473,11 +3565,9 @@ String operator+(const String &str1, const std::wstring &str2)
 }
 
 
-std::ostream& operator<<(std::ostream& s, const String &str)
+std::ostream& operator<<(std::ostream & s, const String & str)
 {
-	return s.write((const char*)str,str.size());
+	return s.write((const char*)str, str.size());
 }
 
 } // EOF namespace ppl7
-
-

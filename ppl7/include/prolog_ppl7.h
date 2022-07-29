@@ -1,14 +1,8 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
  * Web: http://www.pfp.de/ppl/
- *
- * $Author$
- * $Revision$
- * $Date$
- * $Id$
- *
  *******************************************************************************
- * Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2022, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,24 +26,23 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-namespace ppl7 {
-
-#ifdef _WIN32
-	int inet_aton(const char *cp, struct in_addr *pin);
+#ifndef _GNU_SOURCE
+#define  _GNU_SOURCE
 #endif
 
-typedef struct tagPPLSocket {
-#ifdef _WIN32
-	SOCKET	sd;
+#ifndef _PPL7_CONFIG
+#ifdef PPL7LIB
+#ifdef HAVE_CONFIG_H
+#include "config_ppl7.h"
 #else
-	int sd;
+#ifdef PPLVISUALC
+#include "ppl7-visualc-config.h"
+#elif defined _WIN32
+#include "ppl7-config.h"
 #endif
-	int proto;
-	char *ipname;
-	int port;
-	//int addrlen;
-} PPLSOCKET;
-
-
-
-}
+#endif
+#else
+#include <ppl7-config.h>
+#endif
+#endif
+#include "compat_ppl7.h"

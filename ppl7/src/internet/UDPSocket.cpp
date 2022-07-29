@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -93,10 +93,18 @@
 
 #include "ppl7.h"
 #include "ppl7-inet.h"
-#include "socket.h"
+#include "socket_ppl7.h"
 
 namespace ppl7 {
 
+static inline int getErrno()
+{
+#ifdef WIN32
+	return WSAGetLastError();
+#else
+	return errno;
+#endif
+}
 
 /*!\class UDPSocket
  * \ingroup PPLGroupInternet
@@ -268,13 +276,13 @@ static int out_bind(const char *host, int port)
 		host = NULL;
 
 	if (host != NULL && port > 0) {
-		char portstr[10];
+		char portstr[12];
 		sprintf(portstr, "%i", port);
 		n = getaddrinfo(host, portstr, &hints, &res);
 	} else if (host) {
 		n = getaddrinfo(host, NULL, &hints, &res);
 	} else if (port) {
-		char portstr[10];
+		char portstr[12];
 		sprintf(portstr, "%i", port);
 		n = getaddrinfo(NULL, portstr, &hints, &res);
 	} else {
@@ -291,7 +299,7 @@ static int out_bind(const char *host, int port)
 
 		if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0) {
 			freeaddrinfo(ressave);
-			throwExceptionFromErrno(errno, ToString("UDPSocket bind connect: %s:%i", host, port));
+			throwSocketException(errno, ToString("UDPSocket bind connect: %s:%i", host, port));
 		}
 
 		//HexDump(res->ai_addr,res->ai_addrlen);
@@ -468,16 +476,15 @@ void UDPSocket::connect(const String &host, int port)
 			conres=::connect(sockfd,res->ai_addr,res->ai_addrlen);
 #else
 			conres = ppl_connect_nb(sockfd, res->ai_addr, res->ai_addrlen, connect_timeout_sec, connect_timeout_usec);
-			e = errno;
 #endif
+			e=getErrno();
 		} else {
 			conres = ::connect(sockfd, res->ai_addr, res->ai_addrlen);
-			e = errno;
+			e = getErrno();
 		}
 		if (conres == 0)
 			break;
 #ifdef _WIN32
-		e=WSAGetLastError();
 		::shutdown(sockfd,2);
 		closesocket(sockfd);
 #else
@@ -494,7 +501,7 @@ void UDPSocket::connect(const String &host, int port)
 	}
 	if (res == NULL) {
 		freeaddrinfo(ressave);
-		throwExceptionFromErrno(e, ToString("Host: %s, Port: %d", (const char*) host, port));
+		throwSocketException(e, ToString("Host: %s, Port: %d", (const char*) host, port));
 	}
 	s->sd = sockfd;
 	//HostName = host;
@@ -549,7 +556,7 @@ void UDPSocket::setTimeoutRead(int seconds, int useconds)
 #else
 	if (setsockopt(s->sd, SOL_SOCKET, SO_RCVTIMEO, (void*) &tv, sizeof(tv)) != 0) {
 #endif
-		throwExceptionFromErrno(errno, "setTimeoutRead");
+		throwSocketException(getErrno(), "setTimeoutRead");
 	}
 }
 
@@ -586,7 +593,7 @@ void UDPSocket::setTimeoutWrite(int seconds, int useconds)
 #else
 	if (setsockopt(s->sd, SOL_SOCKET, SO_SNDTIMEO, (void*) &tv, sizeof(tv)) != 0) {
 #endif
-		throwExceptionFromErrno(errno, "setTimeoutRead");
+		throwSocketException(getErrno(), "setTimeoutRead");
 	}
 }
 
@@ -621,7 +628,7 @@ bool UDPSocket::waitForIncomingData(int seconds, int useconds)
 	FD_SET(s->sd,&rset); // Wir wollen nur prüfen, ob was zu lesen da ist
 	int ret=select(s->sd+1,&rset,&wset,&eset,&timeout);
 	if (ret<0) {
-		throwExceptionFromErrno(errno, "UDPSocket::waitForIncomingData");
+		throwSocketException(getErrno(), "UDPSocket::waitForIncomingData");
 	}
 	if (FD_ISSET(s->sd,&eset)) {
 		throw OutOfBandDataReceivedException("UDPSocket::waitForIncomingData");
@@ -632,7 +639,7 @@ bool UDPSocket::waitForIncomingData(int seconds, int useconds)
 		ret=recv(s->sd, buf,1, MSG_PEEK|MSG_DONTWAIT);
 		// Kommt hier ein Fehler zurück?
 		if (ret<0) {
-			throwExceptionFromErrno(errno, "UDPSocket::isReadable");
+			throwSocketException(getErrno(), "UDPSocket::isReadable");
 		}
 		// Ein Wert von 0 zeigt an, dass die Verbindung getrennt wurde
 		if (ret==0) {
@@ -675,7 +682,7 @@ bool UDPSocket::waitForOutgoingData(int seconds, int useconds)
 	FD_SET(s->sd,&wset); // Wir wollen nur prüfen, ob wir schreiben können
 	int ret=select(s->sd+1,&rset,&wset,&eset,&timeout);
 	if (ret<0) {
-		throwExceptionFromErrno(errno, "UDPSocket::waitForOutgoingData");
+		throwSocketException(getErrno(), "UDPSocket::waitForOutgoingData");
 	}
 	if (FD_ISSET(s->sd,&eset)) {
 		throw OutOfBandDataReceivedException("UDPSocket::waitForIncomingData");
@@ -714,13 +721,13 @@ void UDPSocket::setBlocking(bool value)
 		ret=ioctlsocket(s->sd,FIONBIO,&v);
 	}
 	if (ret==0) return;
-	throwExceptionFromErrno(errno, "UDPSocket::setBlocking");
+	throwSocketException(getErrno(), "UDPSocket::setBlocking");
 #else
 	if (value)
 	    ret=fcntl(s->sd,F_SETFL,fcntl(s->sd,F_GETFL,0)&(~O_NONBLOCK)); // Blocking
 	else
 		ret=fcntl(s->sd,F_SETFL,fcntl(s->sd,F_GETFL,0)|O_NONBLOCK);// NON-Blocking
-	if (ret<0) throwExceptionFromErrno(errno, "UDPSocket::setBlocking");
+	if (ret<0) throwSocketException(getErrno(), "UDPSocket::setBlocking");
 #endif
 }
 
@@ -859,7 +866,7 @@ SockAddr UDPSocket::getSockAddr() const
 	struct sockaddr addr;
 	socklen_t len=sizeof(addr);
 	int ret=getsockname(s->sd, &addr, &len);
-	if (ret<0) throwExceptionFromErrno(errno, "UDPSocket::getSockAddr");
+	if (ret<0) throwSocketException(getErrno(), "UDPSocket::getSockAddr");
 	return ppl7::SockAddr((const void*)&addr,(size_t)len);
 }
 
@@ -881,7 +888,7 @@ SockAddr UDPSocket::getPeerAddr() const
 	struct sockaddr addr;
 	socklen_t len=sizeof(addr);
 	int ret=getpeername(s->sd, &addr, &len);
-	if (ret<0) throwExceptionFromErrno(errno, "UDPSocket::getSockAddr");
+	if (ret<0) throwSocketException(getErrno(), "UDPSocket::getSockAddr");
 	return ppl7::SockAddr((const void*)&addr,(size_t)len);
 }
 
@@ -920,10 +927,10 @@ size_t UDPSocket::write(const void *buffer, size_t bytes)
 #else
 			if (b < 0) {
 #endif
-				if (errno == EAGAIN) {
+				if (getErrno() == EAGAIN) {
 					waitForOutgoingData(0, 100000);
 				} else {
-					throwExceptionFromErrno(errno, "UDPSocket::write");
+					throwSocketException(getErrno(), "UDPSocket::write");
 				}
 			}
 		}

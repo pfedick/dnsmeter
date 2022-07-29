@@ -1,14 +1,8 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
  * Web: http://www.pfp.de/ppl/
- *
- * $Author$
- * $Revision$
- * $Date$
- * $Id$
- *
  *******************************************************************************
- * Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2022, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,43 +26,25 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
-#ifdef HAVE_STDIO_H
-#include <stdio.h>
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_STDARG_H
-#include <stdarg.h>
-#endif
-
-#include "ppl7.h"
-
 
 namespace ppl7 {
 
-
-typedef struct tagThreadData {
-	ppluint64	threadId;
 #ifdef _WIN32
-	HANDLE	thread;
-	DWORD	dwThreadID;
-#elif defined HAVE_PTHREADS
-	pthread_t thread;
-	pthread_attr_t	attr;
-#else
-	int	thread;
+int inet_aton(const char* cp, struct in_addr* pin);
 #endif
-	void		(*mysql_thread_end)();
-				// Bit  0: Thread hat MySQL benutzt
-	void *clientData;
-} THREADDATA;
 
-THREADDATA * GetThreadData();
+typedef struct tagPPLSocket {
+#ifdef _WIN32
+	SOCKET	sd;
+#else
+	int sd;
+#endif
+	int proto;
+	char* ipname;
+	int port;
+	//int addrlen;
+} PPLSOCKET;
 
 
-} // EOF namespace ppl7
+
+}

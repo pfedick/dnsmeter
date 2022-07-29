@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -51,7 +51,7 @@
 
 #include "ppl7.h"
 #include "ppl7-inet.h"
-#include "socket.h"
+#include "socket_ppl7.h"
 
 
 //#define DEBUGOUT
@@ -247,7 +247,7 @@ void SocketMessage::compilePacketHeader(char *buffer, size_t *buffer_size, const
 	//														Bit 2: Client supports MsgChannel
 	PokeN8(buffer+13,payload_type);				// Byte 13: Datatype, PPL_ARRAY, usw.	(1 Byte)
 	PokeN16(buffer+14,rand(177,65534));			// Byte 14: Zufallszahl					(2 Byte)
-	ppluint32 crc_data=0;
+	uint32_t crc_data=0;
 	if (payload_size) crc_data=Crc32(payload,payload_size);
 	PokeN32(buffer+16,crc_data);				// Byte 16: CRC-Summe ueber die Daten	(4 Byte)
 	PokeN32(buffer+20,Crc32(buffer,20));		// Byte 20: CRC-Summe ueber den Header	(4 Byte)
@@ -335,7 +335,7 @@ bool TCPSocket::waitForMessage(SocketMessage &msg, int timeout_seconds, Thread *
 	Compression comp(Compression::Algo_ZLIB,Compression::Level_High);
 	ByteArray uncompressed;
 	comp.usePrefix(Compression::Prefix_V1);
-	ppluint64 tt=GetTime()+timeout_seconds;
+	uint64_t tt=GetTime()+timeout_seconds;
 	char msgbuffer[28];
 	void *buffer=NULL;
 	int flags;

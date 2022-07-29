@@ -33,11 +33,10 @@
  *******************************************************************************/
 
 
-#include "prolog.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "prolog_ppl7.h"
 
 #ifdef HAVE_WCHAR_H
 	#include <wchar.h>

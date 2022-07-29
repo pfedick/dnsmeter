@@ -1,14 +1,8 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
  * Web: http://www.pfp.de/ppl/
- *
- * $Author$
- * $Revision$
- * $Date$
- * $Id$
- *
  *******************************************************************************
- * Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2022, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
+
 
 #ifndef COMPAT_H_
 #define COMPAT_H_
@@ -58,9 +53,9 @@
 #endif
 
 #ifdef _WIN32
-    #include <winsock2.h>
-	#include <Ws2tcpip.h>
-	#include <windows.h>
+#include <winsock2.h>
+#include <Ws2tcpip.h>
+#include <windows.h>
 #else
 
 #ifdef HAVE_SYS_SOCKET_H
@@ -80,70 +75,70 @@
 namespace ppl7 {
 namespace compat {
 
-char * trim (char * text);
+char* trim(char* text);
 
 #ifndef HAVE_STRTOLOWER
-char *strtolower (char * text);
+char* strtolower(char* text);
 #endif
 
 #ifndef HAVE_STRTOUPPER
-char *strtoupper (char * text);
+char* strtoupper(char* text);
 #endif
 
 #ifndef HAVE_STRCASESTR
-const char *strcasestr(const char *haystack, const char *needle);
+const char* strcasestr(const char* haystack, const char* needle);
 #endif
 
 #ifndef HAVE_STRCASECMP
-int strcasecmp(const char *s1, const char *s2);
+int strcasecmp(const char* s1, const char* s2);
 #endif
 
 #ifndef HAVE_STRNCASECMP
-int strncasecmp(const char *s1, const char *s2, size_t n);
+int strncasecmp(const char* s1, const char* s2, size_t n);
 #endif
 
 #ifndef HAVE_VASPRINTF
-int vasprintf(char **buff, const char *fmt, va_list args);
+int vasprintf(char** buff, const char* fmt, va_list args);
 #endif
 
 #ifndef HAVE_ASPRINTF
-int asprintf(char **buff, const char *format, ...);
+int asprintf(char** buff, const char* format, ...);
 #endif
 
 #ifndef HAVE_HTOL
-long htol (const char * wert);
+long htol(const char* wert);
 #endif
 
 #ifndef HAVE_ATOLL
-long long atoll (const char *wert);
+long long atoll(const char* wert);
 #endif
 
 #ifndef HAVE_STRNDUP
-char *strndup(const char *str, size_t len);
+char* strndup(const char* str, size_t len);
 #endif
 
 #ifndef HAVE_STRNCMP
-int strncmp(const char *s1, const char *s2, size_t len);
+int strncmp(const char* s1, const char* s2, size_t len);
 #endif
 
 #ifndef HAVE_BCOPY
-void bcopy(const void *src, void *dst, size_t len);
+void bcopy(const void* src, void* dst, size_t len);
 #endif
 
 #ifndef HAVE_BZERO
-void bzero(void *b, size_t len);
+void bzero(void* b, size_t len);
 #endif
 
 #ifndef HAVE_STRNLEN
-size_t strnlen(const char *str, size_t len);
+size_t strnlen(const char* str, size_t len);
 #endif
 
 #ifndef HAVE_INET_NTOP
-const char * inet_ntop(int af, const void *src, char *dst, socklen_t size);
+const char* inet_ntop(int af, const void* src, char* dst, socklen_t size);
 #endif
 
 #ifndef HAVE_INET_PTON
-int inet_pton(int af, const char *src, void *dst);
+int inet_pton(int af, const char* src, void* dst);
 #endif
 
 

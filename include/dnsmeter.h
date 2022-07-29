@@ -113,10 +113,10 @@ public:
 	public:
 		Counter();
 		void clear();
-		ppluint64 num_pkgs;
-		ppluint64 bytes_rcv;
-		ppluint64 rcodes[16];
-		ppluint64 truncated;
+		uint64_t num_pkgs;
+		uint64_t bytes_rcv;
+		uint64_t rcodes[16];
+		uint64_t truncated;
 		double rtt_total, rtt_min, rtt_max;
 	};
 
@@ -144,7 +144,7 @@ class PayloadFile
 {
 private:
 	ppl7::Mutex QueryMutex;
-	ppluint64 validLinesInQueryFile;
+	uint64_t validLinesInQueryFile;
 	std::list<ppl7::ByteArray> querycache;
 	std::list<ppl7::ByteArray>::const_iterator it;
 	bool payloadIsPcap;
@@ -171,8 +171,8 @@ public:
 	void setSource(const ppl7::IPAddress& ip, int port);
 	void run();
 
-	ppluint64 getPacketsReceived() const;
-	ppluint64 getBytesReceived() const;
+	uint64_t getPacketsReceived() const;
+	uint64_t getBytesReceived() const;
 
 	double getDuration() const;
 	double getRoundTripTimeAverage() const;
@@ -189,16 +189,16 @@ public:
 	{
 	public:
 		int			queryrate;
-		ppluint64	counter_send;
-		ppluint64	counter_received;
-		ppluint64	bytes_send;
-		ppluint64	bytes_received;
-		ppluint64	counter_errors;
-		ppluint64	packages_lost;
-		ppluint64   counter_0bytes;
-		ppluint64   counter_errorcodes[255];
-		ppluint64	rcodes[16];
-		ppluint64	truncated;
+		uint64_t	counter_send;
+		uint64_t	counter_received;
+		uint64_t	bytes_send;
+		uint64_t	bytes_received;
+		uint64_t	counter_errors;
+		uint64_t	packages_lost;
+		uint64_t   counter_0bytes;
+		uint64_t   counter_errorcodes[255];
+		uint64_t	rcodes[16];
+		uint64_t	truncated;
 		double		rtt_total;
 		double		rtt_avg;
 		double		rtt_min;
@@ -268,10 +268,10 @@ private:
 
 	PayloadFile* payload;
 	unsigned char* buffer;
-	ppluint64 queryrate;
-	ppluint64 counter_packets_send, errors, counter_0bytes;
-	ppluint64 counter_bytes_send;
-	ppluint64 counter_errorcodes[255];
+	uint64_t queryrate;
+	uint64_t counter_packets_send, errors, counter_0bytes;
+	uint64_t counter_bytes_send;
+	uint64_t counter_errorcodes[255];
 
 	unsigned int spoofing_net_start;
 	unsigned int spoofing_net_size;
@@ -305,16 +305,16 @@ public:
 	void setRuntime(int seconds);
 	void setTimeout(int seconds);
 	void setDNSSECRate(int rate);
-	void setQueryRate(ppluint64 qps);
+	void setQueryRate(uint64_t qps);
 	void setTimeslice(float ms);
 	void setVerbose(bool verbose);
 	void setPayload(PayloadFile& payload);
 	void run();
-	ppluint64 getPacketsSend() const;
-	ppluint64 getBytesSend() const;
-	ppluint64 getErrors() const;
-	ppluint64 getCounter0Bytes() const;
-	ppluint64 getCounterErrorCode(int err) const;
+	uint64_t getPacketsSend() const;
+	uint64_t getBytesSend() const;
+	uint64_t getErrors() const;
+	uint64_t getCounter0Bytes() const;
+	uint64_t getCounterErrorCode(int err) const;
 
 };
 

@@ -33,7 +33,7 @@
  *******************************************************************************/
 
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
@@ -47,6 +47,11 @@
 
 #ifdef HAVE_ERRNO_H
 	#include <errno.h>
+#endif
+
+#ifdef _WIN32
+#include <winsock2.h>
+#include <winerror.h>
 #endif
 
 
@@ -85,6 +90,7 @@ Exception::Exception(const Exception &other) throw()
 
 Exception& Exception::operator= (const Exception &other) throw()
 {
+	if (ErrorText) free(ErrorText);
 	if (other.ErrorText) {
 		ErrorText=strdup(other.ErrorText);
 	} else {
@@ -227,8 +233,11 @@ void throwExceptionFromErrno(int e, const String &info)
 	case ENOTSOCK: throw InvalidSocketException(info);
 	case ENOPROTOOPT: throw UnknownOptionException(info);
 	case EPIPE: throw BrokenPipeException(info);
-
-
+	case EINPROGRESS: throw OperationBlockedException(info);
+	case EALREADY: throw OperationAlreadyInProgressException(info);
+	case EDESTADDRREQ: throw DestinationAddressRequiredException(info);
+	case EMSGSIZE: throw MessageTooLongException(info);
+	case EPROTOTYPE: throw ProtocolWrongTypeForSocketException(info);
 	default: {
 		String ret;
 #ifdef HAVE_STRERROR_S
@@ -245,6 +254,110 @@ void throwExceptionFromErrno(int e, const String &info)
 	}
 }
 
+void throwSocketException(int e,const String &info)
+{
+#ifndef WIN32
+	throwExceptionFromErrno(e,info);
+#else
+	switch (e) {
+		case WSA_INVALID_HANDLE: throw InvalidArgumentsException(info);
+		case WSA_NOT_ENOUGH_MEMORY: throw OutOfMemoryException(info);
+		case WSA_INVALID_PARAMETER: throw InvalidArgumentsException(info);
+		case WSA_OPERATION_ABORTED: throw OperationAbortedException(info);
+		case WSA_IO_INCOMPLETE: throw ObjectNotInSignaledStateException(info);
+		case WSA_IO_PENDING: throw OverlappedOperationPendingException(info);
+		case WSAEINTR: throw OperationInterruptedException(info);
+		case WSAEBADF: throw BadFiledescriptorException(info);
+		case WSAEACCES: throw PermissionDeniedException(info);
+		case WSAEFAULT: throw BadAddressException(info);
+		case WSAEINVAL: throw InvalidArgumentsException(info);
+		case WSAEMFILE: throw TooManyOpenFilesException(info);
+		case WSAEWOULDBLOCK: throw OperationBlockedException(info);
+		case WSAEINPROGRESS: throw OperationInProgressException(info);
+		case WSAEALREADY: throw OperationAlreadyInProgressException(info);
+		case WSAENOTSOCK: throw SocketOperationOnNonSocketException(info);
+		case WSAEDESTADDRREQ: throw DestinationAddressRequiredException(info);
+		case WSAEMSGSIZE: throw MessageTooLongException(info);
+		case WSAEPROTOTYPE: throw ProtocolWrongTypeForSocketException(info);
+		case WSAENOPROTOOPT: throw ProtocolNotAvailableException(info);
+		case WSAEPROTONOSUPPORT: throw ProtocolNotSupportedException(info);
+		case WSAESOCKTNOSUPPORT: throw SocketTypeNotSupportedException(info);
+		case WSAEOPNOTSUPP: throw UnsupportedFileOperationException(info);
+		case WSAEPFNOSUPPORT: throw ProtocolFamilyNotSupportedException(info);
+		case WSAEAFNOSUPPORT: throw AddressFamilyNotSupportedException(info);
+		case WSAEADDRINUSE: throw AddressAlreadyInUseException(info);
+		case WSAEADDRNOTAVAIL: throw AddressNotAvailableException(info);
+		case WSAENETDOWN: throw NetworkIsDownException(info);
+		case WSAENETUNREACH: throw NetworkUnreachableException(info);
+		case WSAENETRESET: throw ConnectionAbortedByNetworkException(info);
+		case WSAECONNABORTED: throw ConnectionAbortedException(info);
+		case WSAECONNRESET: throw ConnectionResetException(info);
+		case WSAENOBUFS: throw NoBufferSpaceAvailableException(info);
+		case WSAEISCONN: throw SocketIsConnectedException(info);
+		case WSAENOTCONN: throw SocketNotConnectedException(info);
+		case WSAESHUTDOWN: throw TransportEndpointHasShutdownException(info);
+		case WSAETOOMANYREFS: throw TooManyReferencesException(info);
+		case WSAETIMEDOUT: throw ConnectionTimeoutException(info);
+		case WSAECONNREFUSED: throw ConnectionRefusedException(info);
+		case WSAELOOP: throw InvalidFileNameException(info);
+		case WSAENAMETOOLONG: throw InvalidFileNameException(info);
+		case WSAEHOSTDOWN: throw HostDownException(info);
+		case WSAEHOSTUNREACH: throw HostIsUnreachableException(info);
+		case WSAENOTEMPTY: throw DirectoryNotEmptyException(info);
+		case WSAEPROCLIM: throw ProcessLimitException(info);
+		case WSAEUSERS: throw TooManyUsersException(info);
+		case WSAEDQUOT: throw QuotaExceededException(info);
+		case WSAESTALE: throw StaleFileHandleException(info);
+		case WSAEREMOTE: throw ObjectIsRemoteException(info);
+		case WSASYSNOTREADY: throw NetworkSubsystemUnavailableException(info);
+		case WSAVERNOTSUPPORTED: throw UnsupportedWinsockVersionException(info);
+		case WSANOTINITIALISED: throw NotInitializedException(info);
+		case WSAEDISCON: throw GracefulShutdownInProgressException(info);
+		case WSAENOMORE: throw NoMoreResultsException(info);
+		case WSAECANCELLED: throw CallHasBeenCanceledException(info);
+		case WSAEINVALIDPROCTABLE: throw ProcedureCallTableIsInvalidException(info);
+		case WSAEINVALIDPROVIDER: throw ServiceProviderIsInvalidException(info);
+		case WSAEPROVIDERFAILEDINIT: throw ServiceProviderFailedToInitializeException(info);
+		case WSASYSCALLFAILURE: throw SystemCallFailureException(info);
+		case WSASERVICE_NOT_FOUND: throw ServiceNotFoundException(info);
+		case WSATYPE_NOT_FOUND: throw ClassTypeNotFoundException(info);
+		case WSA_E_NO_MORE: throw NoMoreResultsException(info);
+		case WSA_E_CANCELLED: throw CallHasBeenCanceledException(info);
+		case WSAEREFUSED: throw QueryRefusedException(info);
+		case WSAHOST_NOT_FOUND: throw HostNotFoundException(info);
+		case WSATRY_AGAIN: throw NonauthoritativeHostNotFound(info);
+		case WSANO_RECOVERY: throw UnrecoverableErrorException(info);
+		case WSA_QOS_RECEIVERS:
+		case WSA_QOS_SENDERS:
+		case WSA_QOS_NO_SENDERS:
+		case WSA_QOS_NO_RECEIVERS:
+		case WSA_QOS_REQUEST_CONFIRMED:
+		case WSA_QOS_ADMISSION_FAILURE:
+		case WSA_QOS_POLICY_FAILURE:
+		case WSA_QOS_BAD_STYLE:
+		case WSA_QOS_BAD_OBJECT:
+		case WSA_QOS_TRAFFIC_CTRL_ERROR:
+		case WSA_QOS_GENERIC_ERROR:
+		case WSA_QOS_ESERVICETYPE:
+		case WSA_QOS_EFLOWSPEC:
+		case WSA_QOS_EPROVSPECBUF:
+		case WSA_QOS_EFILTERSTYLE:
+		case WSA_QOS_EFILTERTYPE:
+		case WSA_QOS_EFILTERCOUNT:
+		case WSA_QOS_EOBJLENGTH:
+		case WSA_QOS_EUNKOWNPSOBJ:
+		case WSA_QOS_EPOLICYOBJ:
+		case WSA_QOS_EFLOWDESC:
+		case WSA_QOS_EPSFLOWSPEC:
+		case WSA_QOS_EPSFILTERSPEC:
+		case WSA_QOS_ESDMODEOBJ:
+		case WSA_QOS_ESHAPERATEOBJ:
+		case WSA_QOS_RESERVED_PETYPE:
+			throw QoSException(info);
+		default: throwExceptionFromErrno(e,info);
+	}
+#endif
+}
 
 
 }

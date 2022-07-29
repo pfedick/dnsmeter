@@ -217,7 +217,7 @@ ppl7::Array DNSSender::getQueryRates(const ppl7::String& QueryRates)
 	} else {
 		ppl7::Array matches;
 		if (QueryRates.pregMatch("/^([0-9]+)-([0-9]+),([0-9]+)$", matches)) {
-			for (ppluint64 i = matches[1].toUnsignedInt64(); i <= matches[2].toUnsignedInt64(); i += matches[3].toUnsignedInt64()) {
+			for (uint64_t i = matches[1].toUnsignedInt64(); i <= matches[2].toUnsignedInt64(); i += matches[3].toUnsignedInt64()) {
 				rates.addf("%llu", i);
 			}
 
@@ -450,11 +450,11 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 		double differenz=(double)diff.counter_send - (double)diff.counter_received;
 		dp=0.0f - differenz * 100.0f / (double)diff.counter_send;
 	}
-	printf("%02d:%02d:%02d send: %7llu, rcv: %7llu, ", now.hour(), now.minute(), now.second(),
+	printf("%02d:%02d:%02d send: %7lu, rcv: %7lu, ", now.hour(), now.minute(), now.second(),
 		diff.counter_send, diff.counter_received
 	);
 	printf("diff: %6.1f%%, ", dp);
-	printf("send: %6llu KB, rcv: %6llu KB", diff.bytes_send / 1024, diff.bytes_received / 1024);
+	printf("send: %6lu KB, rcv: %6lu KB", diff.bytes_send / 1024, diff.bytes_received / 1024);
 
 	double cpu=SystemStat::Cpu::getUsage(snap_start.cpu, snap_end.cpu);
 	const SystemStat::Interface& net1=snap_start.interfaces[InterfaceName];
@@ -550,9 +550,9 @@ void DNSSender::saveResultsToCsv(const DNSSender::Results& result)
 
 	if (CSVFile.isOpen()) {
 		CSVFile.putsf("%llu;%llu;%llu;%0.3f;%0.0f;%0.0f;%0.0f;\n",
-			(ppluint64)((double)result.counter_send / (double)Runtime),
-			(ppluint64)((double)result.counter_received / (double)Runtime),
-			(ppluint64)((double)result.counter_errors / (double)Runtime),
+			(uint64_t)((double)result.counter_send / (double)Runtime),
+			(uint64_t)((double)result.counter_received / (double)Runtime),
+			(uint64_t)((double)result.counter_errors / (double)Runtime),
 			(double)result.packages_lost * 100.0 / (double)result.counter_send,
 			result.rtt_avg * 1000.0,
 			result.rtt_min * 1000.0,
@@ -574,18 +574,18 @@ void DNSSender::presentResults(const DNSSender::Results& result)
 		(const char*)InterfaceName,
 		transmit.packets, received.packets, transmit.bytes / 1024, received.bytes / 1024);
 
-	ppluint64 qps_send=(ppluint64)((double)result.counter_send / (double)Runtime);
-	ppluint64 bps_send=(ppluint64)((double)result.bytes_send / (double)Runtime);
-	ppluint64 qps_received=(ppluint64)((double)result.counter_received / (double)Runtime);
-	ppluint64 bps_received=(ppluint64)((double)result.bytes_received / (double)Runtime);
+	uint64_t qps_send=(uint64_t)((double)result.counter_send / (double)Runtime);
+	uint64_t bps_send=(uint64_t)((double)result.bytes_send / (double)Runtime);
+	uint64_t qps_received=(uint64_t)((double)result.counter_received / (double)Runtime);
+	uint64_t bps_received=(uint64_t)((double)result.bytes_received / (double)Runtime);
 
-	printf("DNS Queries send: %10llu, Qps: %7llu, Data send: %7llu KB = %6llu MBit\n",
+	printf("DNS Queries send: %10lu, Qps: %7lu, Data send: %7lu KB = %6lu MBit\n",
 		result.counter_send, qps_send, result.bytes_send / 1024, bps_send / (1024 * 1024));
 
-	printf("DNS Queries rcv:  %10llu, Qps: %7llu, Data rcv:  %7llu KB = %6llu MBit\n",
+	printf("DNS Queries rcv:  %10lu, Qps: %7lu, Data rcv:  %7lu KB = %6lu MBit\n",
 		result.counter_received, qps_received, result.bytes_received / 1024, bps_received / (1024 * 1024));
 
-	printf("DNS Queries lost: %10llu, Qps: %7llu = %0.3f %%\n", result.packages_lost,
+	printf("DNS Queries lost: %10lu, Qps: %7lu = %0.3f %%\n", result.packages_lost,
 		qps_send - qps_received,
 		(double)result.packages_lost * 100.0 / (double)result.counter_send);
 
@@ -595,10 +595,10 @@ void DNSSender::presentResults(const DNSSender::Results& result)
 		result.rtt_avg * 1000.0,
 		result.rtt_min * 1000.0,
 		result.rtt_max * 1000.0);
-	printf("DNS truncated: %llu\nDNS RCODES: ", result.truncated);
+	printf("DNS truncated: %lu\nDNS RCODES: ", result.truncated);
 	for (int i=0;i < 15;i++) {
 		if (result.rcodes[i]) {
-			printf("%s: %llu, ", rcode_names[i], result.rcodes[i]);
+			printf("%s: %lu, ", rcode_names[i], result.rcodes[i]);
 		}
 	}
 	printf("\n");
@@ -606,17 +606,17 @@ void DNSSender::presentResults(const DNSSender::Results& result)
 
 
 	if (result.counter_errors) {
-		printf("Errors:           %10llu, Qps: %10llu\n", result.counter_errors,
-			(ppluint64)((double)result.counter_errors / (double)Runtime));
+		printf("Errors:           %10lu, Qps: %10lu\n", result.counter_errors,
+			(uint64_t)((double)result.counter_errors / (double)Runtime));
 	}
 	if (result.counter_0bytes) {
-		printf("Errors 0Byte:     %10llu, Qps: %10llu\n", result.counter_0bytes,
-			(ppluint64)((double)result.counter_0bytes / (double)Runtime));
+		printf("Errors 0Byte:     %10lu, Qps: %10lu\n", result.counter_0bytes,
+			(uint64_t)((double)result.counter_0bytes / (double)Runtime));
 	}
 	for (int i=0;i < 255;i++) {
 		if (result.counter_errorcodes[i] > 0) {
-			printf("Errors %3d:       %10llu, Qps: %10llu [%s]\n", i, result.counter_errorcodes[i],
-				(ppluint64)((double)result.counter_errorcodes[i] / (double)Runtime),
+			printf("Errors %3d:       %10lu, Qps: %10lu [%s]\n", i, result.counter_errorcodes[i],
+				(uint64_t)((double)result.counter_errorcodes[i] / (double)Runtime),
 				strerror(i));
 
 		}

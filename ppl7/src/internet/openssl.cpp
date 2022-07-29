@@ -32,7 +32,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -94,7 +94,7 @@
 
 #include "ppl7.h"
 #include "ppl7-inet.h"
-#include "socket.h"
+#include "socket_ppl7.h"
 
 namespace ppl7 {
 
@@ -102,12 +102,22 @@ typedef struct {
 	ppl7::Mutex *mutex;
 } MUTEX_STRUCT;
 
+static inline int getErrno()
+{
+#ifdef WIN32
+	return WSAGetLastError();
+#else
+	return errno;
+#endif
+}
+
 #ifdef HAVE_OPENSSL
 static bool SSLisInitialized=false;
 static bool PRNGIsSeed=false;
 //static int  SSLRefCount=0;
 static Mutex	SSLMutex;
 static MUTEX_STRUCT *mutex_buf=NULL;
+
 
 
 // seed PRNG (Pseudo Random Number Generator)
@@ -753,9 +763,9 @@ void SSLContext::setTmpDHParam(const String &dh_param_file)
 #else
 	if ((ff=(FILE*)fopen((const char*)dh_param_file,"r"))==NULL) {
 #endif
-		int e=errno;
+		int e=getErrno();
 		mutex.unlock();
-		throwExceptionFromErrno(e,dh_param_file);
+		throwSocketException(e,dh_param_file);
 	}
 	DH *dh=PEM_read_DHparams(ff, NULL, NULL, NULL);
 	if (!dh) {
@@ -1037,7 +1047,7 @@ void TCPSocket::sslAccept(SSLContext &context)
 void TCPSocket::sslWaitForAccept(SSLContext &context, int timeout_ms)
 {
 	try {
-	ppluint64 tt=GetMilliSeconds()+timeout_ms;
+	uint64_t tt=GetMilliSeconds()+timeout_ms;
 	while (timeout_ms==0 || GetMilliSeconds()<=tt) {
 		if (stoplisten) {
 

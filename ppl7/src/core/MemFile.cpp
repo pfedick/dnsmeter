@@ -33,13 +33,13 @@
  *******************************************************************************/
 
 
-#include "prolog.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <time.h>
+
+#include "prolog_ppl7.h"
 #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
 #endif
@@ -302,9 +302,9 @@ void MemFile::close()
 	}
 }
 
-ppluint64 MemFile::size () const
+uint64_t MemFile::size () const
 {
-	return (pplint64)mysize;
+	return (int64_t)mysize;
 }
 
 void MemFile::rewind ()
@@ -313,7 +313,7 @@ void MemFile::rewind ()
 }
 
 
-void MemFile::seek(ppluint64 position)
+void MemFile::seek(uint64_t position)
 {
 	if (MemBase!=NULL || readonly==false) {
 		if (position<mysize) {
@@ -328,24 +328,24 @@ void MemFile::seek(ppluint64 position)
 	throw FileNotOpenException();
 }
 
-ppluint64 MemFile::seek (pplint64 offset, SeekOrigin origin )
+uint64_t MemFile::seek (int64_t offset, SeekOrigin origin )
 {
 	if (MemBase!=NULL || readonly==false) {
-		ppluint64 oldpos=pos;
+		uint64_t oldpos=pos;
 		switch (origin) {
 			case SEEKCUR:
 				pos+=offset;
 				if (pos<mysize) return pos;
-				if ((pplint64)pos<0) {pos=0;return pos; }
+				if ((int64_t)pos<0) {pos=0;return pos; }
 				break;
 			case SEEKEND:
 				pos=mysize-offset;
 				if (pos>mysize) return pos;
-				if ((pplint64)pos<0) {pos=0; return pos;}
+				if ((int64_t)pos<0) {pos=0; return pos;}
 				break;
 			case SEEKSET:
 				pos=offset;
-				if ((pplint64)pos<0) {pos=0; return pos;}
+				if ((int64_t)pos<0) {pos=0; return pos;}
 				if (pos>mysize) return pos;
 				break;
 		}
@@ -355,7 +355,7 @@ ppluint64 MemFile::seek (pplint64 offset, SeekOrigin origin )
 	throw FileNotOpenException();
 }
 
-ppluint64 MemFile::tell()
+uint64_t MemFile::tell()
 {
 	if (MemBase!=NULL || readonly==false) {
 		return pos;
@@ -390,11 +390,11 @@ char *MemFile::fgets (char *buffer1, size_t num)
 {
 	if (MemBase!=NULL) {
 		if (pos>=mysize) throw EndOfFileException();
-		ppluint64 by;
+		uint64_t by;
 		by=num-1;
-		if (pos+by>mysize) by=(ppluint64)(mysize-pos);
+		if (pos+by>mysize) by=(uint64_t)(mysize-pos);
 		char *ptr=MemBase+pos;
-		ppluint64 i;
+		uint64_t i;
 		for (i=0;i<by;i++) {
 			if ((buffer1[i]=ptr[i])=='\n') {
 				i++;
@@ -413,11 +413,11 @@ wchar_t *MemFile::fgetws (wchar_t *buffer1, size_t num)
 {
 	if (MemBase!=NULL) {
 		if (pos>=mysize) throw EndOfFileException();
-		//ppluint64 by;
+		//uint64_t by;
 		//by=(num-1)*sizeof(wchar_t);
-		//if (pos+by>mysize) by=(ppluint64)(mysize-pos);
+		//if (pos+by>mysize) by=(uint64_t)(mysize-pos);
 		wchar_t *ptr=(wchar_t*)(MemBase+pos);
-		ppluint64 i;
+		uint64_t i;
 		for (i=0;i<(num-1);i++) {
 			if ((buffer1[i]=ptr[i])==L'\n') {
 				i++;
@@ -435,7 +435,7 @@ wchar_t *MemFile::fgetws (wchar_t *buffer1, size_t num)
 void MemFile::fputs (const char *str)
 {
 	if (MemBase!=NULL || readonly==false) {
-		fwrite ((void*)str,1,(ppluint32)strlen(str));
+		fwrite ((void*)str,1,(uint32_t)strlen(str));
 		return;
 	}
 	throw FileNotOpenException();
@@ -444,7 +444,7 @@ void MemFile::fputs (const char *str)
 void MemFile::fputws (const wchar_t *str)
 {
 	if (MemBase!=NULL || readonly==false) {
-		fwrite (str,1,(ppluint32)wcslen(str)*sizeof(wchar_t));
+		fwrite (str,1,(uint32_t)wcslen(str)*sizeof(wchar_t));
 		return;
 	}
 	throw FileNotOpenException();
@@ -503,7 +503,7 @@ void MemFile::setMapReadAhead(size_t bytes)
 }
 
 
-const char *MemFile::map(ppluint64 position, size_t bytes)
+const char *MemFile::map(uint64_t position, size_t bytes)
 {
 	if (MemBase==NULL) throw FileNotOpenException();
 	if (position+bytes<=mysize) {
@@ -512,7 +512,7 @@ const char *MemFile::map(ppluint64 position, size_t bytes)
 	return NULL;
 }
 
-char *MemFile::mapRW(ppluint64 position, size_t bytes)
+char *MemFile::mapRW(uint64_t position, size_t bytes)
 {
 	if (MemBase==NULL) throw FileNotOpenException();
 	if (position+bytes<=mysize) {
@@ -550,7 +550,7 @@ int MemFile::getFileNo() const
 }
 
 
-void MemFile::truncate(ppluint64 length)
+void MemFile::truncate(uint64_t length)
 {
 	if (readonly) throw ReadOnlyException();
 	if (length<mysize) {

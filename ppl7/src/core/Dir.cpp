@@ -2,13 +2,8 @@
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
  * Web: http://www.pfp.de/ppl/
  *
- * $Author$
- * $Revision$
- * $Date$
- * $Id$
- *
  *******************************************************************************
- * Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2022, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +29,7 @@
 
 
 
-#include "prolog.h"
+#include "prolog_ppl7.h"
 
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
@@ -47,24 +42,24 @@
 #endif
 
 #ifdef HAVE_WCHAR_H
-	#include <wchar.h>
+#include <wchar.h>
 #endif
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
 #ifdef HAVE_UNISTD_H
-	#include <unistd.h>
+#include <unistd.h>
 #endif
 
 #ifdef HAVE_SYS_MMAN_H
-	#include <sys/mman.h>
+#include <sys/mman.h>
 #endif
 
 #ifdef HAVE_FCNTL_H
-	#include <fcntl.h>
+#include <fcntl.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
-	#include <sys/types.h>
+#include <sys/types.h>
 #endif
 
 #ifdef HAVE_DIRENT_H
@@ -72,16 +67,16 @@
 #endif
 
 #ifdef HAVE_SYS_STAT_H
-	#include <sys/stat.h>
+#include <sys/stat.h>
 #endif
 #ifdef HAVE_SYS_FILE_H
-	#include <sys/file.h>
+#include <sys/file.h>
 #endif
 #ifdef HAVE_STDARG_H
-	#include <stdarg.h>
+#include <stdarg.h>
 #endif
 #ifdef HAVE_ERRNO_H
-	#include <errno.h>
+#include <errno.h>
 #endif
 
 #include <map>
@@ -269,12 +264,12 @@ int main(int argc, char **argv)
 String Dir::currentPath()
 {
 	String ret;
-	char *buf=(char*)malloc(2048);
+	char* buf=(char*)malloc(2048);
 	if (!buf) throw OutOfMemoryException();
 #ifdef _WIN32
-	if (_getcwd(buf,2048)) {
+	if (_getcwd(buf, 2048)) {
 #else
-	if (getcwd(buf,2048)) {
+	if (getcwd(buf, 2048)) {
 #endif
 		ret=buf;
 		free(buf);
@@ -283,12 +278,12 @@ String Dir::currentPath()
 	int e=errno;
 	free(buf);
 	switch (e) {
-		case EINVAL: throw IllegalArgumentException();
-		case ENOENT: throw NonexistingPathException();
-		case ENOMEM: throw OutOfMemoryException();
-		case ERANGE: throw PathnameTooLongException();
-		case EACCES: throw PermissionDeniedException();
-		default: throw UnknownException();
+	case EINVAL: throw IllegalArgumentException();
+	case ENOENT: throw NonexistingPathException();
+	case ENOMEM: throw OutOfMemoryException();
+	case ERANGE: throw PathnameTooLongException();
+	case EACCES: throw PermissionDeniedException();
+	default: throw UnknownException();
 	}
 }
 
@@ -308,13 +303,13 @@ String Dir::homePath()
 {
 	String ret;
 #ifdef _WIN32
-	char *homeDir = getenv("HOMEPATH");
-	char *homeDrive = getenv("HOMEDRIVE");
-	ret.setf("%s\\%s",homeDrive, homeDir);
+	char* homeDir = getenv("HOMEPATH");
+	char* homeDrive = getenv("HOMEDRIVE");
+	ret.setf("%s\\%s", homeDrive, homeDir);
 	return ret;
 #else
-	char *homeDir = getenv("HOME");
-	if (homeDir!=NULL && strlen(homeDir)>0) {
+	char* homeDir = getenv("HOME");
+	if (homeDir != NULL && strlen(homeDir) > 0) {
 		ret.set(homeDir);
 		return ret;
 	}
@@ -340,12 +335,12 @@ String Dir::tempPath()
 	s.set(TempPath);
 	return s;
 #endif
-	const char *dir = getenv("TMPDIR");
-	if (dir!=NULL && strlen(dir)>0) return String(dir);
+	const char* dir = getenv("TMPDIR");
+	if (dir != NULL && strlen(dir) > 0) return String(dir);
 #ifdef P_tmpdir
 	dir=P_tmpdir;
 #endif
-	if (dir!=NULL && strlen(dir)>0) return String(dir);
+	if (dir != NULL && strlen(dir) > 0) return String(dir);
 	return String("/tmp");
 }
 
@@ -372,10 +367,10 @@ Dir::Dir()
  * @param[in] s gewünschte Sortierreihenfolge. Defaultmäßig wird keine Sortierung
  * verwendet.
  */
-Dir::Dir(const char *path, Sort s)
+Dir::Dir(const char* path, Sort s)
 {
 	sort=s;
-	if (path) open(path,s);
+	if (path) open(path, s);
 }
 
 /*!\brief Konstruktor der Klasse
@@ -390,10 +385,10 @@ Dir::Dir(const char *path, Sort s)
  * @param[in] s gewünschte Sortierreihenfolge. Defaultmäßig wird keine Sortierung
  * verwendet.
  */
-Dir::Dir(const String &path, Sort s)
+Dir::Dir(const String & path, Sort s)
 {
 	sort=s;
-	if (path.notEmpty()) open(path,s);
+	if (path.notEmpty()) open(path, s);
 }
 
 
@@ -435,12 +430,12 @@ void Dir::clear()
  *
  * \param[in] de Referenz auf einen Verzeichniseintrag
  */
-void Dir::print(const DirEntry &de) const
+void Dir::print(const DirEntry & de) const
 {
-	printf ("%s %3u ",(const char*)de.AttrStr,de.NumLinks);
-	printf ("%5u %5u ",de.Uid, de.Gid);
-	printf ("%10llu ",de.Size);
-	printf ("%s %s\n",(const char*)de.MTime.get(),(const char*)de.Filename);
+	printf("%s %3u ", (const char*)de.AttrStr, de.NumLinks);
+	printf("%5u %5u ", de.Uid, de.Gid);
+	printf("%10llu ", (unsigned long long)de.Size);
+	printf("%s %s\n", (const char*)de.MTime.get(), (const char*)de.Filename);
 }
 
 
@@ -455,8 +450,8 @@ void Dir::print(const DirEntry &de) const
 void Dir::print() const
 {
 	ppl7::List<const DirEntry*>::Iterator it;
-	printf ("Directory Listing: %s\n",(const char*)Path);
-	printf ("Total Files: %zu\n",num());
+	printf("Directory Listing: %s\n", (const char*)Path);
+	printf("Total Files: %zu\n", num());
 	SortedFiles.reset(it);
 	while (SortedFiles.getNext(it)) {
 		print(*it.value());
@@ -513,14 +508,14 @@ void Dir::resort(Sort s)
 {
 	SortedFiles.clear();
 	switch (s) {
-		case SORT_NONE: resortNone(); break;
-		case SORT_FILENAME: resortFilename(); break;
-		case SORT_FILENAME_IGNORCASE: resortFilenameIgnoreCase(); break;
-		case SORT_ATIME: resortATime(); break;
-		case SORT_CTIME: resortCTime(); break;
-		case SORT_MTIME: resortMTime(); break;
-		case SORT_SIZE: resortSize(); break;
-		default: throw IllegalArgumentException();
+	case SORT_NONE: resortNone(); break;
+	case SORT_FILENAME: resortFilename(); break;
+	case SORT_FILENAME_IGNORCASE: resortFilenameIgnoreCase(); break;
+	case SORT_ATIME: resortATime(); break;
+	case SORT_CTIME: resortCTime(); break;
+	case SORT_MTIME: resortMTime(); break;
+	case SORT_SIZE: resortSize(); break;
+	default: throw IllegalArgumentException();
 	}
 	sort=s;
 }
@@ -557,11 +552,11 @@ void Dir::resortFilename()
 
 	std::multimap<String, const DirEntry*> sorter;
 	while (Files.getNext(it)) {
-		const DirEntry &de=it.value();
-		sorter.insert(std::pair<String,const DirEntry*>(de.Filename,&de));
+		const DirEntry& de=it.value();
+		sorter.insert(std::pair<String, const DirEntry*>(de.Filename, &de));
 	}
 	std::multimap<String, const DirEntry*>::const_iterator sortit;
-	for (sortit=sorter.begin();sortit!=sorter.end();++sortit) {
+	for (sortit=sorter.begin();sortit != sorter.end();++sortit) {
 		SortedFiles.add((*sortit).second);
 	}
 }
@@ -582,13 +577,13 @@ void Dir::resortFilenameIgnoreCase()
 	std::multimap<String, const DirEntry*> sorter;
 	String filename;
 	while (Files.getNext(it)) {
-		const DirEntry &de=it.value();
+		const DirEntry& de=it.value();
 		filename.set(de.Filename);
 		filename.lowerCase();
-		sorter.insert(std::pair<String,const DirEntry*>(filename,&de));
+		sorter.insert(std::pair<String, const DirEntry*>(filename, &de));
 	}
 	std::multimap<String, const DirEntry*>::const_iterator sortit;
-	for (sortit=sorter.begin();sortit!=sorter.end();++sortit) {
+	for (sortit=sorter.begin();sortit != sorter.end();++sortit) {
 		SortedFiles.add((*sortit).second);
 	}
 }
@@ -612,11 +607,11 @@ void Dir::resortMTime()
 
 	std::multimap<DateTime, const DirEntry*> sorter;
 	while (Files.getNext(it)) {
-		const DirEntry &de=it.value();
-		sorter.insert(std::pair<DateTime,const DirEntry*>(de.MTime,&de));
+		const DirEntry& de=it.value();
+		sorter.insert(std::pair<DateTime, const DirEntry*>(de.MTime, &de));
 	}
 	std::multimap<DateTime, const DirEntry*>::const_iterator sortit;
-	for (sortit=sorter.begin();sortit!=sorter.end();++sortit) {
+	for (sortit=sorter.begin();sortit != sorter.end();++sortit) {
 		SortedFiles.add((*sortit).second);
 	}
 }
@@ -640,11 +635,11 @@ void Dir::resortCTime()
 
 	std::multimap<DateTime, const DirEntry*> sorter;
 	while (Files.getNext(it)) {
-		const DirEntry &de=it.value();
-		sorter.insert(std::pair<DateTime,const DirEntry*>(de.CTime,&de));
+		const DirEntry& de=it.value();
+		sorter.insert(std::pair<DateTime, const DirEntry*>(de.CTime, &de));
 	}
 	std::multimap<DateTime, const DirEntry*>::const_iterator sortit;
-	for (sortit=sorter.begin();sortit!=sorter.end();++sortit) {
+	for (sortit=sorter.begin();sortit != sorter.end();++sortit) {
 		SortedFiles.add((*sortit).second);
 	}
 }
@@ -666,11 +661,11 @@ void Dir::resortATime()
 
 	std::multimap<DateTime, const DirEntry*> sorter;
 	while (Files.getNext(it)) {
-		const DirEntry &de=it.value();
-		sorter.insert(std::pair<DateTime,const DirEntry*>(de.ATime,&de));
+		const DirEntry& de=it.value();
+		sorter.insert(std::pair<DateTime, const DirEntry*>(de.ATime, &de));
 	}
 	std::multimap<DateTime, const DirEntry*>::const_iterator sortit;
-	for (sortit=sorter.begin();sortit!=sorter.end();++sortit) {
+	for (sortit=sorter.begin();sortit != sorter.end();++sortit) {
 		SortedFiles.add((*sortit).second);
 	}
 }
@@ -690,13 +685,13 @@ void Dir::resortSize()
 	ppl7::List<DirEntry>::Iterator it;
 	Files.reset(it);
 
-	std::multimap<ppluint64, const DirEntry*> sorter;
+	std::multimap<uint64_t, const DirEntry*> sorter;
 	while (Files.getNext(it)) {
-		const DirEntry &de=it.value();
-		sorter.insert(std::pair<ppluint64,const DirEntry*>(de.Size,&de));
+		const DirEntry& de=it.value();
+		sorter.insert(std::pair<uint64_t, const DirEntry*>(de.Size, &de));
 	}
-	std::multimap<ppluint64, const DirEntry*>::const_iterator sortit;
-	for (sortit=sorter.begin();sortit!=sorter.end();++sortit) {
+	std::multimap<uint64_t, const DirEntry*>::const_iterator sortit;
+	for (sortit=sorter.begin();sortit != sorter.end();++sortit) {
 		SortedFiles.add((*sortit).second);
 	}
 
@@ -711,7 +706,7 @@ void Dir::resortSize()
  * würde somit den ersten Eintrag zurückliefern.
  * \param it Iterator vom Typ ppl7::Dir::Iterator
  */
-void Dir::reset(Iterator &it) const
+void Dir::reset(Iterator & it) const
 {
 	SortedFiles.reset(it);
 }
@@ -728,7 +723,7 @@ void Dir::reset(Iterator &it) const
  * @return Referenz auf die erste Datei des Verzeichnisses.
  * \exception EndOfListException Wird geworfen, wenn keine Einträge im geöffneten Verzeichnis vorhanden sind.
  */
-const DirEntry &Dir::getFirst(Iterator &it) const
+const DirEntry& Dir::getFirst(Iterator & it) const
 {
 	if (SortedFiles.getFirst(it)) return *it.value();
 	throw EndOfListException();
@@ -747,7 +742,7 @@ const DirEntry &Dir::getFirst(Iterator &it) const
  * @return Referenz auf die nächste Datei des Verzeichnisses.
  * \exception EndOfListException Wird geworfen, wenn das Ende der Liste erreicht wurde.
  */
-const DirEntry &Dir::getNext(Iterator &it) const
+const DirEntry& Dir::getNext(Iterator & it) const
 {
 	if (SortedFiles.getNext(it)) return *it.value();
 	throw EndOfListException();
@@ -774,7 +769,7 @@ const DirEntry &Dir::getNext(Iterator &it) const
  * @return Referenz auf die erste Datei des Verzeichnisses.
  * \exception EndOfListException Wird geworfen, wenn keine Einträge im geöffneten Verzeichnis vorhanden sind.
  */
-const DirEntry &Dir::getFirstPattern(Iterator &it, const String &pattern, bool ignorecase) const
+const DirEntry& Dir::getFirstPattern(Iterator & it, const String & pattern, bool ignorecase) const
 {
 	reset(it);
 	return getNextPattern(it, pattern, ignorecase);
@@ -800,21 +795,21 @@ const DirEntry &Dir::getFirstPattern(Iterator &it, const String &pattern, bool i
  * @return Referenz auf die nächste Datei des Verzeichnisses.
  * \exception EndOfListException Wird geworfen, wenn das Ende der Liste erreicht wurde.
  */
-const DirEntry &Dir::getNextPattern(Iterator &it, const String &pattern, bool ignorecase) const
+const DirEntry& Dir::getNextPattern(Iterator & it, const String & pattern, bool ignorecase) const
 {
 	String Pattern;
 	Pattern=pattern;
 	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
 	Pattern.pregEscape();
 	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
-	Pattern.replace("\\*",".*");
-	Pattern.replace("\\?",".");
-	Pattern="/^"+Pattern;
+	Pattern.replace("\\*", ".*");
+	Pattern.replace("\\?", ".");
+	Pattern="/^" + Pattern;
 	Pattern+="$/s";
 	if (ignorecase) Pattern+="i";
 	//printf ("Pattern: %s\n",(const char*)Pattern);
 	while (SortedFiles.getNext(it)) {
-		const DirEntry *de=it.value();
+		const DirEntry* de=it.value();
 		// Patternmatch
 		//printf ("Match gegen: %s\n",(const char*)de->Filename);
 		if (de->Filename.pregMatch(Pattern)) return *de;
@@ -838,10 +833,10 @@ const DirEntry &Dir::getNextPattern(Iterator &it, const String &pattern, bool ig
  * @return Referenz auf die erste Datei des Verzeichnisses.
  * \exception EndOfListException Wird geworfen, wenn keine Einträge im geöffneten Verzeichnis vorhanden sind.
  */
-const DirEntry &Dir::getFirstRegExp(Iterator &it, const String &regexp) const
+const DirEntry& Dir::getFirstRegExp(Iterator & it, const String & regexp) const
 {
 	reset(it);
-	return getNextRegExp(it,regexp);
+	return getNextRegExp(it, regexp);
 }
 
 /*!\brief Nächster Verzeichniseintrag, der zu der angegebenen Regular Expression passt
@@ -859,10 +854,10 @@ const DirEntry &Dir::getFirstRegExp(Iterator &it, const String &regexp) const
  * @return Referenz auf die nächste Datei des Verzeichnisses.
  * \exception EndOfListException Wird geworfen, wenn das Ende der Liste erreicht wurde.
  */
-const DirEntry &Dir::getNextRegExp(Iterator &it, const String &regexp) const
+const DirEntry& Dir::getNextRegExp(Iterator & it, const String & regexp) const
 {
 	while (SortedFiles.getNext(it)) {
-		const DirEntry *de=it.value();
+		const DirEntry* de=it.value();
 		// Patternmatch
 		if (de->Filename.pregMatch(regexp)) return *de;
 	}
@@ -885,7 +880,7 @@ const DirEntry &Dir::getNextRegExp(Iterator &it, const String &regexp) const
  * @return Gibt \c true zurück, wenn eine Datei im Verzeichnis vorhanden war, sonst \c false.
  * Falls ein Fehler auftritt, kann auch eine Exception geworfen werden.
  */
-bool Dir::getFirst(DirEntry &e, Iterator &it) const
+bool Dir::getFirst(DirEntry & e, Iterator & it) const
 {
 	if (!SortedFiles.getFirst(it)) return false;
 	e=*it.value();
@@ -905,7 +900,7 @@ bool Dir::getFirst(DirEntry &e, Iterator &it) const
  * @return Gibt \c true zurück, wenn eine Datei im Verzeichnis vorhanden war, sonst \c false.
  * Falls ein Fehler auftritt, kann auch eine Exception geworfen werden.
  */
-bool Dir::getNext(DirEntry &e, Iterator &it) const
+bool Dir::getNext(DirEntry & e, Iterator & it) const
 {
 	if (!SortedFiles.getNext(it)) return false;
 	e=*it.value();
@@ -936,7 +931,7 @@ bool Dir::getNext(DirEntry &e, Iterator &it) const
  * @return Gibt \c true zurück, wenn eine Datei im Verzeichnis vorhanden war, sonst \c false.
  * Falls ein Fehler auftritt, kann auch eine Exception geworfen werden.
  */
-bool Dir::getFirstPattern(DirEntry &e, Iterator &it, const String &pattern, bool ignorecase) const
+bool Dir::getFirstPattern(DirEntry & e, Iterator & it, const String & pattern, bool ignorecase) const
 {
 	reset(it);
 	return getNextPattern(e, it, pattern, ignorecase);
@@ -963,21 +958,21 @@ bool Dir::getFirstPattern(DirEntry &e, Iterator &it, const String &pattern, bool
  * @return Gibt \c true zurück, wenn eine Datei im Verzeichnis vorhanden war, sonst \c false.
  * Falls ein Fehler auftritt, kann auch eine Exception geworfen werden.
  */
-bool Dir::getNextPattern(DirEntry &e, Iterator &it, const String &pattern, bool ignorecase) const
+bool Dir::getNextPattern(DirEntry & e, Iterator & it, const String & pattern, bool ignorecase) const
 {
 	String Pattern;
 	Pattern=pattern;
 	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
 	Pattern.pregEscape();
 	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
-	Pattern.replace("\\*",".*");
-	Pattern.replace("\\?",".");
-	Pattern="/^"+Pattern;
+	Pattern.replace("\\*", ".*");
+	Pattern.replace("\\?", ".");
+	Pattern="/^" + Pattern;
 	Pattern+="$/";
 	if (ignorecase) Pattern+="i";
 	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
 	while (SortedFiles.getNext(it)) {
-		const DirEntry *de=it.value();
+		const DirEntry* de=it.value();
 		// Patternmatch
 		//printf ("Match gegen: %ls\n",(const wchar_t*)Name);
 		if (de->Filename.pregMatch(Pattern)) {
@@ -1007,10 +1002,10 @@ bool Dir::getNextPattern(DirEntry &e, Iterator &it, const String &pattern, bool 
  * @return Gibt \c true zurück, wenn eine Datei im Verzeichnis vorhanden war, sonst \c false.
  * Falls ein Fehler auftritt, kann auch eine Exception geworfen werden.
  */
-bool Dir::getFirstRegExp(DirEntry &e, Iterator &it, const String &regexp) const
+bool Dir::getFirstRegExp(DirEntry & e, Iterator & it, const String & regexp) const
 {
 	reset(it);
-	return getNextRegExp(e,it,regexp);
+	return getNextRegExp(e, it, regexp);
 }
 
 /*!\brief Nächster Verzeichniseintrag, der zu der angegebenen Regular Expression passt
@@ -1031,10 +1026,10 @@ bool Dir::getFirstRegExp(DirEntry &e, Iterator &it, const String &regexp) const
  * @return Gibt \c true zurück, wenn eine Datei im Verzeichnis vorhanden war, sonst \c false.
  * Falls ein Fehler auftritt, kann auch eine Exception geworfen werden.
  */
-bool Dir::getNextRegExp(DirEntry &e, Iterator &it, const String &regexp) const
+bool Dir::getNextRegExp(DirEntry & e, Iterator & it, const String & regexp) const
 {
 	while (SortedFiles.getNext(it)) {
-		const DirEntry *de=it.value();
+		const DirEntry* de=it.value();
 		// Patternmatch
 		if (de->Filename.pregMatch(regexp)) {
 			e=*de;
@@ -1057,9 +1052,9 @@ bool Dir::getNextRegExp(DirEntry &e, Iterator &it, const String &regexp) const
  * @return Die Funktion hat keinen Rückgabewert. Bei Auftreten eines Fehlers wird
  * eine Exception geworfen.
  */
-void Dir::open(const String &path, Sort s)
+void Dir::open(const String & path, Sort s)
 {
-	open((const char*)path,s);
+	open((const char*)path, s);
 }
 
 /*!\brief Verzeichnis einlesen
@@ -1074,28 +1069,62 @@ void Dir::open(const String &path, Sort s)
  * @return Die Funktion hat keinen Rückgabewert. Bei Auftreten eines Fehlers wird
  * eine Exception geworfen.
  */
-void Dir::open(const char *path, Sort s)
+void Dir::open(const char* path, Sort s)
 {
-#ifdef HAVE_OPENDIR
 	clear();
 	sort=s;
 	Path=path;
 	Path.trim();
 	Path.trimRight("/");
 	Path.trimRight("\\");
-	DIR *dir=opendir((const char*)Path);
+#ifdef WIN32
+	{
+		HANDLE hFind;
+		WIN32_FIND_DATAW FindFileData;
+		ppl7::WideString w_path(Path);
+		ppl7::WideString path_pattern=w_path+L"/*";
+
+		if ((hFind = FindFirstFileW((const wchar_t*)path_pattern, &FindFileData)) == INVALID_HANDLE_VALUE) {
+			throw CouldNotOpenDirectoryException("%s", (const char*)Path);
+		}
+		DirEntry de;
+		WideString CurrentFile;
+		do {
+			CurrentFile=w_path+L"/";
+			CurrentFile+=FindFileData.cFileName;
+			//printf ("found: %ls\n",(const wchar_t*)CurrentFile);
+			//CurrentFile.hexDump();
+			try {
+				File::statFile(CurrentFile, de);
+				Files.add(de);
+				//printf ("stat ok: %s\n",(const char*)de.Filename);
+				//de.Filename.hexDump();
+			} catch (...) {
+
+			}
+		} while (FindNextFileW(hFind, &FindFileData) == true);
+		FindClose(hFind);
+		resort(sort);
+		return;
+	}
+#endif
+
+
+#ifdef HAVE_OPENDIR
+	DIR* dir=opendir((const char*)Path);
 	if (!dir) {
-		File::throwErrno(errno,path);
+		File::throwErrno(errno, path);
 	}
 	DirEntry de;
 	String CurrentFile;
 	while (1) {
-		struct dirent *result=readdir(dir);
-		if (result==NULL) break;
-		CurrentFile=Path+"/"+String(result->d_name);
+		struct dirent* result=readdir(dir);
+		if (result == NULL) break;
+		CurrentFile=Path + "/" + String(result->d_name);
 		//ppl7::PrintDebugTime ("DEBUG: CurrentFile=%s\n",(const char*)CurrentFile);
+		//CurrentFile.hexDump();
 		try {
-			File::statFile(CurrentFile,de);
+			File::statFile(CurrentFile, de);
 			Files.add(de);
 		} catch (...) {
 
@@ -1108,12 +1137,24 @@ void Dir::open(const char *path, Sort s)
 #endif
 }
 
+bool Dir::tryOpen(const String & path, Sort s)
+{
+	try {
+		open(path, s);
+		return true;
 
-bool Dir::exists(const String &dirname)
+	} catch (...) {
+
+	}
+	return false;
+}
+
+
+bool Dir::exists(const String & dirname)
 {
 	try {
 		DirEntry f;
-		File::statFile(dirname,f);
+		File::statFile(dirname, f);
 		if (f.isDir()) return true;
 		if (f.isLink()) return true;
 		return false;
@@ -1123,23 +1164,23 @@ bool Dir::exists(const String &dirname)
 	return false;
 }
 
-void Dir::mkDir(const String &path)
+void Dir::mkDir(const String & path)
 {
-	Dir::mkDir(path,false);
+	Dir::mkDir(path, false);
 }
 
-void Dir::mkDir(const String &path, bool recursive)
+void Dir::mkDir(const String & path, bool recursive)
 {
-#ifdef _WIN32
-	Dir::mkDir(path,0,recursive);
+#ifdef WIN32
+	Dir::mkDir(path, 0, recursive);
 #else
 	Dir::mkDir(path,
-		S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH,
+		S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH,
 		recursive);
 #endif
 }
 
-void Dir::mkDir(const String &path, mode_t mode, bool recursive)
+void Dir::mkDir(const String & path, mode_t mode, bool recursive)
 {
 	String s;
 	if (path.isEmpty()) throw IllegalArgumentException("IllegalArgumentException");
@@ -1149,39 +1190,39 @@ void Dir::mkDir(const String &path, mode_t mode, bool recursive)
 	//printf ("path=%s\n",(const char*)path);
 	// 1=erfolgreich, 0=Fehler
 	if (!recursive) {
-#ifdef _WIN32
+#ifdef WIN32
 		s=path;
-		s.replace("/","\\");
-		if (mkdir(s)==0) return;
+		s.replace("/", "\\");
+		if (_wmkdir((const wchar_t*)WideString(s)) == 0) return;
 #else
-		if (mkdir((const char*)path,mode)==0) return;
+		if (mkdir((const char*)path, mode) == 0) return;
 #endif
 		throw CreateDirectoryFailedException();
 	}
 	// Wir hangeln uns von unten nach oben
 	s.clear();
 	Array tok;
-	StrTok(tok,path,"/");
+	StrTok(tok, path, "/");
 	//tok.explode(path,"/");
 	//tok.list("tok");
 	//throw UnknownException();
 
-	if(path[0]=='/') s.append("/");
-	for (size_t i=0;i<tok.count();i++) {
+	if (path[0] == '/') s.append("/");
+	for (size_t i=0;i < tok.count();i++) {
 		s.append(tok[i]);
 		// Prüfen, ob das Verzeichnis da ist.
 		if (!Dir::exists(s)) {
 #ifdef _WIN32
-			if(s.right(1)!=":") {
-				s.replace("/","\\");
-				if (mkdir((const char*)s)!=0) throw CreateDirectoryFailedException();
-			}
-#else
-			if (mkdir((const char*)s,mode)!=0) throw CreateDirectoryFailedException();
-#endif
+			if (s.right(1) != ":") {
+				s.replace("/", "\\");
+				if (_wmkdir((const wchar_t*)WideString(s)) != 0) throw CreateDirectoryFailedException();
 		}
-		s.append("/");
+#else
+			if (mkdir((const char*)s, mode) != 0) throw CreateDirectoryFailedException();
+#endif
 	}
+		s.append("/");
+}
 }
 
 } // EOF namespace ppl7

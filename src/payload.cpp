@@ -84,7 +84,7 @@ void PayloadFile::openQueryFile(const ppl7::String& Filename)
 	} else {
 		loadAndCompile(QueryFile);
 	}
-	printf("INFO: %llu queries loaded\n", validLinesInQueryFile);
+	printf("INFO: %lu queries loaded\n", validLinesInQueryFile);
 	it=querycache.begin();
 }
 
@@ -131,7 +131,7 @@ void PayloadFile::loadAndCompilePcapFile(const ppl7::String& Filename)
 	validLinesInQueryFile=0;
 	pcap_t* pp=pcap_open_offline((const char*)Filename, errorbuffer);
 	if (!pp) throw InvalidQueryFile("%s", errorbuffer);
-	ppluint64 pkts_total=0;
+	uint64_t pkts_total=0;
 	const u_char* pkt;
 	while ((pkt=pcap_next(pp, &hdr)) != NULL) {
 		pkts_total++;
@@ -148,7 +148,7 @@ void PayloadFile::loadAndCompilePcapFile(const ppl7::String& Filename)
 		querycache.push_back(ppl7::ByteArray(pkt, hdr.caplen));
 		validLinesInQueryFile++;
 	}
-	printf("Packets read from pcap file: %llu, valid UDP DNS queries: %llu\n",
+	printf("Packets read from pcap file: %lu, valid UDP DNS queries: %lu\n",
 		pkts_total, validLinesInQueryFile);
 	pcap_close(pp);
 	if (validLinesInQueryFile == 0) {

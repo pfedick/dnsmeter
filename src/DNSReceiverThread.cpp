@@ -61,12 +61,12 @@ void DNSReceiverThread::run()
 	}
 }
 
-ppluint64 DNSReceiverThread::getPacketsReceived() const
+uint64_t DNSReceiverThread::getPacketsReceived() const
 {
 	return counter.num_pkgs;
 }
 
-ppluint64 DNSReceiverThread::getBytesReceived() const
+uint64_t DNSReceiverThread::getBytesReceived() const
 {
 	return counter.bytes_rcv;
 }
