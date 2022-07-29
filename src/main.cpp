@@ -601,11 +601,11 @@ void DNSSender::presentResults(const DNSSender::Results& result)
 	uint64_t qps_received=(uint64_t)((double)result.counter_received / (double)real_run_time);
 	uint64_t bps_received=(uint64_t)((double)result.bytes_received / (double)real_run_time);
 
-	printf("DNS Queries send: %10lu, Qps: %7lu, Data send: %7lu KB = %6lu MBit\n",
-		result.counter_send, qps_send, result.bytes_send / 1024, bps_send / (1024 * 1024));
+	printf("DNS Queries send: %10lu, Qps: %7lu, Data send: %7lu KB = %6lu MBit/s\n",
+		result.counter_send, qps_send, result.bytes_send / 1024, bps_send * 8 / (1024 * 1024));
 
-	printf("DNS Queries rcv:  %10lu, Qps: %7lu, Data rcv:  %7lu KB = %6lu MBit\n",
-		result.counter_received, qps_received, result.bytes_received / 1024, bps_received / (1024 * 1024));
+	printf("DNS Queries rcv:  %10lu, Qps: %7lu, Data rcv:  %7lu KB = %6lu MBit/s\n",
+		result.counter_received, qps_received, result.bytes_received / 1024, bps_received * 8 / (1024 * 1024));
 
 	printf("DNS Queries lost: %10lu, Qps: %7lu = %0.3f %%\n", result.packages_lost,
 		qps_send - qps_received,
