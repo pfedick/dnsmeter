@@ -518,17 +518,18 @@ void DNSSender::run(int queryrate)
 			showCurrentStats(start, snap_start, snap_end);
 		}
 	}
+
+
+	if (stopFlag == true) {
+		threadpool.stopThreads();
+	}
+	if (Receiver) Receiver->threadStop();
 	double total_duration=0.0f;
 	for (it=threadpool.begin();it != threadpool.end();++it) {
 		total_duration+=((DNSSenderThread*)(*it))->getDuration();
 	}
 	real_run_time=total_duration / threadpool.size();
 	sampleSensorData(sys2);
-
-	if (stopFlag == true) {
-		threadpool.stopThreads();
-	}
-	if (Receiver) Receiver->threadStop();
 	if (stopFlag == true) {
 		throw ppl7::OperationInterruptedException("test aborted");
 	}
