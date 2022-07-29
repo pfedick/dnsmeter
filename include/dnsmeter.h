@@ -228,6 +228,7 @@ private:
 	int Timeout;
 	int ThreadCount;
 	int DnssecRate;
+	int report_line;
 	bool ignoreResponses;
 	bool spoofingEnabled;
 	bool spoofFromPcap;

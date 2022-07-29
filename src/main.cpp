@@ -201,6 +201,7 @@ DNSSender::DNSSender()
 	spoofingEnabled=false;
 	Receiver=NULL;
 	spoofFromPcap=false;
+	report_line=0;
 }
 
 DNSSender::~DNSSender()
@@ -444,24 +445,33 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 
 	ppl7::DateTime now=ppl7::DateTime().currentTime();
 
+	if (report_line == 0 || report_line > 25) {
+		printf("--------+--------------------------------------+-------------------------------+-----\n");
+		printf("        |Packets/Data Application side         |Packets/Data Network %-10s|\n", (const char*)InterfaceName);
+		printf("Time    |   send|    rcv|diff %%|KB send| KB rcv|     TX|     RX|  KB TX|  KB RX|CPU %%\n");
+		printf("--------+-------+-------+------+-------+-------+-------+-------+-------+-------+-----\n");
+		report_line=0;
+
+	}
+	report_line++;
 
 	double dp=0.0f;
 	if (diff.counter_send) {
 		double differenz=(double)diff.counter_send - (double)diff.counter_received;
 		dp=0.0f - differenz * 100.0f / (double)diff.counter_send;
 	}
-	printf("%02d:%02d:%02d send: %7lu, rcv: %7lu, ", now.hour(), now.minute(), now.second(),
+	printf("%02d:%02d:%02d|%7lu|%7lu|", now.hour(), now.minute(), now.second(),
 		diff.counter_send, diff.counter_received
 	);
-	printf("diff: %6.1f%%, ", dp);
-	printf("send: %6lu KB, rcv: %6lu KB", diff.bytes_send / 1024, diff.bytes_received / 1024);
+	printf("%6.1f|", dp);
+	printf("%7lu|%7lu|", diff.bytes_send / 1024, diff.bytes_received / 1024);
 
 	double cpu=SystemStat::Cpu::getUsage(snap_start.cpu, snap_end.cpu);
 	const SystemStat::Interface& net1=snap_start.interfaces[InterfaceName];
 	const SystemStat::Interface& net2=snap_end.interfaces[InterfaceName];
 	SystemStat::Network transmit=SystemStat::Network::getDelta(net1.transmit, net2.transmit);
 	SystemStat::Network received=SystemStat::Network::getDelta(net1.receive, net2.receive);
-	printf(" || Net TX: %6lu, RX: %6lu, KB TX: %6lu, RX: %6lu, CPU: %0.3f",
+	printf("%7lu|%7lu|%7lu|%7lu|%5.1f",
 		transmit.packets, received.packets, transmit.bytes / 1024, received.bytes / 1024, cpu);
 	printf("\n");
 }
@@ -477,6 +487,7 @@ void DNSSender::run(int queryrate)
 		printf("# Start Session with Threads: %d, Queryrate: unlimited\n",
 			ThreadCount);
 	}
+	report_line=0;
 
 	ppl7::ThreadPool::iterator it;
 	int queries_rest=queryrate;
@@ -565,7 +576,7 @@ void DNSSender::saveResultsToCsv(const DNSSender::Results& result)
 
 void DNSSender::presentResults(const DNSSender::Results& result)
 {
-	printf("===============================================================================\n");
+	printf("--------+-------+-------+------+-------+-------+-------+-------+-------+-------+-----\n");
 	const SystemStat::Interface& net1=sys1.interfaces[InterfaceName];
 	const SystemStat::Interface& net2=sys2.interfaces[InterfaceName];
 	SystemStat::Network transmit=SystemStat::Network::getDelta(net1.transmit, net2.transmit);
