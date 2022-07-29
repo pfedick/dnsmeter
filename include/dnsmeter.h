@@ -37,36 +37,36 @@ PPL7EXCEPTION(FailedToInitializePacketfilter, Exception);
 
 struct DNS_HEADER
 {
-    unsigned short id; // identification number
+	unsigned short id; // identification number
 
-    unsigned char rd :1; // recursion desired
-    unsigned char tc :1; // truncated message
-    unsigned char aa :1; // authoritive answer
-    unsigned char opcode :4; // purpose of message
-    unsigned char qr :1; // query/response flag
+	unsigned char rd : 1; // recursion desired
+	unsigned char tc : 1; // truncated message
+	unsigned char aa : 1; // authoritive answer
+	unsigned char opcode : 4; // purpose of message
+	unsigned char qr : 1; // query/response flag
 
-    unsigned char rcode :4; // response code
-    unsigned char cd :1; // checking disabled
-    unsigned char ad :1; // authenticated data
-    unsigned char z :1; // its z! reserved
-    unsigned char ra :1; // recursion available
+	unsigned char rcode : 4; // response code
+	unsigned char cd : 1; // checking disabled
+	unsigned char ad : 1; // authenticated data
+	unsigned char z : 1; // its z! reserved
+	unsigned char ra : 1; // recursion available
 
-    unsigned short q_count; // number of question entries
-    unsigned short ans_count; // number of answer entries
-    unsigned short auth_count; // number of authority entries
-    unsigned short add_count; // number of resource entries
+	unsigned short q_count; // number of question entries
+	unsigned short ans_count; // number of answer entries
+	unsigned short auth_count; // number of authority entries
+	unsigned short add_count; // number of resource entries
 };
 
 
-int MakeQuery(const ppl7::String &query, unsigned char *buffer, size_t buffersize, bool dnssec=false, int udp_payload_size=4096);
-int AddDnssecToQuery(unsigned char *buffer, size_t buffersize, int querysize, int udp_payload_size=4096);
+int MakeQuery(const ppl7::String& query, unsigned char* buffer, size_t buffersize, bool dnssec=false, int udp_payload_size=4096);
+int AddDnssecToQuery(unsigned char* buffer, size_t buffersize, int querysize, int udp_payload_size=4096);
 unsigned short getQueryTimestamp();
 double getQueryRTT(unsigned short start);
 
 class Packet
 {
 private:
-	unsigned char *buffer;
+	unsigned char* buffer;
 	int buffersize;
 	int payload_size;
 	bool chksum_valid;
@@ -75,17 +75,17 @@ private:
 public:
 	Packet();
 	~Packet();
-	void setSource(const ppl7::IPAddress &ip_addr, int port);
-	void setDestination(const ppl7::IPAddress &ip_addr, int port);
-	void setPayload(const void *payload, size_t size);
-	void setPayloadDNSQuery(const ppl7::String &query, bool dnssec=false);
+	void setSource(const ppl7::IPAddress& ip_addr, int port);
+	void setDestination(const ppl7::IPAddress& ip_addr, int port);
+	void setPayload(const void* payload, size_t size);
+	void setPayloadDNSQuery(const ppl7::String& query, bool dnssec=false);
 	void setDnsId(unsigned short id);
 	void setIpId(unsigned short id);
 
-	void randomSourceIP(const ppl7::IPNetwork &net);
+	void randomSourceIP(const ppl7::IPNetwork& net);
 	void randomSourceIP(unsigned int start, unsigned int size);
 	void randomSourcePort();
-	void useSourceFromPcap(const char *pkt, size_t size);
+	void useSourceFromPcap(const char* pkt, size_t size);
 
 	size_t size() const;
 	unsigned char* ptr();
@@ -95,13 +95,13 @@ public:
 class RawSocketSender
 {
 private:
-	void *buffer;
+	void* buffer;
 	int sd;
 public:
 	RawSocketSender();
 	~RawSocketSender();
-	void setDestination(const ppl7::IPAddress &ip_addr, int port);
-	ssize_t send(Packet &pkt);
+	void setDestination(const ppl7::IPAddress& ip_addr, int port);
+	ssize_t send(Packet& pkt);
 	ppl7::SockAddr getSockAddr() const;
 	bool socketReady();
 };
@@ -122,7 +122,7 @@ public:
 
 private:
 	ppl7::IPAddress SourceIP;
-	unsigned char *buffer;
+	unsigned char* buffer;
 	int buflen;
 	int sd;
 	unsigned short SourcePort;
@@ -133,10 +133,10 @@ private:
 public:
 	RawSocketReceiver();
 	~RawSocketReceiver();
-	void initInterface(const ppl7::String &Device);
+	void initInterface(const ppl7::String& Device);
 	bool socketReady();
-	void setSource(const ppl7::IPAddress &ip_addr, int port);
-	void receive(Counter &counter);
+	void setSource(const ppl7::IPAddress& ip_addr, int port);
+	void receive(Counter& counter);
 };
 
 
@@ -148,173 +148,173 @@ private:
 	std::list<ppl7::ByteArray> querycache;
 	std::list<ppl7::ByteArray>::const_iterator it;
 	bool payloadIsPcap;
-	bool detectPcap(ppl7::File &ff);
-	void loadAndCompile(ppl7::File &ff);
-	void loadAndCompilePcapFile(const ppl7::String &Filename);
+	bool detectPcap(ppl7::File& ff);
+	void loadAndCompile(ppl7::File& ff);
+	void loadAndCompilePcapFile(const ppl7::String& Filename);
 public:
 	PayloadFile();
-	void openQueryFile(const ppl7::String &Filename);
-	const ppl7::ByteArrayPtr &getQuery();
+	void openQueryFile(const ppl7::String& Filename);
+	const ppl7::ByteArrayPtr& getQuery();
 	bool isPcap();
 };
 
 class DNSReceiverThread : public ppl7::Thread
 {
-	private:
-		RawSocketReceiver Socket;
-		RawSocketReceiver::Counter counter;
+private:
+	RawSocketReceiver Socket;
+	RawSocketReceiver::Counter counter;
 
-	public:
-		DNSReceiverThread();
-		~DNSReceiverThread();
-		void setInterface(const ppl7::String &Device);
-		void setSource(const ppl7::IPAddress &ip, int port);
-		void run();
+public:
+	DNSReceiverThread();
+	~DNSReceiverThread();
+	void setInterface(const ppl7::String& Device);
+	void setSource(const ppl7::IPAddress& ip, int port);
+	void run();
 
-		ppluint64 getPacketsReceived() const;
-		ppluint64 getBytesReceived() const;
+	ppluint64 getPacketsReceived() const;
+	ppluint64 getBytesReceived() const;
 
-		double getDuration() const;
-		double getRoundTripTimeAverage() const;
-		double getRoundTripTimeMin() const;
-		double getRoundTripTimeMax() const;
-		const RawSocketReceiver::Counter &getCounter() const;
+	double getDuration() const;
+	double getRoundTripTimeAverage() const;
+	double getRoundTripTimeMin() const;
+	double getRoundTripTimeMax() const;
+	const RawSocketReceiver::Counter& getCounter() const;
 
 };
 
 class DNSSender
 {
+public:
+	class Results
+	{
 	public:
-		class Results
-		{
-			public:
-				int			queryrate;
-				ppluint64	counter_send;
-				ppluint64	counter_received;
-				ppluint64	bytes_send;
-				ppluint64	bytes_received;
-				ppluint64	counter_errors;
-				ppluint64	packages_lost;
-				ppluint64   counter_0bytes;
-				ppluint64   counter_errorcodes[255];
-				ppluint64	rcodes[16];
-				ppluint64	truncated;
-				double		rtt_total;
-				double		rtt_avg;
-				double		rtt_min;
-				double		rtt_max;
-				Results();
-				void clear();
-		};
+		int			queryrate;
+		ppluint64	counter_send;
+		ppluint64	counter_received;
+		ppluint64	bytes_send;
+		ppluint64	bytes_received;
+		ppluint64	counter_errors;
+		ppluint64	packages_lost;
+		ppluint64   counter_0bytes;
+		ppluint64   counter_errorcodes[255];
+		ppluint64	rcodes[16];
+		ppluint64	truncated;
+		double		rtt_total;
+		double		rtt_avg;
+		double		rtt_min;
+		double		rtt_max;
+		Results();
+		void clear();
+	};
 
 
-	private:
-		ppl7::ThreadPool threadpool;
-		ppl7::IPAddress TargetIP;
-		ppl7::IPAddress SourceIP;
-		ppl7::IPNetwork SourceNet;
-		ppl7::String CSVFileName;
-		ppl7::String QueryFilename;
-		ppl7::File CSVFile;
-		ppl7::Array rates;
-		ppl7::String InterfaceName;
-		PayloadFile payload;
-		DNSReceiverThread *Receiver;
-		DNSSender::Results vis_prev_results;
-		SystemStat sys1,sys2;
+private:
+	ppl7::ThreadPool threadpool;
+	ppl7::IPAddress TargetIP;
+	ppl7::IPAddress SourceIP;
+	ppl7::IPNetwork SourceNet;
+	ppl7::String CSVFileName;
+	ppl7::String QueryFilename;
+	ppl7::File CSVFile;
+	ppl7::Array rates;
+	ppl7::String InterfaceName;
+	PayloadFile payload;
+	DNSReceiverThread* Receiver;
+	DNSSender::Results vis_prev_results;
+	SystemStat sys1, sys2;
 
-		int TargetPort;
-		int Runtime;
-		int Timeout;
-		int ThreadCount;
-		int DnssecRate;
-		bool ignoreResponses;
-		bool spoofingEnabled;
-		bool spoofFromPcap;
+	int TargetPort;
+	int Runtime;
+	int Timeout;
+	int ThreadCount;
+	int DnssecRate;
+	bool ignoreResponses;
+	bool spoofingEnabled;
+	bool spoofFromPcap;
 
-		void openCSVFile(const ppl7::String &Filename);
-		void run(int queryrate);
-		void presentResults(const DNSSender::Results &result);
-		void saveResultsToCsv(const DNSSender::Results &result);
-		void prepareThreads();
-		void getResults(DNSSender::Results &result);
-		ppl7::Array getQueryRates(const ppl7::String &QueryRates);
-		void readSourceIPList(const ppl7::String &filename);
+	void openCSVFile(const ppl7::String& Filename);
+	void run(int queryrate);
+	void presentResults(const DNSSender::Results& result);
+	void saveResultsToCsv(const DNSSender::Results& result);
+	void prepareThreads();
+	void getResults(DNSSender::Results& result);
+	ppl7::Array getQueryRates(const ppl7::String& QueryRates);
+	void readSourceIPList(const ppl7::String& filename);
 
-		void getTarget(int argc, char**argv);
-		void getSource(int argc, char**argv);
-		int getParameter(int argc, char**argv);
-		int openFiles();
-		void showCurrentStats(ppl7::ppl_time_t start_time);
+	void getTarget(int argc, char** argv);
+	void getSource(int argc, char** argv);
+	int getParameter(int argc, char** argv);
+	int openFiles();
+	void showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_start, SystemStat& snap_end);
 
-	public:
-		DNSSender();
-		~DNSSender();
-		void help();
-		int main(int argc, char**argv);
+public:
+	DNSSender();
+	~DNSSender();
+	void help();
+	int main(int argc, char** argv);
 };
 
-DNSSender::Results operator-(const DNSSender::Results &first, const DNSSender::Results &second);
+DNSSender::Results operator-(const DNSSender::Results& first, const DNSSender::Results& second);
 
 class DNSSenderThread : public ppl7::Thread
 {
-	private:
-		RawSocketSender Socket;
-		Packet pkt;
+private:
+	RawSocketSender Socket;
+	Packet pkt;
 
-		ppl7::IPAddress destination;
-		ppl7::IPAddress sourceip;
-		ppl7::IPNetwork sourcenet;
+	ppl7::IPAddress destination;
+	ppl7::IPAddress sourceip;
+	ppl7::IPNetwork sourcenet;
 
-		PayloadFile *payload;
-		unsigned char *buffer;
-		ppluint64 queryrate;
-		ppluint64 counter_packets_send, errors, counter_0bytes;
-		ppluint64 counter_bytes_send;
-		ppluint64 counter_errorcodes[255];
+	PayloadFile* payload;
+	unsigned char* buffer;
+	ppluint64 queryrate;
+	ppluint64 counter_packets_send, errors, counter_0bytes;
+	ppluint64 counter_bytes_send;
+	ppluint64 counter_errorcodes[255];
 
-		unsigned int spoofing_net_start;
-		unsigned int spoofing_net_size;
+	unsigned int spoofing_net_start;
+	unsigned int spoofing_net_size;
 
-		int runtime;
-		int timeout;
-		int DnssecRate;
-		int dnsseccounter;
+	int runtime;
+	int timeout;
+	int DnssecRate;
+	int dnsseccounter;
 
-		double duration;
-		bool spoofingEnabled;
-		bool verbose;
-		bool payloadIsPcap;
-		bool spoofingFromPcap;
+	double duration;
+	bool spoofingEnabled;
+	bool verbose;
+	bool payloadIsPcap;
+	bool spoofingFromPcap;
 
-		void sendPacket();
-		void waitForTimeout();
-		bool socketReady();
+	void sendPacket();
+	void waitForTimeout();
+	bool socketReady();
 
-		void runWithoutRateLimit();
-		void runWithRateLimit();
+	void runWithoutRateLimit();
+	void runWithRateLimit();
 
-	public:
-		DNSSenderThread();
-		~DNSSenderThread();
-		void setDestination(const ppl7::IPAddress &ip, int port);
-		void setSourceIP(const ppl7::IPAddress &ip);
-		void setSourceNet(const ppl7::IPNetwork &net);
-		void setSourcePcap();
-		void setRandomSource(const ppl7::IPNetwork &net);
-		void setRuntime(int seconds);
-		void setTimeout(int seconds);
-		void setDNSSECRate(int rate);
-		void setQueryRate(ppluint64 qps);
-		void setTimeslice(float ms);
-		void setVerbose(bool verbose);
-		void setPayload(PayloadFile &payload);
-		void run();
-		ppluint64 getPacketsSend() const;
-		ppluint64 getBytesSend() const;
-		ppluint64 getErrors() const;
-		ppluint64 getCounter0Bytes() const;
-		ppluint64 getCounterErrorCode(int err) const;
+public:
+	DNSSenderThread();
+	~DNSSenderThread();
+	void setDestination(const ppl7::IPAddress& ip, int port);
+	void setSourceIP(const ppl7::IPAddress& ip);
+	void setSourceNet(const ppl7::IPNetwork& net);
+	void setSourcePcap();
+	void setRandomSource(const ppl7::IPNetwork& net);
+	void setRuntime(int seconds);
+	void setTimeout(int seconds);
+	void setDNSSECRate(int rate);
+	void setQueryRate(ppluint64 qps);
+	void setTimeslice(float ms);
+	void setVerbose(bool verbose);
+	void setPayload(PayloadFile& payload);
+	void run();
+	ppluint64 getPacketsSend() const;
+	ppluint64 getBytesSend() const;
+	ppluint64 getErrors() const;
+	ppluint64 getCounter0Bytes() const;
+	ppluint64 getCounterErrorCode(int err) const;
 
 };
 

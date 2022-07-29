@@ -42,12 +42,12 @@ DNSReceiverThread::~DNSReceiverThread()
 
 }
 
-void DNSReceiverThread::setInterface(const ppl7::String &Device)
+void DNSReceiverThread::setInterface(const ppl7::String& Device)
 {
 	Socket.initInterface(Device);
 }
 
-void DNSReceiverThread::setSource(const ppl7::IPAddress &ip, int port)
+void DNSReceiverThread::setSource(const ppl7::IPAddress& ip, int port)
 {
 	Socket.setSource(ip, port);
 }
@@ -78,7 +78,7 @@ double DNSReceiverThread::getDuration() const
 
 double DNSReceiverThread::getRoundTripTimeAverage() const
 {
-	if (counter.num_pkgs) return counter.rtt_total/counter.num_pkgs;
+	if (counter.num_pkgs) return counter.rtt_total / counter.num_pkgs;
 	return 0.0f;
 }
 
@@ -92,10 +92,7 @@ double DNSReceiverThread::getRoundTripTimeMax() const
 	return counter.rtt_max;
 }
 
-const RawSocketReceiver::Counter &DNSReceiverThread::getCounter() const
+const RawSocketReceiver::Counter& DNSReceiverThread::getCounter() const
 {
 	return counter;
 }
-
-
-

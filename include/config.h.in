@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef __DNSMETER_CONFIG__
 #define __DNSMETER_CONFIG__
 
@@ -92,6 +91,6 @@
 #undef HAVE_SYSLOG
 #undef HAVE_OPENLOG
 #undef HAVE_CLOSELOG
- 
+
 
 #endif
