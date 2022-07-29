@@ -202,6 +202,7 @@ AC_CHECK_HEADERS([locale.h])
 AC_CHECK_HEADERS([wchar.h])
 AC_CHECK_HEADERS([widec.h])
 AC_CHECK_HEADERS([syslog.h])
+AC_CHECK_HEADERS([pthread.h pthread_np.h])
 AC_CHECK_HEADERS([sys/mman.h])
 AC_CHECK_HEADERS([resolv.h],[],[],
 [
