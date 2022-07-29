@@ -202,7 +202,6 @@ DNSSender::DNSSender()
 	Receiver=NULL;
 	spoofFromPcap=false;
 	report_line=0;
-	start_time=0.0f;
 	real_run_time=0.0f;
 }
 
@@ -506,7 +505,6 @@ void DNSSender::run(int queryrate)
 	SystemStat snap_end;
 	if (Receiver) Receiver->threadStart();
 	threadpool.startThreads();
-	start_time=ppl7::GetMicrotime();
 	ppl7::ppl_time_t start=ppl7::GetTime();
 	while (ppl7::GetTime() == start) ppl7::MSleep(1);
 	ppl7::ppl_time_t report=start + 2;
@@ -520,12 +518,17 @@ void DNSSender::run(int queryrate)
 			showCurrentStats(start, snap_start, snap_end);
 		}
 	}
+	double total_duration=0.0f;
+	for (it=threadpool.begin();it != threadpool.end();++it) {
+		total_duration+=((DNSSenderThread*)(*it))->getDuration();
+	}
+	real_run_time=total_duration / threadpool.size();
+	sampleSensorData(sys2);
+
 	if (stopFlag == true) {
 		threadpool.stopThreads();
 	}
 	if (Receiver) Receiver->threadStop();
-	real_run_time=ppl7::GetMicrotime() - start_time;
-	sampleSensorData(sys2);
 	if (stopFlag == true) {
 		throw ppl7::OperationInterruptedException("test aborted");
 	}

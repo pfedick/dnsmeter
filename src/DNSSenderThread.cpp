@@ -337,3 +337,8 @@ uint64_t DNSSenderThread::getCounterErrorCode(int err) const
 	if (err < 255) return counter_errorcodes[err];
 	return 0;
 }
+
+double DNSSenderThread::getDuration() const
+{
+	return duration;
+}
