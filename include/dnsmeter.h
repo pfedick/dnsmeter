@@ -232,6 +232,8 @@ private:
 	bool ignoreResponses;
 	bool spoofingEnabled;
 	bool spoofFromPcap;
+	double start_time;
+	double real_run_time;
 
 	void openCSVFile(const ppl7::String& Filename);
 	void run(int queryrate);

@@ -51,7 +51,7 @@ bool stopFlag=false;
 void sighandler(int sig)
 {
 	stopFlag=true;
-	printf("Stopping...\n");
+	printf("\nStopping...\n\n");
 }
 
 unsigned short getQueryTimestamp()
@@ -202,6 +202,8 @@ DNSSender::DNSSender()
 	Receiver=NULL;
 	spoofFromPcap=false;
 	report_line=0;
+	start_time=0.0f;
+	real_run_time=0.0f;
 }
 
 DNSSender::~DNSSender()
@@ -504,6 +506,7 @@ void DNSSender::run(int queryrate)
 	SystemStat snap_end;
 	if (Receiver) Receiver->threadStart();
 	threadpool.startThreads();
+	start_time=ppl7::GetMicrotime();
 	ppl7::ppl_time_t start=ppl7::GetTime();
 	while (ppl7::GetTime() == start) ppl7::MSleep(1);
 	ppl7::ppl_time_t report=start + 2;
@@ -517,10 +520,13 @@ void DNSSender::run(int queryrate)
 			showCurrentStats(start, snap_start, snap_end);
 		}
 	}
-	if (Receiver) Receiver->threadStop();
-	sampleSensorData(sys2);
 	if (stopFlag == true) {
 		threadpool.stopThreads();
+	}
+	if (Receiver) Receiver->threadStop();
+	real_run_time=ppl7::GetMicrotime() - start_time;
+	sampleSensorData(sys2);
+	if (stopFlag == true) {
 		throw ppl7::OperationInterruptedException("test aborted");
 	}
 }
@@ -561,9 +567,9 @@ void DNSSender::saveResultsToCsv(const DNSSender::Results& result)
 
 	if (CSVFile.isOpen()) {
 		CSVFile.putsf("%llu;%llu;%llu;%0.3f;%0.0f;%0.0f;%0.0f;\n",
-			(uint64_t)((double)result.counter_send / (double)Runtime),
-			(uint64_t)((double)result.counter_received / (double)Runtime),
-			(uint64_t)((double)result.counter_errors / (double)Runtime),
+			(uint64_t)((double)result.counter_send / (double)real_run_time),
+			(uint64_t)((double)result.counter_received / (double)real_run_time),
+			(uint64_t)((double)result.counter_errors / (double)real_run_time),
 			(double)result.packages_lost * 100.0 / (double)result.counter_send,
 			result.rtt_avg * 1000.0,
 			result.rtt_min * 1000.0,
@@ -581,14 +587,15 @@ void DNSSender::presentResults(const DNSSender::Results& result)
 	const SystemStat::Interface& net2=sys2.interfaces[InterfaceName];
 	SystemStat::Network transmit=SystemStat::Network::getDelta(net1.transmit, net2.transmit);
 	SystemStat::Network received=SystemStat::Network::getDelta(net1.receive, net2.receive);
+	printf("Runtime: %0.3f s\n", real_run_time);
 	printf("network if %s Pkt send: %lu, rcv: %lu, Data send: %lu KB, rcv: %lu KB\n",
 		(const char*)InterfaceName,
 		transmit.packets, received.packets, transmit.bytes / 1024, received.bytes / 1024);
 
-	uint64_t qps_send=(uint64_t)((double)result.counter_send / (double)Runtime);
-	uint64_t bps_send=(uint64_t)((double)result.bytes_send / (double)Runtime);
-	uint64_t qps_received=(uint64_t)((double)result.counter_received / (double)Runtime);
-	uint64_t bps_received=(uint64_t)((double)result.bytes_received / (double)Runtime);
+	uint64_t qps_send=(uint64_t)((double)result.counter_send / (double)real_run_time);
+	uint64_t bps_send=(uint64_t)((double)result.bytes_send / (double)real_run_time);
+	uint64_t qps_received=(uint64_t)((double)result.counter_received / (double)real_run_time);
+	uint64_t bps_received=(uint64_t)((double)result.bytes_received / (double)real_run_time);
 
 	printf("DNS Queries send: %10lu, Qps: %7lu, Data send: %7lu KB = %6lu MBit\n",
 		result.counter_send, qps_send, result.bytes_send / 1024, bps_send / (1024 * 1024));
@@ -618,16 +625,16 @@ void DNSSender::presentResults(const DNSSender::Results& result)
 
 	if (result.counter_errors) {
 		printf("Errors:           %10lu, Qps: %10lu\n", result.counter_errors,
-			(uint64_t)((double)result.counter_errors / (double)Runtime));
+			(uint64_t)((double)result.counter_errors / (double)real_run_time));
 	}
 	if (result.counter_0bytes) {
 		printf("Errors 0Byte:     %10lu, Qps: %10lu\n", result.counter_0bytes,
-			(uint64_t)((double)result.counter_0bytes / (double)Runtime));
+			(uint64_t)((double)result.counter_0bytes / (double)real_run_time));
 	}
 	for (int i=0;i < 255;i++) {
 		if (result.counter_errorcodes[i] > 0) {
 			printf("Errors %3d:       %10lu, Qps: %10lu [%s]\n", i, result.counter_errorcodes[i],
-				(uint64_t)((double)result.counter_errorcodes[i] / (double)Runtime),
+				(uint64_t)((double)result.counter_errorcodes[i] / (double)real_run_time),
 				strerror(i));
 
 		}
