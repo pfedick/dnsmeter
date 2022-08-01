@@ -516,6 +516,7 @@ void DNSSender::run(int queryrate)
 			report=now + 1;
 			sampleSensorData(snap_end);
 			showCurrentStats(start, snap_start, snap_end);
+			snap_start=snap_end;
 		}
 	}
 
