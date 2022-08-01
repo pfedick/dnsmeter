@@ -475,7 +475,6 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 	printf("%7lu|%7lu|%7lu|%7lu|%5.1f",
 		transmit.packets, received.packets, transmit.bytes / 1024, received.bytes / 1024, cpu);
 	printf("\n");
-	printf("   DEBUG: igb0 RX: %lu, TX: %lu\n", snap_end.interfaces[InterfaceName].receive.packets, snap_end.interfaces[InterfaceName].transmit.packets);
 }
 
 
