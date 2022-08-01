@@ -68,6 +68,7 @@ public:
 		int system;
 		int idle;
 		int iowait;
+		void clear();
 
 		static double getUsage(const SystemStat::Cpu& sample1, const SystemStat::Cpu& sample2);
 
@@ -88,6 +89,7 @@ public:
 		long totalram;
 		long sharedram;
 		int procs;
+		void clear();
 	};
 
 	class Interface
@@ -96,6 +98,7 @@ public:
 		ppl7::String Name;
 		Network receive;
 		Network transmit;
+		void clear();
 	};
 
 	double sampleTime;
@@ -111,6 +114,7 @@ public:
 	void exportToArray(ppl7::AssocArray& data) const;
 	void importFromArray(const ppl7::AssocArray& data);
 	void print() const;
+	void clear();
 
 };
 

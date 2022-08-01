@@ -250,7 +250,7 @@ void sampleSensorData(SystemStat& stat)
 	sampleCpuUsage(stat.cpu);
 	sampleSysinfo(stat.sysinfo);
 	sampleNetwork(stat.interfaces, stat.net_total);
-	}
+}
 
 double SystemStat::Cpu::getUsage(const SystemStat::Cpu& sample1, const SystemStat::Cpu& sample2)
 {
@@ -372,4 +372,31 @@ void SystemStat::print() const
 	ppl7::AssocArray a;
 	exportToArray(a);
 	a.list();
+}
+
+void SystemStat::clear()
+{
+	cpu.clear();
+	sysinfo.clear();
+	net_total.clear();
+	interfaces.clear();
+	sampleTime=0.0f;
+}
+
+void SystemStat::Sysinfo::clear()
+{
+	uptime=freeswap=totalswap=freeram=bufferram=totalram=sharedram=0;
+	procs=0;
+}
+
+void SystemStat::Cpu::clear()
+{
+	user=nice=system=idle=iowait=0;
+}
+
+void SystemStat::Interface::clear()
+{
+	Name.clear();
+	receive.clear();
+	transmit.clear();
 }

@@ -475,6 +475,7 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 	printf("%7lu|%7lu|%7lu|%7lu|%5.1f",
 		transmit.packets, received.packets, transmit.bytes / 1024, received.bytes / 1024, cpu);
 	printf("\n");
+	printf("   DEBUG: igb0 RX: %lu, TX: %lu\n", snap_end.interfaces[InterfaceName].receive.packets, snap_end.interfaces[InterfaceName].transmit.packets);
 }
 
 
@@ -514,6 +515,7 @@ void DNSSender::run(int queryrate)
 		ppl7::ppl_time_t now=ppl7::GetTime();
 		if (now >= report) {
 			report=now + 1;
+			snap_end.clear();
 			sampleSensorData(snap_end);
 			showCurrentStats(start, snap_start, snap_end);
 			snap_start=snap_end;
