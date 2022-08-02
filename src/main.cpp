@@ -474,6 +474,7 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 	SystemStat::Network received=SystemStat::Network::getDelta(net1.receive, net2.receive);
 	printf("%7lu|%7lu|%7lu|%7lu|%5.1f",
 		transmit.packets, received.packets, transmit.bytes / 1024, received.bytes / 1024, cpu);
+	//printf("|| start TX: %lu, RX: %lu || end TX: %lu, RX: %lu\n", net1.transmit.packets, net1.receive.packets, net2.transmit.packets, net2.receive.packets);
 	printf("\n");
 }
 
@@ -500,6 +501,8 @@ void DNSSender::run(int queryrate)
 		((DNSSenderThread*)(*it))->setQueryRate(queries_thread);
 	}
 	vis_prev_results.clear();
+	sys1.clear();
+	sys2.clear();
 	sampleSensorData(sys1);
 	SystemStat snap_start=sys1;
 	SystemStat snap_end;
@@ -508,7 +511,7 @@ void DNSSender::run(int queryrate)
 	ppl7::ppl_time_t start=ppl7::GetTime();
 	while (ppl7::GetTime() == start) ppl7::MSleep(1);
 	ppl7::ppl_time_t report=start + 2;
-	ppl7::MSleep(500);
+	ppl7::MSleep(100);
 	while (threadpool.running() == true && stopFlag == false) {
 		ppl7::USleep(500);
 		ppl7::ppl_time_t now=ppl7::GetTime();
