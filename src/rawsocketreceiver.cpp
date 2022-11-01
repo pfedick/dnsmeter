@@ -80,12 +80,13 @@ static int open_bpf()
 
 bool tryAllocZeroCopyBuffer(int sd, struct bpf_zbuf* zbuf, size_t size)
 {
+	size_t page_size=getpagesize();
 	zbuf->bz_buflen=size;
-	zbuf->bz_bufa=malloc(zbuf->bz_buflen);
+	zbuf->bz_bufa=aligned_alloc(page_size, zbuf->bz_buflen);
 	if (!zbuf->bz_bufa) {
 		throw ppl7::OutOfMemoryException();
 	}
-	zbuf->bz_bufb=malloc(zbuf->bz_buflen);
+	zbuf->bz_bufb=aligned_alloc(page_size, zbuf->bz_buflen);
 	if (!zbuf->bz_bufb) {
 		free(zbuf->bz_bufa);
 		throw ppl7::OutOfMemoryException();
@@ -111,8 +112,17 @@ void initZeroCopyBuffer(int sd, struct bpf_zbuf* zbuf)
 	if (ioctl(sd, BIOCSTSTAMP, &tstype) < 0) {
 		ppl7::throwExceptionFromErrno(errno, "BIOCSTSTAMP");
 	}
-	if (tryAllocZeroCopyBuffer(sd, zbuf, 8192)) return;
-	if (tryAllocZeroCopyBuffer(sd, zbuf, 4096)) return;
+
+	size_t maxsize=0;
+	if (ioctl(sd, BIOCGETZMAX, &maxsize) == 0) {
+		printf("DEBUG: maximum buffer: %zu\n", maxsize);
+	}
+	int v=65536 * 4;
+	if (v > maxsize) v=maxsize;
+	while (v >= 4096) {
+		if (tryAllocZeroCopyBuffer(sd, zbuf, v)) return;
+		v=v >> 1;
+	}
 	throw FailedToInitializePacketfilter("Could not configure ZeroCopy-Buffer (BIOCSETZBUF)");
 }
 
@@ -156,7 +166,7 @@ RawSocketReceiver::RawSocketReceiver()
 {
 	SourceIP.set("0.0.0.0");
 	SourcePort=0;
-	buflen=4096;
+	buflen=32768;
 	sd=-1;
 	buffer=NULL;
 #ifdef __FreeBSD__
@@ -170,7 +180,7 @@ RawSocketReceiver::RawSocketReceiver()
 		initZeroCopyBuffer(sd, zbuf);
 		useZeroCopyBuffer=true;
 		buflen=zbuf->bz_buflen;
-		printf("INFO: using fast bpf zero copy buffer for packet capturing\n");
+		printf("INFO: using fast bpf zero copy buffer for packet capturing with %d bytes buffer\n", buflen);
 		return;
 	}
 	catch (const ppl7::Exception& ex) {
@@ -179,12 +189,12 @@ RawSocketReceiver::RawSocketReceiver()
 		useZeroCopyBuffer=false;
 		free(buffer);
 	}
-	buflen=8192;
+	buflen=32768;
 	buffer=(unsigned char*)malloc(buflen);
 	if (!buffer) { close(sd); throw ppl7::OutOfMemoryException(); }
 	try {
 		initBufferedMode(sd, buflen);
-		printf("INFO: using normal bpf buffered mode for packet capturing\n");
+		printf("INFO: using normal bpf buffered mode for packet capturing with %d bytes buffersize\n", buflen);
 		int ret=fcntl(sd, F_SETFL, fcntl(sd, F_GETFL, 0) | O_NONBLOCK);// NON-Blocking
 		if (ret < 0) ppl7::throwExceptionFromErrno(errno, "Could not set bpf into non blocking mode");
 
@@ -228,7 +238,7 @@ RawSocketReceiver::~RawSocketReceiver()
 	}
 #endif
 	free(buffer);
-}
+	}
 
 void RawSocketReceiver::initInterface(const ppl7::String& Device)
 {
@@ -336,6 +346,7 @@ static int buffer_check(struct bpf_zbuf_header* bzh)
 static void read_buffer(unsigned char* ptr, size_t size, RawSocketReceiver::Counter& counter)
 {
 	size_t done=0;
+	printf("Got Packets with size: %zd\n", size);
 	while (done < size) {
 		struct bpf_hdr* bpfh=(struct bpf_hdr*)ptr;
 		if (bpfh->bh_caplen == 0 || bpfh->bh_hdrlen == 0) break;
