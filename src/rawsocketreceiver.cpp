@@ -166,7 +166,7 @@ RawSocketReceiver::RawSocketReceiver()
 {
 	SourceIP.set("0.0.0.0");
 	SourcePort=0;
-	buflen=32768;
+	buflen=65536;
 	sd=-1;
 	buffer=NULL;
 #ifdef __FreeBSD__
@@ -189,7 +189,7 @@ RawSocketReceiver::RawSocketReceiver()
 		useZeroCopyBuffer=false;
 		free(buffer);
 	}
-	buflen=32768;
+	buflen=65536;
 	buffer=(unsigned char*)malloc(buflen);
 	if (!buffer) { close(sd); throw ppl7::OutOfMemoryException(); }
 	try {
