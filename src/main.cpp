@@ -173,6 +173,7 @@ DNSSender::Results operator-(const DNSSender::Results& first, const DNSSender::R
 	r.bytes_received=first.bytes_received - second.bytes_received;
 	r.counter_errors=first.counter_errors - second.counter_errors;
 	r.packages_lost=first.packages_lost - second.packages_lost;
+	if (first.packages_lost < second.packages_lost) r.packages_lost=0;
 	r.counter_0bytes=first.counter_0bytes - second.counter_0bytes;
 	for (int i=0;i < 255;i++) r.counter_errorcodes[i]=first.counter_errorcodes[i] - second.counter_errorcodes[i];
 	r.rtt_total=first.rtt_total - second.rtt_total;
@@ -222,9 +223,13 @@ ppl7::Array DNSSender::getQueryRates(const ppl7::String& QueryRates)
 			for (uint64_t i = matches[1].toUnsignedInt64(); i <= matches[2].toUnsignedInt64(); i += matches[3].toUnsignedInt64()) {
 				rates.addf("%llu", i);
 			}
-
 		} else {
 			rates.explode(QueryRates, ",");
+			/* TODO
+			ppl7::Array rates_in;
+			rates_in.explode(QueryRates, ",");
+			*/
+
 		}
 	}
 	return rates;
@@ -575,6 +580,7 @@ void DNSSender::saveResultsToCsv(const DNSSender::Results& result)
 {
 
 	if (CSVFile.isOpen()) {
+		double qps_lost_percent=(double)result.packages_lost * 100.0 / (double)result.counter_send;
 		CSVFile.putsf("%llu;%llu;%llu;%0.3f;%0.0f;%0.0f;%0.0f;\n",
 			(uint64_t)((double)result.counter_send / (double)real_run_time),
 			(uint64_t)((double)result.counter_received / (double)real_run_time),
@@ -612,9 +618,15 @@ void DNSSender::presentResults(const DNSSender::Results& result)
 	printf("DNS Queries rcv:  %10lu, Qps: %7lu, Data rcv:  %7lu KB = %6lu MBit/s\n",
 		result.counter_received, qps_received, result.bytes_received / 1024, bps_received * 8 / (1024 * 1024));
 
+	int64_t qps_lost=qps_send - qps_received;
+	double qps_lost_percent=(double)result.packages_lost * 100.0 / (double)result.counter_send;
+	if (qps_lost < 0) {
+		qps_lost_percent=0;
+		qps_lost=0;
+	}
 	printf("DNS Queries lost: %10lu, Qps: %7lu = %0.3f %%\n", result.packages_lost,
-		qps_send - qps_received,
-		(double)result.packages_lost * 100.0 / (double)result.counter_send);
+		(uint64_t)qps_lost,
+		qps_lost_percent);
 
 	printf("DNS rtt average: %0.0f ms, "
 		"min: %0.0f ms, "
