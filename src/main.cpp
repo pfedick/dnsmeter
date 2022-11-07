@@ -115,7 +115,8 @@ void DNSSender::help()
 		"  -n #          number of worker threads (default=1)\n"
 		"  -r #          queryrate (Default=as much as possible)\n"
 		"                can be a single value, a comma separated list (rate,rate,...)\n"
-		"                or a range and a step value (start - end, step)\n"
+		"                or a range and a step value (start - end, step). Can also be a\n"
+		"                combination: rate, rate, start-end:step, rate, ....\n"
 		"  -d #          amount of queries in percent on which the DNSSEC-flags are set\n"
 		"                (default=0)\n"
 		"  -c FILE       CSV-file for results\n"
@@ -224,14 +225,23 @@ ppl7::Array DNSSender::getQueryRates(const ppl7::String& QueryRates)
 				rates.addf("%llu", i);
 			}
 		} else {
-			rates.explode(QueryRates, ",");
-			/* TODO
+			//rates.explode(QueryRates, ",");
 			ppl7::Array rates_in;
 			rates_in.explode(QueryRates, ",");
-			*/
-
+			for (size_t i=0;i < rates_in.size();i++) {
+				const ppl7::String& element=rates_in.get(i);
+				if (element.pregMatch("/^([0-9]+)-([0-9]+):([0-9]+)$", matches)) {
+					for (uint64_t i = matches[1].toUnsignedInt64(); i <= matches[2].toUnsignedInt64(); i += matches[3].toUnsignedInt64()) {
+						rates.addf("%llu", i);
+					}
+				} else {
+					int r=element.toInt();
+					if (r > 0) rates.addf("%d", r);
+				}
+			}
 		}
 	}
+	rates.list();
 	return rates;
 }
 
