@@ -238,7 +238,7 @@ RawSocketReceiver::~RawSocketReceiver()
 	}
 #endif
 	free(buffer);
-	}
+}
 
 void RawSocketReceiver::initInterface(const ppl7::String& Device)
 {
@@ -346,7 +346,7 @@ static int buffer_check(struct bpf_zbuf_header* bzh)
 static void read_buffer(unsigned char* ptr, size_t size, RawSocketReceiver::Counter& counter)
 {
 	size_t done=0;
-	printf("Got Packets with size: %zd\n", size);
+	//printf("Got Packets with size: %zd\n", size);
 	while (done < size) {
 		struct bpf_hdr* bpfh=(struct bpf_hdr*)ptr;
 		if (bpfh->bh_caplen == 0 || bpfh->bh_hdrlen == 0) break;
