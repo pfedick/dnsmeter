@@ -241,7 +241,7 @@ ppl7::Array DNSSender::getQueryRates(const ppl7::String& QueryRates)
 			}
 		}
 	}
-	rates.list();
+	//rates.list();
 	return rates;
 }
 
