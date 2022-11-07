@@ -590,7 +590,7 @@ void DNSSender::saveResultsToCsv(const DNSSender::Results& result)
 {
 
 	if (CSVFile.isOpen()) {
-		double qps_lost_percent=(double)result.packages_lost * 100.0 / (double)result.counter_send;
+		//double qps_lost_percent=(double)result.packages_lost * 100.0 / (double)result.counter_send;
 		CSVFile.putsf("%llu;%llu;%llu;%0.3f;%0.0f;%0.0f;%0.0f;\n",
 			(uint64_t)((double)result.counter_send / (double)real_run_time),
 			(uint64_t)((double)result.counter_received / (double)real_run_time),
