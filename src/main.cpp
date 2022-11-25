@@ -117,6 +117,8 @@ void DNSSender::help()
 		"                can be a single value, a comma separated list (rate,rate,...)\n"
 		"                or a range and a step value (start - end, step). Can also be a\n"
 		"                combination: rate, rate, start-end:step, rate, ....\n"
+		"                For better human readable numbers you can use \"k\" for 1000 queries\n"
+		"                and \"m\" for a million queries.\n"
 		"  -d #          amount of queries in percent on which the DNSSEC-flags are set\n"
 		"                (default=0)\n"
 		"  -c FILE       CSV-file for results\n"
@@ -340,6 +342,8 @@ int DNSSender::getParameter(int argc, char** argv)
 		help();
 		return 1;
 	}
+	QueryRates.replace("k", "000");
+	QueryRates.replace("m", "000000");
 	rates = getQueryRates(QueryRates);
 	return 0;
 }
