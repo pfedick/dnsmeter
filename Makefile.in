@@ -1,7 +1,10 @@
-EXTRA_CFLAGS = 
+CXX                     = @CXX@
+CPPFLAGS        = @CPPFLAGS@
+CXXFLAGS        = @CXXFLAGS@
+EXTRA_CFLAGS =
 INCLUDE	= -I. -Iinclude -Ippl7/include
 
-CFLAGS		=  -ggdb -O2 -Wall  $(INCLUDE) @CFLAGS@ @DEFS@  @PTHREAD_CFLAGS@ \
+CFLAGS		=  -ggdb -O2 -Wall  $(INCLUDE) @CFLAGS@ @CXXFLAGS@ @DEFS@  @PTHREAD_CFLAGS@ \
 	@ZLIB_CFLAGS@ @BZ2_CFLAGS@ @PCRE_CFLAGS@ @OPENSSL_INCLUDES@ @ICONV_CFLAGS@  \
 	@PCAP_CFLAGS@  $(EXTRA_CFLAGS)
 
@@ -32,7 +35,7 @@ clean:
 
 docker-build: dnsmeter
 	docker build -t dnsmeter:latest .
-	
+
 docker-start:
 	- @docker stop dnsmeter > /dev/null 2>&1 || echo -n ""
 	- @docker rm dnsmeter
@@ -79,5 +82,3 @@ build/DNSReceiverThread.o: src/DNSReceiverThread.cpp Makefile include/dnsmeter.h
 build/SampleSensorData.o: src/SampleSensorData.cpp Makefile include/sensor.h
 	mkdir -p build
 	$(CXX) $(CFLAGS) -o build/SampleSensorData.o -c src/SampleSensorData.cpp
-
-
