@@ -806,7 +806,7 @@ public:
 	virtual size_t		fread(void* ptr, size_t size, size_t nmemb);
 	virtual char* fgets(char* buffer, size_t num);
 	virtual	int			fgetc();
-	//virtual size_t		fwrite(const void * ptr, size_t size, size_t nmemb);
+	virtual size_t		fwrite(const void* ptr, size_t size, size_t nmemb);
 	//virtual void		fputs (const char *str);
 	//virtual	void		fputc (int c);
 };
@@ -906,8 +906,13 @@ public:
 	static String currentPath();
 	static String homePath();
 	static String tempPath();
+	static String applicationDataPath();
+	static String applicationDataPath(const String& company, const String& application);
+	static String documentsPath();
+	static String documentsPath(const String& company, const String& application);
 
 	static bool exists(const String& dirname);
+	static bool canOpen(const String& path);
 	static void mkDir(const String& path);
 	static void mkDir(const String& path, bool recursive);
 	static void mkDir(const String& path, mode_t mode, bool recursive);
@@ -1286,6 +1291,7 @@ public:
 	const String& getSection(const String& name) const;
 	void copySection(AssocArray& target, const String& section) const;
 	void createSection(const String& name);
+	void setSection(const String& name);
 	void deleteSection(const String& name);
 	void add(const String& section, const String& key, const String& value);
 	void add(const String& section, const String& key, const char* value);
@@ -1322,8 +1328,8 @@ public:
 	void transcode(const ByteArrayPtr& from, ByteArray& to);
 	void transcode(const String& from, String& to);
 	String transcode(const String& from);
-	static String fromUnicode(const WideString &from, const String& toEncoding);
-	static WideString toUnicode(const String &from, const String& fromEncoding);
+	static String fromUnicode(const WideString& from, const String& toEncoding);
+	static WideString toUnicode(const String& from, const String& fromEncoding);
 	static void enumerateCharsets(Array& list);
 	static void enumerateCharsets(std::list<ppl7::String>& list);
 	static String getLocalCharset();

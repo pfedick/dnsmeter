@@ -424,6 +424,10 @@ public:
 	ssize_t instrCase(const String& needle, size_t start=0) const;
 	bool has(const String& needle, bool ignoreCase=false) const;
 
+	bool startsWith(const String& prefix, size_t start=0, size_t end=(size_t)-1) const;
+	bool endsWith(const String& suffix, size_t start=0, size_t end=(size_t)-1) const;
+	String join(const ppl7::Array& iterable) const;
+
 	String& stripSlashes();
 
 	String& replace(const String& search, const String& replacement);
@@ -734,6 +738,11 @@ public:
 	ssize_t findCase(const WideString& needle, ssize_t start=0) const;
 	ssize_t instr(const WideString& needle, size_t start=0) const;
 	ssize_t instrCase(const WideString& needle, size_t start=0) const;
+
+
+	bool startsWith(const WideString& prefix, size_t start=0, size_t end=(size_t)-1) const;
+	bool endsWith(const WideString& suffix, size_t start=0, size_t end=(size_t)-1) const;
+	WideString join(const ppl7::Array& iterable) const;
 
 	WideString& stripSlashes();
 

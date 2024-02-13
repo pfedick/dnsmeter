@@ -177,7 +177,8 @@ public:
 		item->value=value;
 		try {
 			AVLTreeAlgorithm::addNode(item);
-		} catch (...) {
+		}
+		catch (...) {
 			item->~TreeItem();
 			MyHeap.free(item);
 			throw;

@@ -121,7 +121,7 @@ WideString::WideString() throw()
  * @param str Wide-Character-String, der mit einem 0-Wert Endet
  * @exception OutOfMemoryException
  */
-WideString::WideString(const wchar_t *str)
+WideString::WideString(const wchar_t* str)
 {
 	ptr=NULL;
 	stringlen=0;
@@ -139,12 +139,12 @@ WideString::WideString(const wchar_t *str)
  * @param size Maximale Anzahl Zeichen, die übernommen werden sollen
  * @exception OutOfMemoryException
  */
-WideString::WideString(const wchar_t *str, size_t size)
+WideString::WideString(const wchar_t* str, size_t size)
 {
 	ptr=NULL;
 	stringlen=0;
 	s=0;
-	set(str,size);
+	set(str, size);
 }
 
 /*!\brief Konstruktor aus String-Pointer
@@ -155,7 +155,7 @@ WideString::WideString(const wchar_t *str, size_t size)
  * @param str Pointer auf einen anderen String
  * @exception OutOfMemoryException
  */
-WideString::WideString(const WideString *str)
+WideString::WideString(const WideString* str)
 {
 	ptr=NULL;
 	stringlen=0;
@@ -171,7 +171,7 @@ WideString::WideString(const WideString *str)
  * @param str Pointer auf einen anderen String
  * @exception OutOfMemoryException
  */
-WideString::WideString(const String *str)
+WideString::WideString(const String* str)
 {
 	ptr=NULL;
 	stringlen=0;
@@ -188,7 +188,7 @@ WideString::WideString(const String *str)
  * @param str Referenz auf einen anderen String
  * @exception OutOfMemoryException
  */
-WideString::WideString(const WideString &str)
+WideString::WideString(const WideString& str)
 {
 	ptr=NULL;
 	stringlen=0;
@@ -204,7 +204,7 @@ WideString::WideString(const WideString &str)
  * @param str Referenz auf einen anderen String
  * @exception OutOfMemoryException
  */
-WideString::WideString(const String &str)
+WideString::WideString(const String& str)
 {
 	ptr=NULL;
 	stringlen=0;
@@ -223,12 +223,12 @@ WideString::WideString(const String &str)
  * @exception UnsupportedCharacterEncodingException
  * @exception CharacterEncodingException
  */
-WideString::WideString(const std::string &str)
+WideString::WideString(const std::string& str)
 {
 	ptr=NULL;
 	stringlen=0;
 	s=0;
-	set(str.data(),str.size());
+	set(str.data(), str.size());
 }
 
 /*!\brief Konstruktor aus Standard-Template Wide-String
@@ -239,12 +239,12 @@ WideString::WideString(const std::string &str)
  * @param str Referenz auf Wide-String der STL
  * @exception OutOfMemoryException
  */
-WideString::WideString(const std::wstring &str)
+WideString::WideString(const std::wstring& str)
 {
 	ptr=NULL;
 	stringlen=0;
 	s=0;
-	set(str.data(),str.size());
+	set(str.data(), str.size());
 }
 
 /*!\brief Destruktor
@@ -280,10 +280,10 @@ void WideString::clear() throw()
  *
  * @return Anzahl Zeichen
  */
-size_t WideString::capacity ( ) const
+size_t WideString::capacity() const
 {
 	if (!s) return 0;
-	return (s/sizeof(wchar_t))-1;
+	return (s / sizeof(wchar_t)) - 1;
 }
 
 /*!\brief Reserviert Speicher für den String
@@ -303,9 +303,9 @@ size_t WideString::capacity ( ) const
  */
 void WideString::reserve(size_t size)
 {
-	size_t bytes=(size+1)*sizeof(wchar_t);
-	if (s>=bytes) return; // Nothing to do
-	wchar_t *p=(wchar_t*)realloc(ptr,bytes);
+	size_t bytes=(size + 1) * sizeof(wchar_t);
+	if (s >= bytes) return; // Nothing to do
+	wchar_t* p=(wchar_t*)realloc(ptr, bytes);
 	if (!p) throw OutOfMemoryException();
 	ptr=p;
 	s=bytes;
@@ -371,7 +371,7 @@ size_t WideString::size() const
  */
 size_t WideString::byteLength() const
 {
-	return stringlen*sizeof(wchar_t);
+	return stringlen * sizeof(wchar_t);
 }
 
 /*! \brief Prüft, ob der String leer ist.
@@ -384,7 +384,7 @@ size_t WideString::byteLength() const
  */
 bool WideString::isEmpty() const
 {
-	if (stringlen==0) return true;
+	if (stringlen == 0) return true;
 	return false;
 }
 
@@ -398,7 +398,7 @@ bool WideString::isEmpty() const
  */
 bool WideString::notEmpty() const
 {
-	if (stringlen==0) return false;
+	if (stringlen == 0) return false;
 	return true;
 }
 
@@ -415,18 +415,18 @@ bool WideString::isNumeric() const
 {
 	if (!stringlen) return false;
 	size_t dotcount=0;
-	for (size_t i=0;i<stringlen;i++) {
+	for (size_t i=0;i < stringlen;i++) {
 		wchar_t c=((wchar_t*)ptr)[i];
-		if (c<'0' || c>'9') {
-			if (c!='.' && c!=',' && c!='-') return false;
-			if (c=='-' && i>0) return false;
-			if (c=='.' || c==',') {
+		if (c < '0' || c>'9') {
+			if (c != '.' && c != ',' && c != '-') return false;
+			if (c == '-' && i > 0) return false;
+			if (c == '.' || c == ',') {
 				dotcount++;
-				if (dotcount>1) return false;
+				if (dotcount > 1) return false;
 			}
 		}
 	}
-	if(ptr[stringlen-1]=='.') return false;
+	if (ptr[stringlen - 1] == '.') return false;
 	return true;
 }
 
@@ -442,10 +442,10 @@ bool WideString::isNumeric() const
 bool WideString::isInteger() const
 {
 	if (!stringlen) return false;
-	for (size_t i=0;i<stringlen;i++) {
+	for (size_t i=0;i < stringlen;i++) {
 		wchar_t c=((wchar_t*)ptr)[i];
-		if (c<'0' || c>'9') {
-			if (c=='-' && i==0) continue;		// Minus am Anfang ist erlaubt
+		if (c < '0' || c>'9') {
+			if (c == '-' && i == 0) continue;		// Minus am Anfang ist erlaubt
 			return false;
 		}
 	}
@@ -468,12 +468,12 @@ bool WideString::isInteger() const
 bool WideString::isTrue() const
 {
 	if (!stringlen) return false;
-	if (wcstol(ptr,NULL,0)!=0) return true;
-	if (strCaseCmp(L"true")==0) return true;
-	if (strCaseCmp(L"wahr")==0) return true;
-	if (strCaseCmp(L"ja")==0) return true;
-	if (strCaseCmp(L"yes")==0) return true;
-	if (strCaseCmp(L"t")==0) return true;
+	if (wcstol(ptr, NULL, 0) != 0) return true;
+	if (strCaseCmp(L"true") == 0) return true;
+	if (strCaseCmp(L"wahr") == 0) return true;
+	if (strCaseCmp(L"ja") == 0) return true;
+	if (strCaseCmp(L"yes") == 0) return true;
+	if (strCaseCmp(L"t") == 0) return true;
 	return false;
 }
 
@@ -517,21 +517,21 @@ bool WideString::isFalse() const
  * Multibyte-Characters zählen als ein Zeichen.
  *
  */
-WideString & WideString::set(const char *str, size_t size)
+WideString& WideString::set(const char* str, size_t size)
 {
 	if (!str) {
 		clear();
 		return *this;
 	}
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=strlen(str);
-	size_t outbytes=inbytes*sizeof(wchar_t)+4;
-	if (outbytes>=s) {
+	size_t outbytes=inbytes * sizeof(wchar_t) + 4;
+	if (outbytes >= s) {
 		if (ptr) free(ptr);
 		stringlen=0;
 		s=InitialBuffersize;
-		if (s<=outbytes) s=((outbytes/InitialBuffersize)+1)*InitialBuffersize+4;
+		if (s <= outbytes) s=((outbytes / InitialBuffersize) + 1) * InitialBuffersize + 4;
 		ptr=(wchar_t*)malloc(s);
 		if (!ptr) {
 			s=0;
@@ -540,23 +540,23 @@ WideString & WideString::set(const char *str, size_t size)
 	}
 	String GlobalEncoding=String::getGlobalEncoding();
 #ifdef WIN32
-	if (GlobalEncoding.instrCase(".1252")>0) {
+	if (GlobalEncoding.instrCase(".1252") > 0) {
 		GlobalEncoding="WINDOWS-1252";
 	}
 #endif
 #ifndef WIN32
 #ifdef HAVE_MBSTOWCS
-	if (GlobalEncoding.instrCase("UTF-8")>=0
-			|| GlobalEncoding.instrCase("UTF8")>=0
-			|| GlobalEncoding.instrCase("USASCII")>=0
-			|| GlobalEncoding.instrCase("US-ASCII")>=0
-			|| GlobalEncoding.strCaseCmp("C")==0
-			|| GlobalEncoding.strCaseCmp("POSIX")==0
-			|| GlobalEncoding.strCaseCmp("WINDOWS-1252")==0
-			) {
-		//printf ("DEBUG 2a\n");
+	if (GlobalEncoding.instrCase("UTF-8") >= 0
+		|| GlobalEncoding.instrCase("UTF8") >= 0
+		|| GlobalEncoding.instrCase("USASCII") >= 0
+		|| GlobalEncoding.instrCase("US-ASCII") >= 0
+		|| GlobalEncoding.strCaseCmp("C") == 0
+		|| GlobalEncoding.strCaseCmp("POSIX") == 0
+		|| GlobalEncoding.strCaseCmp("WINDOWS-1252") == 0
+		) {
+	//printf ("DEBUG 2a\n");
 		size_t ret=mbstowcs((wchar_t*)ptr, str, inbytes);
-		if (ret==(size_t) -1) {
+		if (ret == (size_t)-1) {
 			((wchar_t*)ptr)[0]=0;
 			stringlen=0;
 			//printf ("BAENG!\n");
@@ -570,17 +570,17 @@ WideString & WideString::set(const char *str, size_t size)
 #endif
 #ifdef HAVE_ICONV
 	//printf ("DEBUG: ICONV: %s\n",(const char*)GlobalEncoding);
-	iconv_t iconvimport=iconv_open(ICONV_UNICODE,(const char*)GlobalEncoding);
-	if ((iconv_t)(-1)==iconvimport) {
+	iconv_t iconvimport=iconv_open(ICONV_UNICODE, (const char*)GlobalEncoding);
+	if ((iconv_t)(-1) == iconvimport) {
 		//printf ("MIST\n");
 		throw UnsupportedCharacterEncodingException(GlobalEncoding);
 	}
-	char *outbuf=(char*)ptr;
+	char* outbuf=(char*)ptr;
 	//HexDump(str,inbytes);
-	size_t res=iconv(iconvimport, (ICONV_CONST char **)&str, &inbytes,
-				(char**)&outbuf, &outbytes);
+	size_t res=iconv(iconvimport, (ICONV_CONST char**) & str, &inbytes,
+		(char**)&outbuf, &outbytes);
 	iconv_close(iconvimport);
-	if (res==(size_t)(-1)) {
+	if (res == (size_t)(-1)) {
 		((wchar_t*)ptr)[0]=0;
 		stringlen=0;
 		//SetError(289,"%s",strerror(errno));
@@ -607,28 +607,28 @@ WideString & WideString::set(const char *str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-WideString & WideString::set(const wchar_t *str, size_t size)
+WideString& WideString::set(const wchar_t* str, size_t size)
 {
 	if (!str) {
 		clear();
 		return *this;
 	}
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=wcslen(str);
-	size_t outbytes=inbytes*sizeof(wchar_t)+4;
-	if (outbytes>=s) {
+	size_t outbytes=inbytes * sizeof(wchar_t) + 4;
+	if (outbytes >= s) {
 		if (ptr) free(ptr);
 		stringlen=0;
 		s=InitialBuffersize;
-		if (s<=outbytes) s=((outbytes/InitialBuffersize)+1)*InitialBuffersize+4;
+		if (s <= outbytes) s=((outbytes / InitialBuffersize) + 1) * InitialBuffersize + 4;
 		ptr=(wchar_t*)malloc(s);
 		if (!ptr) {
 			s=0;
 			throw OutOfMemoryException();
 		}
 	}
-	wcsncpy((wchar_t*)ptr,str,inbytes);
+	wcsncpy((wchar_t*)ptr, str, inbytes);
 	stringlen=inbytes;
 	((wchar_t*)ptr)[stringlen]=0;
 	return *this;
@@ -647,17 +647,17 @@ WideString & WideString::set(const wchar_t *str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-WideString & WideString::set(const WideString *str, size_t size)
+WideString& WideString::set(const WideString* str, size_t size)
 {
 	if (!str) {
 		clear();
 		return *this;
 	}
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str->stringlen;
-	if (inbytes>str->stringlen) inbytes=str->stringlen;
-	return set((wchar_t*)str->ptr,inbytes);
+	if (inbytes > str->stringlen) inbytes=str->stringlen;
+	return set((wchar_t*)str->ptr, inbytes);
 }
 
 /*!\brief Wert eines anderen Strings übernehmen
@@ -672,13 +672,13 @@ WideString & WideString::set(const WideString *str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-WideString & WideString::set(const WideString &str, size_t size)
+WideString& WideString::set(const WideString& str, size_t size)
 {
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str.stringlen;
-	if (inbytes>str.stringlen) inbytes=str.stringlen;
-	return set((wchar_t*)str.ptr,inbytes);
+	if (inbytes > str.stringlen) inbytes=str.stringlen;
+	return set((wchar_t*)str.ptr, inbytes);
 }
 
 /*!\brief Wert eines anderen Strings übernehmen
@@ -693,26 +693,26 @@ WideString & WideString::set(const WideString &str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-WideString & WideString::set(const String *str, size_t size)
+WideString& WideString::set(const String* str, size_t size)
 {
 	if (!str) {
 		clear();
 		return *this;
 	}
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str->length();
-	if (inbytes>str->length()) inbytes=str->length();
-	return set((const char*)str->c_str(),inbytes);
+	if (inbytes > str->length()) inbytes=str->length();
+	return set((const char*)str->c_str(), inbytes);
 }
 
-WideString & WideString::set(const String &str, size_t size)
+WideString& WideString::set(const String& str, size_t size)
 {
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str.length();
-	if (inbytes>str.length()) inbytes=str.length();
-	return set((const char*)str.c_str(),inbytes);
+	if (inbytes > str.length()) inbytes=str.length();
+	return set((const char*)str.c_str(), inbytes);
 }
 
 
@@ -728,13 +728,13 @@ WideString & WideString::set(const String &str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-WideString & WideString::set(const std::string &str, size_t size)
+WideString& WideString::set(const std::string& str, size_t size)
 {
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str.length();
-	if (inbytes>str.length()) inbytes=str.length();
-	return set((const char*)str.c_str(),inbytes);
+	if (inbytes > str.length()) inbytes=str.length();
+	return set((const char*)str.c_str(), inbytes);
 }
 
 /*!\brief Wert eines Wide-Strings der STL übernehmen
@@ -749,13 +749,13 @@ WideString & WideString::set(const std::string &str, size_t size)
  * \return Referenz auf den String
  * \exception OutOfMemoryException
  */
-WideString & WideString::set(const std::wstring &str, size_t size)
+WideString& WideString::set(const std::wstring& str, size_t size)
 {
 	size_t inbytes;
-	if (size!=(size_t)-1) inbytes=size;
+	if (size != (size_t)-1) inbytes=size;
 	else inbytes=str.length();
-	if (inbytes>str.length()) inbytes=str.length();
-	return set(str.c_str(),inbytes);
+	if (inbytes > str.length()) inbytes=str.length();
+	return set(str.c_str(), inbytes);
 }
 
 
@@ -771,9 +771,9 @@ WideString & WideString::set(const std::wstring &str, size_t size)
  * \throw OutOfBoundsEception: Wird geworfen, wenn \p position größer ist, als die
  * Länge des Strings
  */
-WideString & WideString::set(size_t position, wchar_t c)
+WideString& WideString::set(size_t position, wchar_t c)
 {
-	if (position>=stringlen) throw OutOfBoundsEception();
+	if (position >= stringlen) throw OutOfBoundsEception();
 	ptr[position]=c;
 	return *this;
 }
@@ -802,20 +802,20 @@ int main(int argc, char **argv)
  *
  * \copydoc sprintf.dox
  */
-WideString & WideString::setf(const char *fmt, ...)
+WideString& WideString::setf(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	char *buff=NULL;
+	char* buff=NULL;
 #ifdef HAVE_VASPRINTF
-	if (::vasprintf (&buff, (char*)fmt, args)>=0 && buff!=NULL) {
+	if (::vasprintf(&buff, (char*)fmt, args) >= 0 && buff != NULL) {
 #else
-	if (compat::vasprintf (&buff, (char*)fmt, args)>=0 && buff!=NULL) {
+	if (compat::vasprintf(&buff, (char*)fmt, args) >= 0 && buff != NULL) {
 #endif
 		try {
 			set(buff);
 			free(buff);
-		} catch(...) {
+		} catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -823,8 +823,8 @@ WideString & WideString::setf(const char *fmt, ...)
 		return *this;
 	}
 	va_end(args);
-    free(buff);
-    throw Exception();
+	free(buff);
+	throw Exception();
 }
 
 /*!\brief Einzelnes Unicode-Zeichen übernehmen
@@ -836,12 +836,12 @@ WideString & WideString::setf(const char *fmt, ...)
  *
  * @return Referenz auf den String
  */
-WideString & WideString::set(wchar_t c)
+WideString& WideString::set(wchar_t c)
 {
 	wchar_t buffer[2];
 	buffer[0]=c;
 	buffer[1]=0;
-	return set(buffer,1);
+	return set(buffer, 1);
 }
 
 /*! \brief Erzeugt einen formatierten String
@@ -867,25 +867,25 @@ void MyFunction(const char *fmt, ...)
  *
  * \copydoc sprintf.dox
  */
-WideString & WideString::vasprintf(const char *fmt, va_list args)
+WideString& WideString::vasprintf(const char* fmt, va_list args)
 {
-	char *buff=NULL;
+	char* buff=NULL;
 #ifdef HAVE_VASPRINTF
-	if (::vasprintf (&buff, (char*)fmt, args)>=0 && buff!=NULL) {
+	if (::vasprintf(&buff, (char*)fmt, args) >= 0 && buff != NULL) {
 #else
-	if (compat::vasprintf (&buff, (char*)fmt, args)>=0 && buff!=NULL) {
+	if (compat::vasprintf(&buff, (char*)fmt, args) >= 0 && buff != NULL) {
 #endif
 		try {
 			set(buff);
 			free(buff);
-		} catch(...) {
+		} catch (...) {
 			free(buff);
 			throw;
 		}
 		return *this;
 	}
-    free(buff);
-    throw Exception();
+	free(buff);
+	throw Exception();
 }
 
 /*!\brief Fügt einen Wide-Character String an das Ende des bestehenden an
@@ -900,28 +900,27 @@ WideString & WideString::vasprintf(const char *fmt, va_list args)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::append(const wchar_t *str, size_t size)
+WideString& WideString::append(const wchar_t* str, size_t size)
 {
 	if (!str) return *this;
 	if (!ptr) {
-		set(str,size);
+		set(str, size);
 		return *this;
 	}
 	size_t inchars;
-	if (size!=(size_t)-1) {
+	if (size != (size_t)-1) {
 		inchars=size;
-		if (inchars>wcslen(str)) inchars=wcslen(str);
-	}
-	else inchars=wcslen(str);
-	size_t outbytes=(inchars+stringlen)*sizeof(wchar_t)+4;
-	if (outbytes>=s) {
-		size_t newbuffersize=((outbytes/InitialBuffersize)+1)*InitialBuffersize+16;
-		wchar_t *t=(wchar_t*)realloc(ptr,newbuffersize);
+		if (inchars > wcslen(str)) inchars=wcslen(str);
+	} else inchars=wcslen(str);
+	size_t outbytes=(inchars + stringlen) * sizeof(wchar_t) + 4;
+	if (outbytes >= s) {
+		size_t newbuffersize=((outbytes / InitialBuffersize) + 1) * InitialBuffersize + 16;
+		wchar_t* t=(wchar_t*)realloc(ptr, newbuffersize);
 		if (!t) throw OutOfMemoryException();
 		ptr=t;
 		s=newbuffersize;
 	}
-	wmemcpy(((wchar_t*)ptr)+stringlen,str,inchars);
+	wmemcpy(((wchar_t*)ptr) + stringlen, str, inchars);
 	stringlen+=inchars;
 	((wchar_t*)ptr)[stringlen]=0;
 	return *this;
@@ -945,11 +944,11 @@ WideString & WideString::append(const wchar_t *str, size_t size)
  * \exception CharacterEncodingException
  *
  */
-WideString & WideString::append(const char *str, size_t size)
+WideString& WideString::append(const char* str, size_t size)
 {
 	WideString a;
-	a.set(str,size);
-	return append((wchar_t*)a.ptr,size);
+	a.set(str, size);
+	return append((wchar_t*)a.ptr, size);
 }
 
 /*!\brief Fügt einen als Pointer übergebenen String an das Ende des bestehenden an
@@ -966,10 +965,10 @@ WideString & WideString::append(const char *str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::append(const WideString *str, size_t size)
+WideString& WideString::append(const WideString * str, size_t size)
 {
 	if (!str) return *this;
-	return append((wchar_t*)str->ptr,size);
+	return append((wchar_t*)str->ptr, size);
 }
 
 /*!\brief Fügt einen String an das Ende des bestehenden an
@@ -984,9 +983,9 @@ WideString & WideString::append(const WideString *str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::append(const WideString &str, size_t size)
+WideString& WideString::append(const WideString & str, size_t size)
 {
-	return append((wchar_t*)str.ptr,size);
+	return append((wchar_t*)str.ptr, size);
 }
 
 /*!\brief Fügt einen std::string an das Ende des bestehenden an
@@ -1001,11 +1000,11 @@ WideString & WideString::append(const WideString &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::append(const std::string &str, size_t size)
+WideString& WideString::append(const std::string & str, size_t size)
 {
 	WideString a;
-	a.set(str,size);
-	return append((wchar_t*)a.ptr,a.stringlen);
+	a.set(str, size);
+	return append((wchar_t*)a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen std::wstring an das Ende des bestehenden an
@@ -1020,11 +1019,11 @@ WideString & WideString::append(const std::string &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::append(const std::wstring &str, size_t size)
+WideString& WideString::append(const std::wstring & str, size_t size)
 {
 	WideString a;
-	a.set(str,size);
-	return append((wchar_t*)a.ptr,a.stringlen);
+	a.set(str, size);
+	return append((wchar_t*)a.ptr, a.stringlen);
 }
 
 
@@ -1051,22 +1050,22 @@ int main(int argc, char **argv)
  *
  * \copydoc sprintf.dox
  */
-WideString & WideString::appendf(const char *fmt, ...)
+WideString& WideString::appendf(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	char *buff=NULL;
+	char* buff=NULL;
 #ifdef HAVE_VASPRINTF
-	if (::vasprintf (&buff, (const char*)fmt, args)>=0 && buff!=NULL) {
+	if (::vasprintf(&buff, (const char*)fmt, args) >= 0 && buff != NULL) {
 #else
-	if (compat::vasprintf (&buff, (const char*)fmt, args)>=0 && buff!=NULL) {
+	if (compat::vasprintf(&buff, (const char*)fmt, args) >= 0 && buff != NULL) {
 #endif
 		try {
 			WideString a;
 			a.set(buff);
 			free(buff);
-			append((wchar_t*)a.ptr,a.stringlen);
-		} catch(...) {
+			append((wchar_t*)a.ptr, a.stringlen);
+		} catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -1074,8 +1073,8 @@ WideString & WideString::appendf(const char *fmt, ...)
 		return *this;
 	}
 	va_end(args);
-    free(buff);
-    throw Exception();
+	free(buff);
+	throw Exception();
 }
 
 /*!\brief Einzelnes Unicode-Zeichen anhängen
@@ -1087,12 +1086,12 @@ WideString & WideString::appendf(const char *fmt, ...)
  *
  * @return Referenz auf den String
  */
-WideString & WideString::append(wchar_t c)
+WideString& WideString::append(wchar_t c)
 {
 	wchar_t buffer[2];
 	buffer[0]=c;
 	buffer[1]=0;
-	return append(buffer,1);
+	return append(buffer, 1);
 }
 
 
@@ -1108,30 +1107,29 @@ WideString & WideString::append(wchar_t c)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::prepend(const wchar_t *str, size_t size)
+WideString& WideString::prepend(const wchar_t* str, size_t size)
 {
 	if (!str) return *this;
 	if (!ptr) {
-		set(str,size);
+		set(str, size);
 		return *this;
 	}
 	size_t inchars;
-	if (size!=(size_t)-1 && size<=wcslen(str)) {
+	if (size != (size_t)-1 && size <= wcslen(str)) {
 		inchars=size;
-	}
-	else inchars=wcslen(str);
-	size_t outbytes=(inchars+stringlen)*sizeof(wchar_t)+4;
-	if (outbytes>=s) {
-		size_t newbuffersize=((outbytes/InitialBuffersize)+1)*InitialBuffersize+16;
-		wchar_t *t=(wchar_t*)realloc(ptr,newbuffersize);
+	} else inchars=wcslen(str);
+	size_t outbytes=(inchars + stringlen) * sizeof(wchar_t) + 4;
+	if (outbytes >= s) {
+		size_t newbuffersize=((outbytes / InitialBuffersize) + 1) * InitialBuffersize + 16;
+		wchar_t* t=(wchar_t*)realloc(ptr, newbuffersize);
 		if (!t) throw OutOfMemoryException();
 		ptr=t;
 		s=newbuffersize;
 	}
 	// Bestehenden Speicherblock nach hinten moven
-	wmemmove(((wchar_t*)ptr)+inchars,ptr,stringlen);
+	wmemmove(((wchar_t*)ptr) + inchars, ptr, stringlen);
 	// Neuen Speicherblock davor kopieren
-	wmemcpy(ptr,str,inchars);
+	wmemcpy(ptr, str, inchars);
 	stringlen+=inchars;
 	((wchar_t*)ptr)[stringlen]=0;
 	return *this;
@@ -1149,16 +1147,16 @@ WideString & WideString::prepend(const wchar_t *str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::prepend(const WideString *str, size_t size)
+WideString& WideString::prepend(const WideString * str, size_t size)
 {
 	if (!str) return *this;
 	if (!ptr) {
-		set(str,size);
+		set(str, size);
 		return *this;
 	}
 	WideString a;
-	a.set(str,size);
-	return prepend(a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend(a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen String am Anfang des bestehenden Strings ein
@@ -1173,15 +1171,15 @@ WideString & WideString::prepend(const WideString *str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::prepend(const WideString &str, size_t size)
+WideString& WideString::prepend(const WideString & str, size_t size)
 {
 	if (!ptr) {
-		set(str,size);
+		set(str, size);
 		return *this;
 	}
 	WideString a;
-	a.set(str,size);
-	return prepend(a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend(a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen std::string der STL am Anfang des bestehenden Strings ein
@@ -1196,15 +1194,15 @@ WideString & WideString::prepend(const WideString &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::prepend(const std::string &str, size_t size)
+WideString& WideString::prepend(const std::string & str, size_t size)
 {
 	if (!ptr) {
-		set(str,size);
+		set(str, size);
 		return *this;
 	}
 	WideString a;
-	a.set(str,size);
-	return prepend(a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend(a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen std::wstring der STL am Anfang des bestehenden Strings ein
@@ -1219,15 +1217,15 @@ WideString & WideString::prepend(const std::string &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::prepend(const std::wstring &str, size_t size)
+WideString& WideString::prepend(const std::wstring & str, size_t size)
 {
 	if (!ptr) {
-		set(str,size);
+		set(str, size);
 		return *this;
 	}
 	WideString a;
-	a.set(str,size);
-	return prepend(a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend(a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen C-String am Anfang des bestehenden Strings ein
@@ -1242,11 +1240,11 @@ WideString & WideString::prepend(const std::wstring &str, size_t size)
  *
  * \exception OutOfMemoryException
  */
-WideString & WideString::prepend(const char *str, size_t size)
+WideString& WideString::prepend(const char* str, size_t size)
 {
 	WideString a;
-	a.set(str,size);
-	return prepend((wchar_t*)a.ptr,a.stringlen);
+	a.set(str, size);
+	return prepend((wchar_t*)a.ptr, a.stringlen);
 }
 
 /*!\brief Fügt einen Formatierten String am Anfang bestehenden ein
@@ -1270,22 +1268,22 @@ int main(int argc, char **argv)
  *
  * \copydoc sprintf.dox
  */
-WideString & WideString::prependf(const char *fmt, ...)
+WideString& WideString::prependf(const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	char *buff=NULL;
+	char* buff=NULL;
 #ifdef HAVE_VASPRINTF
-	if (::vasprintf (&buff, (const char*)fmt, args)>=0 && buff!=NULL) {
+	if (::vasprintf(&buff, (const char*)fmt, args) >= 0 && buff != NULL) {
 #else
-	if (compat::vasprintf (&buff, (const char*)fmt, args)>=0 && buff!=NULL) {
+	if (compat::vasprintf(&buff, (const char*)fmt, args) >= 0 && buff != NULL) {
 #endif
 		try {
 			WideString a;
 			a.set(buff);
 			free(buff);
-			prepend((wchar_t*)a.ptr,a.stringlen);
-		} catch(...) {
+			prepend((wchar_t*)a.ptr, a.stringlen);
+		} catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -1293,8 +1291,8 @@ WideString & WideString::prependf(const char *fmt, ...)
 		return *this;
 	}
 	va_end(args);
-    free(buff);
-    throw Exception();
+	free(buff);
+	throw Exception();
 }
 
 /*!\brief Einzelnes Unicode-Zeichen am Anfang einfügen
@@ -1307,12 +1305,12 @@ WideString & WideString::prependf(const char *fmt, ...)
  *
  * @return Referenz auf den String
  */
-WideString & WideString::prepend(wchar_t c)
+WideString& WideString::prepend(wchar_t c)
 {
 	wchar_t buffer[2];
 	buffer[0]=c;
 	buffer[1]=0;
-	return prepend(buffer,1);
+	return prepend(buffer, 1);
 }
 
 /*!\brief String in UTF8 umwandeln
@@ -1325,7 +1323,7 @@ WideString & WideString::prepend(wchar_t c)
  */
 ByteArray WideString::toUtf8() const
 {
-	if (stringlen==0) return ByteArray();
+	if (stringlen == 0) return ByteArray();
 #ifndef HAVE_ICONV
 	throw UnsupportedFeatureException();
 #else
@@ -1361,25 +1359,25 @@ printf ("Lokalisierung: %s\n",setlocale(LC_CTYPE,NULL);
  */
 ByteArray WideString::toLocalEncoding() const
 {
-	if (stringlen==0) return ByteArray();
+	if (stringlen == 0) return ByteArray();
 #ifdef HAVE_WCSTOMBS
-	size_t buffersize=stringlen*4+8;
-	char *buffer=(char*)malloc(buffersize);
+	size_t buffersize=stringlen * 4 + 8;
+	char* buffer=(char*)malloc(buffersize);
 	if (!buffer) throw OutOfMemoryException();
 
 	size_t ret=wcstombs(buffer, (const wchar_t*)ptr, buffersize);
-	if (ret==(size_t)-1) {
-		free (buffer);
+	if (ret == (size_t)-1) {
+		free(buffer);
 		throw CharacterEncodingException();
 	}
 	ByteArray a;
 	try {
-		a.copy(buffer,ret);
+		a.copy(buffer, ret);
 	} catch (...) {
 		free(buffer);
 		throw;
 	}
-	free (buffer);
+	free(buffer);
 	return a;
 #else
 	return toEncoding("UTF-8");
@@ -1400,38 +1398,38 @@ ByteArray WideString::toLocalEncoding() const
  * Für diese Funktion wird "Iconv" benötigt. Ist keine Iconv-Bibliothek auf dem
  * System vorhanden, wird eine UnsupportedFeatureException geworfen.
  */
-ByteArray WideString::toEncoding(const char *encoding) const
+ByteArray WideString::toEncoding(const char* encoding) const
 {
 #ifndef HAVE_ICONV
 	throw UnsupportedFeatureException();
 #else
-	iconv_t iconv_handle=iconv_open(encoding,ICONV_UNICODE);
-	if ((iconv_t)(-1)==iconv_handle) {
+	iconv_t iconv_handle=iconv_open(encoding, ICONV_UNICODE);
+	if ((iconv_t)(-1) == iconv_handle) {
 		throw UnsupportedCharacterEncodingException();
 	}
 
-	size_t buffersize=(stringlen+4)*sizeof(wchar_t);
-	char *buffer=(char*)malloc(buffersize);
+	size_t buffersize=(stringlen + 4) * sizeof(wchar_t);
+	char* buffer=(char*)malloc(buffersize);
 	if (!buffer) {
 		iconv_close(iconv_handle);
 		throw OutOfMemoryException();
 	}
 	size_t outbytes=buffersize;
-	char *b=buffer;
-	char *inbuffer=(char*)ptr;
-	size_t inbytes=stringlen*sizeof(wchar_t);
+	char* b=buffer;
+	char* inbuffer=(char*)ptr;
+	size_t inbytes=stringlen * sizeof(wchar_t);
 
 	//hexDump();
 
-	size_t res=iconv((iconv_t)iconv_handle, (ICONV_CONST char **)&inbuffer, &inbytes,
-			(char**)&b, &outbytes);
+	size_t res=iconv((iconv_t)iconv_handle, (ICONV_CONST char**) & inbuffer, &inbytes,
+		(char**)&b, &outbytes);
 	iconv_close(iconv_handle);
-	if (res==(size_t)(-1)) {
+	if (res == (size_t)(-1)) {
 		free(buffer);
 		throw CharacterEncodingException();
 	}
 	b[0]=0;
-	ByteArray ret(buffer,buffersize-outbytes);
+	ByteArray ret(buffer, buffersize - outbytes);
 	free(buffer);
 	return ret;
 #endif
@@ -1441,29 +1439,29 @@ ByteArray WideString::toUCS4() const
 {
 	ByteArray ret;
 	if (stringlen) {
-		uint32_t *ucs4=(uint32_t*)malloc(stringlen*4+4);
+		uint32_t* ucs4=(uint32_t*)malloc(stringlen * 4 + 4);
 		if (!ucs4) throw OutOfMemoryException();
-		for (size_t i=0;i<stringlen;i++) ucs4[i]=(uint32_t)ptr[i];
+		for (size_t i=0;i < stringlen;i++) ucs4[i]=(uint32_t)ptr[i];
 		ucs4[stringlen]=0;
-		ret.useadr(ucs4,stringlen*4);
+		ret.useadr(ucs4, stringlen * 4);
 	}
 	return ret;
 }
 
-WideString &WideString::fromUCS4(const uint32_t *str, size_t size)
+WideString& WideString::fromUCS4(const uint32_t * str, size_t size)
 {
 	clear();
-	for (size_t i=0;str[i]!=0;i++) {
-		if (size!=(size_t)-1 && i>=size) break;
+	for (size_t i=0;str[i] != 0;i++) {
+		if (size != (size_t)-1 && i >= size) break;
 		wchar_t c=(wchar_t)str[i];
 		append(c);
 	}
 	return *this;
 }
 
-WideString &WideString::fromUCS4(const ByteArrayPtr &bin)
+WideString& WideString::fromUCS4(const ByteArrayPtr & bin)
 {
-	return fromUCS4((uint32_t*)bin.ptr(),bin.size());
+	return fromUCS4((uint32_t*)bin.ptr(), bin.size());
 }
 
 
@@ -1483,8 +1481,8 @@ WideString &WideString::fromUCS4(const ByteArrayPtr &bin)
  */
 wchar_t WideString::get(ssize_t pos) const
 {
-	if (pos>=0 && stringlen>(size_t)pos) return ((wchar_t*)ptr)[pos];
-	if (pos<0 && (size_t)(0-pos)<stringlen) return ((wchar_t*)ptr)[stringlen+pos];
+	if (pos >= 0 && stringlen > (size_t)pos) return ((wchar_t*)ptr)[pos];
+	if (pos < 0 && (size_t)(0 - pos) < stringlen) return ((wchar_t*)ptr)[stringlen + pos];
 	throw OutOfBoundsEception();
 }
 
@@ -1505,8 +1503,8 @@ wchar_t WideString::get(ssize_t pos) const
  */
 wchar_t WideString::operator[](ssize_t pos) const
 {
-	if (pos>=0 && stringlen>(size_t)pos) return ((wchar_t*)ptr)[pos];
-	if (pos<0 && (size_t)(0-pos)<stringlen) return ((wchar_t*)ptr)[stringlen+pos];
+	if (pos >= 0 && stringlen > (size_t)pos) return ((wchar_t*)ptr)[pos];
+	if (pos < 0 && (size_t)(0 - pos) < stringlen) return ((wchar_t*)ptr)[stringlen + pos];
 	throw OutOfBoundsEception();
 }
 
@@ -1526,9 +1524,9 @@ wchar_t WideString::operator[](ssize_t pos) const
  */
 void WideString::print(bool withNewline) const throw()
 {
-	if (ptr!=NULL && stringlen>0) {
-		if (withNewline) printf("%ls\n",(wchar_t*)ptr);
-		else printf("%ls",(wchar_t*)ptr);
+	if (ptr != NULL && stringlen > 0) {
+		if (withNewline) printf("%ls\n", (wchar_t*)ptr);
+		else printf("%ls", (wchar_t*)ptr);
 	} else if (withNewline) {
 		printf("\n");
 	}
@@ -1559,8 +1557,8 @@ void WideString::printnl() const throw()
  */
 void WideString::hexDump() const
 {
-	PrintDebug ("HEXDUMP of String %p: %zi Bytes starting at Address %p:\n",this,stringlen*sizeof(wchar_t),ptr);
-	if (stringlen) HexDump(ptr,stringlen*sizeof(wchar_t),true);
+	PrintDebug("HEXDUMP of String %p: %zi Bytes starting at Address %p:\n", this, stringlen * sizeof(wchar_t), ptr);
+	if (stringlen) HexDump(ptr, stringlen * sizeof(wchar_t), true);
 }
 
 /*!\brief String übernehmen
@@ -1600,7 +1598,7 @@ WideString& WideString::operator=(const wchar_t* str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator=(const WideString *str)
+WideString& WideString::operator=(const WideString * str)
 {
 	return set(str);
 }
@@ -1614,7 +1612,7 @@ WideString& WideString::operator=(const WideString *str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator=(const WideString &str)
+WideString& WideString::operator=(const WideString & str)
 {
 	return set(str);
 }
@@ -1628,7 +1626,7 @@ WideString& WideString::operator=(const WideString &str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator=(const String *str)
+WideString& WideString::operator=(const String * str)
 {
 	return set(str);
 }
@@ -1642,7 +1640,7 @@ WideString& WideString::operator=(const String *str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator=(const String &str)
+WideString& WideString::operator=(const String & str)
 {
 	return set(str);
 }
@@ -1657,7 +1655,7 @@ WideString& WideString::operator=(const String &str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator=(const std::string &str)
+WideString& WideString::operator=(const std::string & str)
 {
 	return set(str);
 }
@@ -1671,7 +1669,7 @@ WideString& WideString::operator=(const std::string &str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator=(const std::wstring &str)
+WideString& WideString::operator=(const std::wstring & str)
 {
 	return set(str);
 }
@@ -1726,7 +1724,7 @@ WideString& WideString::operator+=(const wchar_t* str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator+=(const WideString& str)
+WideString& WideString::operator+=(const WideString & str)
 {
 	return append(str);
 }
@@ -1740,7 +1738,7 @@ WideString& WideString::operator+=(const WideString& str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator+=(const std::string &str)
+WideString& WideString::operator+=(const std::string & str)
 {
 	return append(str);
 }
@@ -1754,7 +1752,7 @@ WideString& WideString::operator+=(const std::string &str)
  * @param[in] str Zu kopierender String
  * @return Referenz auf diese Instanz der Klasse
  */
-WideString& WideString::operator+=(const std::wstring &str)
+WideString& WideString::operator+=(const std::wstring & str)
 {
 	return append(str);
 }
@@ -1789,14 +1787,14 @@ WideString& WideString::operator+=(wchar_t c)
  *
  * \see strCaseCmp Vergleich zweier Strings unter Ignorierung der Gross-/Kleinschreibung
  */
-int WideString::strcmp(const WideString &str, size_t size) const
+int WideString::strcmp(const WideString & str, size_t size) const
 {
-	const wchar_t *mystr=ptr;
-	const wchar_t *otherstr=str.ptr;
-	if (stringlen==0) mystr=L"";
-	if (str.stringlen==0) otherstr=L"";
-	if (size!=(size_t)-1) return wcsncmp(mystr,otherstr,size);
-	return wcscmp(mystr,otherstr);
+	const wchar_t* mystr=ptr;
+	const wchar_t* otherstr=str.ptr;
+	if (stringlen == 0) mystr=L"";
+	if (str.stringlen == 0) otherstr=L"";
+	if (size != (size_t)-1) return wcsncmp(mystr, otherstr, size);
+	return wcscmp(mystr, otherstr);
 }
 
 /*!\brief Stringvergleich mit Ignorierung von Gross-/Kleinschreibung
@@ -1817,25 +1815,25 @@ int WideString::strcmp(const WideString &str, size_t size) const
  *
  * \see strcmp Vergleich zweier Strings unter Berücksichtigung der Gross-/Kleinschreibung
  */
-int WideString::strCaseCmp(const WideString &str, size_t size) const
+int WideString::strCaseCmp(const WideString & str, size_t size) const
 {
-	const wchar_t *mystr=ptr;
-	const wchar_t *otherstr=str.ptr;
-	if (stringlen==0) mystr=L"";
-	if (str.stringlen==0) otherstr=L"";
+	const wchar_t* mystr=ptr;
+	const wchar_t* otherstr=str.ptr;
+	if (stringlen == 0) mystr=L"";
+	if (str.stringlen == 0) otherstr=L"";
 #ifdef HAVE_WCSCASECMP
-	if (size) return wcsncasecmp(mystr,otherstr,size);
-	return wcscasecmp(mystr,otherstr);
+	if (size) return wcsncasecmp(mystr, otherstr, size);
+	return wcscasecmp(mystr, otherstr);
 #elif defined WIN32
-	if (size) return _wcsnicmp(mystr,otherstr,size);
-	return _wcsicmp(mystr,otherstr);
+	if (size) return _wcsnicmp(mystr, otherstr, size);
+	return _wcsicmp(mystr, otherstr);
 #else
 	String b=mystr;
 	String s=otherstr;
 	s.LCase();
 	b.LCase();
-	if (size) return wcsncmp(b.ptr,s.ptr,size);
-	return wcscmp(b.ptr,s.ptr);
+	if (size) return wcsncmp(b.ptr, s.ptr, size);
+	return wcscmp(b.ptr, s.ptr);
 #endif
 }
 
@@ -1849,9 +1847,9 @@ int WideString::strCaseCmp(const WideString &str, size_t size) const
  */
 WideString WideString::left(size_t len) const
 {
-	if(ptr != NULL && stringlen > 0) {
-		if(len > stringlen) len = stringlen;
-		return WideString(ptr,len);
+	if (ptr != NULL && stringlen > 0) {
+		if (len > stringlen) len = stringlen;
+		return WideString(ptr, len);
 	}
 	return WideString();
 }
@@ -1866,9 +1864,9 @@ WideString WideString::left(size_t len) const
   */
 WideString WideString::right(size_t len) const
 {
-	if(ptr != NULL && stringlen > 0) {
-		if(len > stringlen) len = stringlen;
-		return WideString(ptr+stringlen-len,len);
+	if (ptr != NULL && stringlen > 0) {
+		if (len > stringlen) len = stringlen;
+		return WideString(ptr + stringlen - len, len);
 	}
 	return WideString();
 }
@@ -1886,10 +1884,10 @@ WideString WideString::right(size_t len) const
  */
 WideString WideString::mid(size_t start, size_t len) const
 {
-	if (len==(size_t)-1) len=stringlen;
-	if (start<stringlen && ptr!=NULL && len>0) {
-		if (start+len>stringlen) len=stringlen-start;
-		return WideString(ptr+start,len);
+	if (len == (size_t)-1) len=stringlen;
+	if (start < stringlen && ptr != NULL && len>0) {
+		if (start + len > stringlen) len=stringlen - start;
+		return WideString(ptr + start, len);
 	}
 	return WideString();
 }
@@ -1907,10 +1905,10 @@ WideString WideString::mid(size_t start, size_t len) const
  */
 WideString WideString::substr(size_t start, size_t len) const
 {
-	if (len==(size_t)-1) len=stringlen;
-	if (start<stringlen && ptr!=NULL && len>0) {
-		if (start+len>stringlen) len=stringlen-start;
-		return WideString(ptr+start,len);
+	if (len == (size_t)-1) len=stringlen;
+	if (start < stringlen && ptr != NULL && len>0) {
+		if (start + len > stringlen) len=stringlen - start;
+		return WideString(ptr + start, len);
 	}
 	return WideString();
 }
@@ -1936,11 +1934,11 @@ WideString WideString::substr(size_t start, size_t len) const
  */
 void WideString::lowerCase()
 {
-	if (ptr!=NULL && stringlen>0) {
-		for (size_t i=0;i<stringlen;i++) {
+	if (ptr != NULL && stringlen > 0) {
+		for (size_t i=0;i < stringlen;i++) {
 			wchar_t wc=ptr[i];
 			wchar_t c=towlower(wc);
-			if (c!=(wchar_t)WEOF) {
+			if (c != (wchar_t)WEOF) {
 				ptr[i]=c;
 			}
 		}
@@ -1967,11 +1965,11 @@ void WideString::lowerCase()
  */
 void WideString::upperCase()
 {
-	if (ptr!=NULL && stringlen>0) {
-		for (size_t i=0;i<stringlen;i++) {
+	if (ptr != NULL && stringlen > 0) {
+		for (size_t i=0;i < stringlen;i++) {
 			wchar_t wc=ptr[i];
 			wchar_t c=towupper(wc);
-			if (c!=(wchar_t)WEOF) {
+			if (c != (wchar_t)WEOF) {
 				ptr[i]=c;
 			}
 		}
@@ -1986,17 +1984,17 @@ void WideString::upperCase()
  */
 void WideString::upperCaseWords()
 {
-	if (ptr!=NULL && stringlen>0) {
+	if (ptr != NULL && stringlen > 0) {
 		bool wordstart=true;
-		for (size_t i=0;i<stringlen;i++) {
+		for (size_t i=0;i < stringlen;i++) {
 			wchar_t wc=ptr[i];
 			if (wordstart) {
 				wchar_t c=towupper(wc);
-				if (c!=(wchar_t)WEOF) {
+				if (c != (wchar_t)WEOF) {
 					ptr[i]=c;
 				}
 			}
-			if (wc!='\'' && (wc<48 || (wc>57 && wc<65) || (wc>90 && wc<97) || (wc>122 && wc<127)) ) {
+			if (wc != '\'' && (wc < 48 || (wc > 57 && wc < 65) || (wc > 90 && wc < 97) || (wc > 122 && wc < 127))) {
 				wordstart=true;
 			} else {
 				wordstart=false;
@@ -2008,20 +2006,20 @@ void WideString::upperCaseWords()
 //! \brief Schneidet Leerzeichen, Tabs Returns und Linefeeds am Anfang und Ende des Strings ab
 void WideString::trim()
 {
-	if (ptr!=NULL && stringlen>0) {
-		size_t i,start,ende,s;
+	if (ptr != NULL && stringlen > 0) {
+		size_t i, start, ende, s;
 		start=0; s=0;
 		ende=stringlen;
-		for (i=0;i<stringlen;i++) {
-			if (ptr[i]==13 || ptr[i]==10 || ptr[i]==32 || ptr[i]=='\t') {
-				if (s==0) start=i+1;
+		for (i=0;i < stringlen;i++) {
+			if (ptr[i] == 13 || ptr[i] == 10 || ptr[i] == 32 || ptr[i] == '\t') {
+				if (s == 0) start=i + 1;
 			} else {
 				s=1; ende=i;
 			}
 		}
-		ptr[ende+1]=0;
-		if (start>0)
-			memmove(ptr,ptr+start,(ende-start+2)*sizeof(wchar_t));
+		ptr[ende + 1]=0;
+		if (start > 0)
+			memmove(ptr, ptr + start, (ende - start + 2) * sizeof(wchar_t));
 		stringlen=wcslen(ptr);
 		ptr[stringlen]=0;
 	}
@@ -2030,19 +2028,19 @@ void WideString::trim()
 //! \brief Schneidet Leerzeichen, Tabs Returns und Linefeeds am Anfang des Strings ab
 void WideString::trimLeft()
 {
-	if (ptr!=NULL && stringlen>0) {
-		size_t i,start,s;
+	if (ptr != NULL && stringlen > 0) {
+		size_t i, start, s;
 		start=0; s=0;
 		//ende=stringlen;
-		for (i=0;i<stringlen;i++) {
-			if (ptr[i]==13 || ptr[i]==10 || ptr[i]==32 || ptr[i]=='\t') {
-				if (s==0) start=i+1;
+		for (i=0;i < stringlen;i++) {
+			if (ptr[i] == 13 || ptr[i] == 10 || ptr[i] == 32 || ptr[i] == '\t') {
+				if (s == 0) start=i + 1;
 			} else {
 				s=1; // ende=i;
 			}
 		}
-		if (start>0)
-			memmove(ptr,ptr+start,(stringlen-start+1)*sizeof(wchar_t));
+		if (start > 0)
+			memmove(ptr, ptr + start, (stringlen - start + 1) * sizeof(wchar_t));
 		stringlen=wcslen(ptr);
 		ptr[stringlen]=0;
 	}
@@ -2051,12 +2049,12 @@ void WideString::trimLeft()
 //! \brief Schneidet Leerzeichen, Tabs Returns und Linefeeds am Ende des Strings ab
 void WideString::trimRight()
 {
-	if (ptr!=NULL && stringlen>0) {
-		size_t i,ende;
+	if (ptr != NULL && stringlen > 0) {
+		size_t i, ende;
 		ende=0;
-		for (i=stringlen;i>0;i--) {
-			wchar_t w=ptr[i-1];
-			if (w!=13 && w!=10 && w!=32 && w!='\t') {
+		for (i=stringlen;i > 0;i--) {
+			wchar_t w=ptr[i - 1];
+			if (w != 13 && w != 10 && w != 32 && w != '\t') {
 				ende=i;
 				break;
 			}
@@ -2068,16 +2066,16 @@ void WideString::trimRight()
 }
 
 //! \brief Schneidet die definierten Zeichen am Anfang des Strings ab
-void WideString::trimLeft(const WideString &chars)
+void WideString::trimLeft(const WideString & chars)
 {
-	if (ptr!=NULL && stringlen>0 && chars.stringlen>0) {
-		size_t i,start,s,z;
+	if (ptr != NULL && stringlen > 0 && chars.stringlen > 0) {
+		size_t i, start, s, z;
 		start=0; s=0;
-		for (i=0;i<stringlen;i++) {
+		for (i=0;i < stringlen;i++) {
 			int match=0;
-			for (z=0;z<chars.stringlen;z++) {
-				if (ptr[i]==chars.ptr[z]) {
-					if (s==0) start=i+1;
+			for (z=0;z < chars.stringlen;z++) {
+				if (ptr[i] == chars.ptr[z]) {
+					if (s == 0) start=i + 1;
 					match=1;
 					break;
 				}
@@ -2086,24 +2084,24 @@ void WideString::trimLeft(const WideString &chars)
 				s=1;
 			}
 		}
-		if (start>0) {
-			memmove(ptr,ptr+start,(stringlen-start+1)*sizeof(wchar_t));
+		if (start > 0) {
+			memmove(ptr, ptr + start, (stringlen - start + 1) * sizeof(wchar_t));
 			stringlen=wcslen(ptr);
 		}
 	}
 }
 
 //! \brief Schneidet die definierten Zeichen am Ende des Strings ab
-void WideString::trimRight(const WideString &chars)
+void WideString::trimRight(const WideString & chars)
 {
-	if (ptr!=NULL && stringlen>0 && chars.stringlen>0) {
-		size_t i,ende,z;
+	if (ptr != NULL && stringlen > 0 && chars.stringlen > 0) {
+		size_t i, ende, z;
 		ende=0;
-		for (i=stringlen;i>0;i--) {
-			wchar_t w=ptr[i-1];
+		for (i=stringlen;i > 0;i--) {
+			wchar_t w=ptr[i - 1];
 			int match=0;
-			for (z=0;z<chars.stringlen;z++) {
-				if (w==chars.ptr[z]) {
+			for (z=0;z < chars.stringlen;z++) {
+				if (w == chars.ptr[z]) {
 					//if (s==0) start=i+1;
 					match=1;
 					break;
@@ -2120,7 +2118,7 @@ void WideString::trimRight(const WideString &chars)
 }
 
 //! \brief Schneidet die definierten Zeichen am Anfang und Ende des Strings ab
-void WideString::trim(const WideString &chars)
+void WideString::trim(const WideString & chars)
 {
 	trimLeft(chars);
 	trimRight(chars);
@@ -2136,8 +2134,8 @@ void WideString::trim(const WideString &chars)
  */
 void WideString::chopRight(size_t num)
 {
-	if (ptr!=NULL && stringlen>0) {
-		if (stringlen<num) num=stringlen;
+	if (ptr != NULL && stringlen > 0) {
+		if (stringlen < num) num=stringlen;
 		stringlen-=num;
 		ptr[stringlen]=0;
 	}
@@ -2156,8 +2154,8 @@ void WideString::chopRight(size_t num)
  */
 void WideString::chop(size_t num)
 {
-	if (ptr!=NULL && stringlen>0) {
-		if (stringlen<num) num=stringlen;
+	if (ptr != NULL && stringlen > 0) {
+		if (stringlen < num) num=stringlen;
 		stringlen-=num;
 		ptr[stringlen]=0;
 	}
@@ -2173,9 +2171,9 @@ void WideString::chop(size_t num)
  */
 void WideString::chopLeft(size_t num)
 {
-	if (ptr!=NULL && stringlen>0) {
-		if (stringlen<num) num=stringlen;
-		memmove(ptr,ptr+num,(stringlen-num)*sizeof(wchar_t));
+	if (ptr != NULL && stringlen > 0) {
+		if (stringlen < num) num=stringlen;
+		memmove(ptr, ptr + num, (stringlen - num) * sizeof(wchar_t));
 		stringlen-=num;
 		ptr[stringlen]=0;
 	}
@@ -2200,8 +2198,8 @@ void WideString::chomp()
  */
 void WideString::cut(size_t pos)
 {
-	if (ptr==NULL &&stringlen==0) return;
-	if (pos>stringlen) return;
+	if (ptr == NULL && stringlen == 0) return;
+	if (pos > stringlen) return;
 	ptr[pos]=0;
 	stringlen=pos;
 }
@@ -2212,12 +2210,12 @@ void WideString::cut(size_t pos)
  * \param[in] letter Buchstabe oder Buchstabenkombination, an der der String abgeschnitten werden
  * soll. Zeigt der Pointer auf NULL oder ist der String leer, passiert nichts.
  */
-void WideString::cut(const WideString &letter)
+void WideString::cut(const WideString & letter)
 {
-	if (ptr==NULL &&stringlen==0) return;
+	if (ptr == NULL && stringlen == 0) return;
 	if (letter.isEmpty()) return;
-	ssize_t p=instr(letter,0);
-	if (p>=0) {
+	ssize_t p=instr(letter, 0);
+	if (p >= 0) {
 		ptr[p]=0;
 		stringlen=p;
 	}
@@ -2227,8 +2225,8 @@ void WideString::cut(const WideString &letter)
 WideString WideString::strchr(wchar_t c) const
 {
 	WideString ret;
-	if (ptr!=NULL && stringlen>0) {
-		wchar_t *p=wcschr(ptr, c);
+	if (ptr != NULL && stringlen > 0) {
+		wchar_t* p=wcschr(ptr, c);
 		if (p) ret.set(p);
 	}
 	return ret;
@@ -2237,8 +2235,8 @@ WideString WideString::strchr(wchar_t c) const
 WideString WideString::strrchr(wchar_t c) const
 {
 	WideString ret;
-	if (ptr!=NULL && stringlen>0) {
-		wchar_t *p=wcsrchr(ptr, c);
+	if (ptr != NULL && stringlen > 0) {
+		wchar_t* p=wcsrchr(ptr, c);
 		if (p) ret.set(p);
 	}
 	return ret;
@@ -2261,12 +2259,12 @@ WideString WideString::strrchr(wchar_t c) const
  * Ein Sonderfall besteht, wenn \p needle leer ist. In diesem Fall wird
  * der komplette String zurückgegeben.
  */
-WideString WideString::strstr(const WideString &needle) const
+WideString WideString::strstr(const WideString & needle) const
 {
 	WideString ret;
-	if (ptr!=NULL && stringlen>0) {
-		if (needle.len()==0) return *this;
-		wchar_t *p=wcsstr(ptr, needle.ptr);
+	if (ptr != NULL && stringlen > 0) {
+		if (needle.len() == 0) return *this;
+		wchar_t* p=wcsstr(ptr, needle.ptr);
 		if (p) ret.set(p);
 	}
 	return ret;
@@ -2285,12 +2283,12 @@ WideString WideString::strstr(const WideString &needle) const
  * oder -1 wenn er nicht gefunden wurde. Ist \p needle ein leerer String, liefert die
  * Funktion immer 0 zurück.
  */
-ssize_t WideString::find(const WideString &needle, ssize_t start) const
+ssize_t WideString::find(const WideString & needle, ssize_t start) const
 {
-	if (ptr==NULL || stringlen==0) return -1;
-	if (needle.stringlen==0) return 0;
-	if (start>0 && (size_t)start>=stringlen) return -1;
-	if (start<0 && ((size_t)((ssize_t)stringlen+start))>=stringlen) return -1;
+	if (ptr == NULL || stringlen == 0) return -1;
+	if (needle.stringlen == 0) return 0;
+	if (start > 0 && (size_t)start >= stringlen) return -1;
+	if (start < 0 && ((size_t)((ssize_t)stringlen + start)) >= stringlen) return -1;
 
 
 	//Position to return
@@ -2298,10 +2296,10 @@ ssize_t WideString::find(const WideString &needle, ssize_t start) const
 	//Length of the string to search for
 	size_t lstr = needle.stringlen;
 	//Current position to search from and position of found string
-	wchar_t *found = NULL, *tmp = NULL;
+	wchar_t* found = NULL, * tmp = NULL;
 
 	//Search forward
-	if(start >= 0) {
+	if (start >= 0) {
 		//Search first occurence, starting at the given position...
 		found = wcsstr(ptr + start, needle.ptr);
 		//...and calculate the position to return if str was found
@@ -2316,11 +2314,11 @@ ssize_t WideString::find(const WideString &needle, ssize_t start) const
 		/* Beginning at the start of the contained string, start searching for
 			   every occurence of the str and make it the position last found as long
 			   as the found string doesn't exceed the defined end of the search */
-		while((found = wcsstr((tmp == NULL ? ptr : tmp + 1), needle.ptr)) != NULL && found - ptr + lstr <= stringlen + start)
+		while ((found = wcsstr((tmp == NULL ? ptr : tmp + 1), needle.ptr)) != NULL && found - ptr + lstr <= stringlen + start)
 			tmp = found;
 
 		//Calculate the position to return if str was found
-		if(tmp != NULL) {
+		if (tmp != NULL) {
 			p = tmp - ptr;
 		}
 	}
@@ -2343,13 +2341,13 @@ ssize_t WideString::find(const WideString &needle, ssize_t start) const
  * oder -1 wenn er nicht gefunden wurde. Ist \p needle ein leerer String, liefert die
  * Funktion immer 0 zurück.
  */
-ssize_t WideString::findCase(const WideString &needle, ssize_t start) const
+ssize_t WideString::findCase(const WideString & needle, ssize_t start) const
 {
 	WideString CaseNeedle(needle);
-	WideString CaseSearch(ptr,stringlen);
+	WideString CaseSearch(ptr, stringlen);
 	CaseNeedle.lowerCase();
 	CaseSearch.lowerCase();
-	return CaseSearch.find(CaseNeedle,start);
+	return CaseSearch.find(CaseNeedle, start);
 }
 
 /*! \brief Sucht nach einem String
@@ -2365,15 +2363,15 @@ ssize_t WideString::findCase(const WideString &needle, ssize_t start) const
  * oder -1 wenn er nicht gefunden wurde. Ist \p needle ein leerer String, liefert die
  * Funktion immer 0 zurück.
  */
-ssize_t WideString::instr(const WideString &needle, size_t start) const
+ssize_t WideString::instr(const WideString & needle, size_t start) const
 {
-	if (ptr==NULL || stringlen==0) return -1;
-	if (needle.stringlen==0) return 0;
-	if (start>=stringlen) return -1;
-	const wchar_t * p;
-	p=wcsstr((ptr+start),needle.ptr);
-	if (p!=NULL) {
-		return ((ssize_t)(p-ptr));
+	if (ptr == NULL || stringlen == 0) return -1;
+	if (needle.stringlen == 0) return 0;
+	if (start >= stringlen) return -1;
+	const wchar_t* p;
+	p=wcsstr((ptr + start), needle.ptr);
+	if (p != NULL) {
+		return ((ssize_t)(p - ptr));
 	}
 	return -1;
 }
@@ -2392,22 +2390,22 @@ ssize_t WideString::instr(const WideString &needle, size_t start) const
  * oder -1 wenn er nicht gefunden wurde. Ist \p needle ein leerer String, liefert die
  * Funktion immer 0 zurück.
  */
-ssize_t WideString::instrCase(const WideString &needle, size_t start) const
+ssize_t WideString::instrCase(const WideString & needle, size_t start) const
 {
 	WideString CaseNeedle(needle);
-	WideString CaseSearch(ptr,stringlen);
+	WideString CaseSearch(ptr, stringlen);
 	CaseNeedle.lowerCase();
 	CaseSearch.lowerCase();
-	return CaseSearch.instr(CaseNeedle,start);
+	return CaseSearch.instr(CaseNeedle, start);
 }
 
-WideString &WideString::stripSlashes()
+WideString& WideString::stripSlashes()
 {
-	if (ptr==NULL || stringlen==0) return *this;
+	if (ptr == NULL || stringlen == 0) return *this;
 	size_t p=0, np=0;
 	wchar_t a, lastchar=0;
 	while ((a=ptr[p])) {
-		if (lastchar!='\\' && p>0) {
+		if (lastchar != '\\' && p > 0) {
 			ptr[np]=lastchar;
 			np++;
 		}
@@ -2419,7 +2417,7 @@ WideString &WideString::stripSlashes()
 		np++;
 	}
 	ptr[np]=0;
-	if (stringlen!=np) {
+	if (stringlen != np) {
 		stringlen=np;
 	}
 	return *this;
@@ -2436,22 +2434,22 @@ WideString &WideString::stripSlashes()
  */
 WideString& WideString::repeat(size_t num)
 {
-	if (ptr==NULL || stringlen==0) return *this;
-	if (num==0) {
+	if (ptr == NULL || stringlen == 0) return *this;
+	if (num == 0) {
 		clear();
 		return *this;
 	}
-	size_t newsize=(stringlen*num+16)*sizeof(wchar_t);
-	wchar_t *buf=(wchar_t*)malloc(newsize);
+	size_t newsize=(stringlen * num + 16) * sizeof(wchar_t);
+	wchar_t* buf=(wchar_t*)malloc(newsize);
 	if (!buf) throw OutOfMemoryException();
-	wchar_t *tmp=buf;
-	for (size_t i=0;i<num;i++) {
-		wcsncpy(tmp,ptr,stringlen);
+	wchar_t* tmp=buf;
+	for (size_t i=0;i < num;i++) {
+		wcsncpy(tmp, ptr, stringlen);
 		tmp+=stringlen;
 	}
 	free(ptr);
 	ptr=buf;
-	stringlen=stringlen*num;
+	stringlen=stringlen * num;
 	ptr[stringlen]=0;
 	s=newsize;
 	return *this;
@@ -2473,10 +2471,10 @@ WideString& WideString::repeat(wchar_t unicode, size_t num)
 		clear();
 		return *this;
 	}
-	size_t newsize=(num+16)*sizeof(wchar_t);
-	wchar_t *buf=(wchar_t*)malloc(newsize);
+	size_t newsize=(num + 16) * sizeof(wchar_t);
+	wchar_t* buf=(wchar_t*)malloc(newsize);
 	if (!buf) throw OutOfMemoryException();
-	for (size_t i=0;i<num;i++) buf[i]=unicode;
+	for (size_t i=0;i < num;i++) buf[i]=unicode;
 	free(ptr);
 	ptr=buf;
 	stringlen=num;
@@ -2495,18 +2493,18 @@ WideString& WideString::repeat(wchar_t unicode, size_t num)
  * @param num Anzahl wiederholungen
  * @return Referenz auf den String
  */
-WideString& WideString::repeat(const WideString& str, size_t num)
+WideString& WideString::repeat(const WideString & str, size_t num)
 {
-	if (str.stringlen==0 || num==0 || str.ptr==NULL) {
+	if (str.stringlen == 0 || num == 0 || str.ptr == NULL) {
 		clear();
 		return *this;
 	}
-	size_t newsize=(str.stringlen*num+16)*sizeof(wchar_t);
-	wchar_t *buf=(wchar_t*)malloc(newsize);
+	size_t newsize=(str.stringlen * num + 16) * sizeof(wchar_t);
+	wchar_t* buf=(wchar_t*)malloc(newsize);
 	if (!buf) throw OutOfMemoryException();
-	wchar_t *tmp=buf;
-	for (size_t i=0;i<num;i++) {
-		wcsncpy(tmp,str.ptr,str.stringlen);
+	wchar_t* tmp=buf;
+	for (size_t i=0;i < num;i++) {
+		wcsncpy(tmp, str.ptr, str.stringlen);
 		tmp+=str.stringlen;
 	}
 	free(ptr);
@@ -2530,21 +2528,21 @@ WideString& WideString::repeat(const WideString& str, size_t num)
 WideString WideString::repeated(size_t count) const
 {
 	WideString ret;
-	for (size_t i=0;i<count;i++) ret.append(ptr,stringlen);
+	for (size_t i=0;i < count;i++) ret.append(ptr, stringlen);
 	return ret;
 }
 
 
-WideString& WideString::replace(const WideString &search, const WideString &replacement)
+WideString& WideString::replace(const WideString & search, const WideString & replacement)
 //! \brief Ersetzt einen Teilstring durch einen anderen
 {
-	if (ptr==NULL || stringlen==0 || search.ptr==NULL || search.stringlen==0) return *this;
+	if (ptr == NULL || stringlen == 0 || search.ptr == NULL || search.stringlen == 0) return *this;
 	size_t start = 0, slen = search.stringlen;
 	ssize_t end;
 	// collect the result
 	WideString ms;
 	//Do while str is found in the contained string
-	while((end = find(search, start)) >= 0) {
+	while ((end = find(search, start)) >= 0) {
 		//The result is built from the parts that don't match str and the replacement string
 		ms += mid(start, end - start);
 		ms += replacement;
@@ -2557,7 +2555,7 @@ WideString& WideString::replace(const WideString &search, const WideString &repl
 	return set(ms);
 }
 
-WideString &WideString::pregEscape()
+WideString& WideString::pregEscape()
 /*! \brief Fügt dem String Escape-Zeichen zu, zur Verwendung in einem Match
  *
  * \desc
@@ -2567,16 +2565,16 @@ WideString &WideString::pregEscape()
  * Folgende Zeichen werden escaped: - + \ * /
  */
 {
-	if (ptr==NULL || stringlen==0) return *this;
+	if (ptr == NULL || stringlen == 0) return *this;
 	WideString t;
 	WideString compare=L"-+\\*/";
 	WideString letter;
-	for (size_t i=0;i<stringlen;i++) {
+	for (size_t i=0;i < stringlen;i++) {
 		letter.set(ptr[i]);
-		if (compare.instr(letter,0)>=0) t+="\\";
+		if (compare.instr(letter, 0) >= 0) t+="\\";
 		t+=letter;
 	}
-	if (strcmp(t)!=0) set(t);
+	if (strcmp(t) != 0) set(t);
 	return *this;
 }
 
@@ -2593,49 +2591,49 @@ Der String wird intern zuerst nach UTF-8 kodiert, bevor die pcre-Funktionen aufg
 
 \copydoc pcrenote.dox
 */
-bool WideString::pregMatch(const WideString &expression) const
+bool WideString::pregMatch(const WideString & expression) const
 {
-	#ifndef HAVE_PCRE
-		throw UnsupportedFeatureException("PCRE");
-	#else
-		if (ptr==NULL || stringlen==0 || expression.ptr==NULL || expression.stringlen==0) return false;
-		ByteArray utf8=toUtf8();
-		ByteArray expr=expression.toUtf8();
-		int flags=PCRE_UTF8;
-		// letzten Slash in regex finden
+#ifndef HAVE_PCRE
+	throw UnsupportedFeatureException("PCRE");
+#else
+	if (ptr == NULL || stringlen == 0 || expression.ptr == NULL || expression.stringlen == 0) return false;
+	ByteArray utf8=toUtf8();
+	ByteArray expr=expression.toUtf8();
+	int flags=PCRE_UTF8;
+	// letzten Slash in regex finden
 
-		const char *options=::strrchr((const char*)expr,'/');
-		if (options) {
-			expr.set(options-(const char*)expr,0);
-			options++;
-			if (::strchr(options,'i')) flags|=PCRE_CASELESS;
-			if (::strchr(options,'m')) flags|=PCRE_MULTILINE;
-			if (::strchr(options,'x')) flags|=PCRE_EXTENDED;
-			if (::strchr(options,'s')) flags|=PCRE_DOTALL;
-			if (::strchr(options,'a')) flags|=PCRE_ANCHORED;
-			if (::strchr(options,'u')) flags|=PCRE_UNGREEDY;
-		}
-		/*
-		printf ("String Dump:\n");
-		utf8.hexDump();
-		printf ("Expression Dump:\n");
-		expr.hexDump();
-		*/
-		const char *perr;
-		int re,erroffset, ovector[32];
-		int perrorcode;
-		pcre *reg;
-		//printf ("expr=>>%s<<, flags=%i\n",((const char*)expr+1),flags);
-		reg=pcre_compile2(((const char*)expr+1),flags,&perrorcode,&perr, &erroffset, NULL);
-		if (!reg) throw IllegalRegularExpressionException();
-		memset(ovector,0,30*sizeof(int));
-		//printf ("text=>>%s<<, size=%zi\n",(const char*)utf8,utf8.size());
-		if ((re=pcre_exec(reg, NULL, (const char*) utf8,utf8.size(),0, 0, ovector, 30))>=0) {
-			pcre_free(reg);
-			return true;
-		}
+	const char* options=::strrchr((const char*)expr, '/');
+	if (options) {
+		expr.set(options - (const char*)expr, 0);
+		options++;
+		if (::strchr(options, 'i')) flags|=PCRE_CASELESS;
+		if (::strchr(options, 'm')) flags|=PCRE_MULTILINE;
+		if (::strchr(options, 'x')) flags|=PCRE_EXTENDED;
+		if (::strchr(options, 's')) flags|=PCRE_DOTALL;
+		if (::strchr(options, 'a')) flags|=PCRE_ANCHORED;
+		if (::strchr(options, 'u')) flags|=PCRE_UNGREEDY;
+	}
+	/*
+	printf ("String Dump:\n");
+	utf8.hexDump();
+	printf ("Expression Dump:\n");
+	expr.hexDump();
+	*/
+	const char* perr;
+	int re, erroffset, ovector[32];
+	int perrorcode;
+	pcre* reg;
+	//printf ("expr=>>%s<<, flags=%i\n",((const char*)expr+1),flags);
+	reg=pcre_compile2(((const char*)expr + 1), flags, &perrorcode, &perr, &erroffset, NULL);
+	if (!reg) throw IllegalRegularExpressionException();
+	memset(ovector, 0, 30 * sizeof(int));
+	//printf ("text=>>%s<<, size=%zi\n",(const char*)utf8,utf8.size());
+	if ((re=pcre_exec(reg, NULL, (const char*)utf8, utf8.size(), 0, 0, ovector, 30)) >= 0) {
 		pcre_free(reg);
-		return false;
+		return true;
+	}
+	pcre_free(reg);
+	return false;
 #endif
 }
 
@@ -2655,61 +2653,61 @@ Der String wird intern zuerst nach UTF-8 kodiert, bevor die pcre-Funktionen aufg
 
 \copydoc pcrenote.dox
 */
-bool WideString::pregMatch(const WideString &expression, Array &matches, size_t maxmatches) const
+bool WideString::pregMatch(const WideString & expression, Array & matches, size_t maxmatches) const
 {
-	#ifndef HAVE_PCRE
-		throw UnsupportedFeatureException("PCRE");
-	#else
-		if (ptr==NULL || stringlen==0 || expression.ptr==NULL || expression.stringlen==0) return false;
-		ByteArray utf8=toUtf8();
-		ByteArray expr=expression.toUtf8();
-		int flags=PCRE_UTF8;
-		// letzten Slash in regex finden
-		const char *options=::strrchr((const char*)expr,'/');
-		if (options) {
-			expr.set(options-(const char*)expr,0);
-			options++;
-			if (::strchr(options,'i')) flags|=PCRE_CASELESS;
-			if (::strchr(options,'m')) flags|=PCRE_MULTILINE;
-			if (::strchr(options,'x')) flags|=PCRE_EXTENDED;
-			if (::strchr(options,'s')) flags|=PCRE_DOTALL;
-			if (::strchr(options,'a')) flags|=PCRE_ANCHORED;
-			if (::strchr(options,'u')) flags|=PCRE_UNGREEDY;
-		}
-		const char *perr;
-		if (maxmatches<16) maxmatches=16;
-		int re,erroffset;
-		int ovectorsize=(maxmatches+1)*2;
-		int *ovector=(int*)malloc(ovectorsize*sizeof(int));
-		int perrorcode;
-		matches.clear();
-		pcre *reg;
-		//printf ("r=%s, flags=%i\n",r,flags);
-		reg=pcre_compile2(((const char*)expr+1),flags,&perrorcode,&perr, &erroffset, NULL);
-		if (!reg) {
-			free(ovector);
-			throw IllegalRegularExpressionException();
-		}
-		memset(ovector,0,30*sizeof(int));
-		if ((re=pcre_exec(reg, NULL, (const char*) utf8,utf8.size(),0, 0, ovector, ovectorsize))>=0) {
-			if (re>0) maxmatches=re;
-			else maxmatches=maxmatches*2/3;
-			for (size_t i=0;i<maxmatches;i++) {
-				const char *tmp=NULL;
-				pcre_get_substring((const char*)utf8,ovector,ovectorsize,i,(const char**)&tmp);
-				if (tmp) {
-					//printf("tmp[%i]=%s\n",i,tmp);
-					matches.add(tmp);
-					pcre_free_substring(tmp);
-				}
+#ifndef HAVE_PCRE
+	throw UnsupportedFeatureException("PCRE");
+#else
+	if (ptr == NULL || stringlen == 0 || expression.ptr == NULL || expression.stringlen == 0) return false;
+	ByteArray utf8=toUtf8();
+	ByteArray expr=expression.toUtf8();
+	int flags=PCRE_UTF8;
+	// letzten Slash in regex finden
+	const char* options=::strrchr((const char*)expr, '/');
+	if (options) {
+		expr.set(options - (const char*)expr, 0);
+		options++;
+		if (::strchr(options, 'i')) flags|=PCRE_CASELESS;
+		if (::strchr(options, 'm')) flags|=PCRE_MULTILINE;
+		if (::strchr(options, 'x')) flags|=PCRE_EXTENDED;
+		if (::strchr(options, 's')) flags|=PCRE_DOTALL;
+		if (::strchr(options, 'a')) flags|=PCRE_ANCHORED;
+		if (::strchr(options, 'u')) flags|=PCRE_UNGREEDY;
+	}
+	const char* perr;
+	if (maxmatches < 16) maxmatches=16;
+	int re, erroffset;
+	int ovectorsize=(maxmatches + 1) * 2;
+	int* ovector=(int*)malloc(ovectorsize * sizeof(int));
+	int perrorcode;
+	matches.clear();
+	pcre* reg;
+	//printf ("r=%s, flags=%i\n",r,flags);
+	reg=pcre_compile2(((const char*)expr + 1), flags, &perrorcode, &perr, &erroffset, NULL);
+	if (!reg) {
+		free(ovector);
+		throw IllegalRegularExpressionException();
+	}
+	memset(ovector, 0, 30 * sizeof(int));
+	if ((re=pcre_exec(reg, NULL, (const char*)utf8, utf8.size(), 0, 0, ovector, ovectorsize)) >= 0) {
+		if (re > 0) maxmatches=re;
+		else maxmatches=maxmatches * 2 / 3;
+		for (size_t i=0;i < maxmatches;i++) {
+			const char* tmp=NULL;
+			pcre_get_substring((const char*)utf8, ovector, ovectorsize, i, (const char**)&tmp);
+			if (tmp) {
+				//printf("tmp[%i]=%s\n",i,tmp);
+				matches.add(tmp);
+				pcre_free_substring(tmp);
 			}
-			pcre_free(reg);
-			free(ovector);
-			return true;
 		}
 		pcre_free(reg);
 		free(ovector);
-		return false;
+		return true;
+	}
+	pcre_free(reg);
+	free(ovector);
+	return false;
 #endif
 }
 
@@ -2724,9 +2722,9 @@ bool WideString::pregMatch(const WideString &expression, Array &matches, size_t 
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator<(const WideString &str) const
+bool WideString::operator<(const WideString & str) const
 {
-	if (strcmp(str)<0) return true;
+	if (strcmp(str) < 0) return true;
 	return false;
 }
 
@@ -2739,9 +2737,9 @@ bool WideString::operator<(const WideString &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator<=(const WideString &str) const
+bool WideString::operator<=(const WideString & str) const
 {
-	if (strcmp(str)<=0) return true;
+	if (strcmp(str) <= 0) return true;
 	return false;
 }
 
@@ -2754,9 +2752,9 @@ bool WideString::operator<=(const WideString &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator==(const WideString &str) const
+bool WideString::operator==(const WideString & str) const
 {
-	if (strcmp(str)==0) return true;
+	if (strcmp(str) == 0) return true;
 	return false;
 }
 
@@ -2769,9 +2767,9 @@ bool WideString::operator==(const WideString &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator!=(const WideString &str) const
+bool WideString::operator!=(const WideString & str) const
 {
-	if (strcmp(str)==0) return false;
+	if (strcmp(str) == 0) return false;
 	return true;
 
 }
@@ -2785,9 +2783,9 @@ bool WideString::operator!=(const WideString &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator>=(const WideString &str) const
+bool WideString::operator>=(const WideString & str) const
 {
-	if (strcmp(str)>=0) return true;
+	if (strcmp(str) >= 0) return true;
 	return false;
 }
 
@@ -2800,9 +2798,9 @@ bool WideString::operator>=(const WideString &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator>(const WideString &str) const
+bool WideString::operator>(const WideString & str) const
 {
-	if (strcmp(str)>0) return true;
+	if (strcmp(str) > 0) return true;
 	return false;
 }
 
@@ -2816,9 +2814,9 @@ bool WideString::operator>(const WideString &str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator<(const wchar_t *str) const
+bool WideString::operator<(const wchar_t* str) const
 {
-	if (strcmp(str)<0) return true;
+	if (strcmp(str) < 0) return true;
 	return false;
 }
 
@@ -2831,9 +2829,9 @@ bool WideString::operator<(const wchar_t *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator<=(const wchar_t *str) const
+bool WideString::operator<=(const wchar_t* str) const
 {
-	if (strcmp(str)<=0) return true;
+	if (strcmp(str) <= 0) return true;
 	return false;
 }
 
@@ -2846,9 +2844,9 @@ bool WideString::operator<=(const wchar_t *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator==(const wchar_t *str) const
+bool WideString::operator==(const wchar_t* str) const
 {
-	if (strcmp(str)==0) return true;
+	if (strcmp(str) == 0) return true;
 	return false;
 }
 
@@ -2861,9 +2859,9 @@ bool WideString::operator==(const wchar_t *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator!=(const wchar_t *str) const
+bool WideString::operator!=(const wchar_t* str) const
 {
-	if (strcmp(str)==0) return false;
+	if (strcmp(str) == 0) return false;
 	return true;
 
 }
@@ -2877,9 +2875,9 @@ bool WideString::operator!=(const wchar_t *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator>=(const wchar_t *str) const
+bool WideString::operator>=(const wchar_t* str) const
 {
-	if (strcmp(str)>=0) return true;
+	if (strcmp(str) >= 0) return true;
 	return false;
 }
 
@@ -2892,9 +2890,9 @@ bool WideString::operator>=(const wchar_t *str) const
  * @param str Zu vergleichender String
  * @return Liefert \c true oder \c false zurück
  */
-bool WideString::operator>(const wchar_t *str) const
+bool WideString::operator>(const wchar_t* str) const
 {
-	if (strcmp(str)>0) return true;
+	if (strcmp(str) > 0) return true;
 	return false;
 }
 
@@ -2938,9 +2936,9 @@ void PrintString(const ppl7::String &text)
 }
  * \endcode
  */
-const wchar_t * WideString::getPtr() const
+const wchar_t* WideString::getPtr() const
 {
-	if (ptr==NULL || stringlen==0) return L"";
+	if (ptr == NULL || stringlen == 0) return L"";
 	return (const wchar_t*)ptr;
 }
 
@@ -2948,9 +2946,9 @@ const wchar_t * WideString::getPtr() const
  *
  * \copydetails WideString::getPtr
  */
-const wchar_t * WideString::toWchart() const
+const wchar_t* WideString::toWchart() const
 {
-	if (ptr==NULL || stringlen==0) return L"";
+	if (ptr == NULL || stringlen == 0) return L"";
 	return (const wchar_t*)ptr;
 }
 
@@ -2958,9 +2956,9 @@ const wchar_t * WideString::toWchart() const
  *
  * \copydetails WideString::getPtr
  */
-WideString::operator const wchar_t *() const
+WideString::operator const wchar_t* () const
 {
-	if (ptr==NULL || stringlen==0) return L"";
+	if (ptr == NULL || stringlen == 0) return L"";
 	return (wchar_t*)ptr;
 }
 
@@ -2974,14 +2972,14 @@ WideString::operator bool() const
 WideString::operator int() const
 {
 	if (!stringlen) return 0;
-	return wcstol(ptr,NULL,0);
+	return wcstol(ptr, NULL, 0);
 
 }
 
 WideString::operator unsigned int() const
 {
 	if (!stringlen) return 0;
-	return wcstol(ptr,NULL,0);
+	return wcstol(ptr, NULL, 0);
 }
 
 WideString::operator long() const
@@ -3018,35 +3016,35 @@ WideString::operator double() const
 WideString::operator std::string() const
 {
 	ByteArray ba=toLocalEncoding();
-	return std::string((const char*)ba,ba.size());
+	return std::string((const char*)ba, ba.size());
 }
 
 WideString::operator std::wstring() const
 {
-	return std::wstring(ptr,stringlen);
+	return std::wstring(ptr, stringlen);
 }
 
 int WideString::toInt() const
 {
 	if (!stringlen) return 0;
-	return wcstol(ptr,NULL,10);
+	return wcstol(ptr, NULL, 10);
 }
 
 unsigned int WideString::toUnsignedInt() const
 {
 	if (!stringlen) return 0;
-	return wcstoul(ptr,NULL,10);
+	return wcstoul(ptr, NULL, 10);
 }
 
 int64_t WideString::toInt64() const
 {
 	if (!stringlen) return 0;
 #ifdef HAVE_WCSTOLL
-	return (int64_t) wcstoll(ptr,NULL,10);
+	return (int64_t)wcstoll(ptr, NULL, 10);
 #elif defined WIN32
-	return (int64_t) _wcstoi64(ptr,NULL,10);
+	return (int64_t)_wcstoi64(ptr, NULL, 10);
 #else
-	return (int64_t) pplwcstoll(ptr,NULL,10);
+	return (int64_t)pplwcstoll(ptr, NULL, 10);
 #endif
 }
 
@@ -3054,11 +3052,11 @@ uint64_t WideString::toUnsignedInt64() const
 {
 	if (!stringlen) return 0;
 #ifdef HAVE_WCSTOULL
-	return (uint64_t) wcstoll(ptr,NULL,10);
+	return (uint64_t)wcstoll(ptr, NULL, 10);
 #elif defined WIN32
-	return (uint64_t) _wcstoi64(ptr,NULL,10);
+	return (uint64_t)_wcstoi64(ptr, NULL, 10);
 #else
-	return (uint64_t) pplwcstoll(ptr,NULL,10);
+	return (uint64_t)pplwcstoll(ptr, NULL, 10);
 #endif
 
 }
@@ -3072,13 +3070,13 @@ bool WideString::toBool() const
 long WideString::toLong() const
 {
 	if (!stringlen) return 0;
-	return wcstol(ptr,NULL,10);
+	return wcstol(ptr, NULL, 10);
 }
 
 unsigned long WideString::toUnsignedLong() const
 {
 	if (!stringlen) return 0;
-	return wcstoul(ptr,NULL,10);
+	return wcstoul(ptr, NULL, 10);
 }
 
 
@@ -3086,11 +3084,11 @@ long long WideString::toLongLong() const
 {
 	if (!stringlen) return 0;
 #ifdef HAVE_WCSTOLL
-	return (long long) wcstoll(ptr,NULL,10);
+	return (long long)wcstoll(ptr, NULL, 10);
 #elif defined WIN32
-	return (long long) _wcstoi64(ptr,NULL,10);
+	return (long long)_wcstoi64(ptr, NULL, 10);
 #else
-	return (long long) pplwcstoll(ptr,NULL,10);
+	return (long long)pplwcstoll(ptr, NULL, 10);
 #endif
 }
 
@@ -3098,13 +3096,13 @@ unsigned long long WideString::toUnsignedLongLong() const
 {
 	if (!stringlen) return 0;
 #ifdef HAVE_WCSTOULL
-	return (unsigned long long) wcstoull(ptr,NULL,10);
+	return (unsigned long long) wcstoull(ptr, NULL, 10);
 #elif defined HAVE_WCSTOLL
-	return (unsigned long long) wcstoll(ptr,NULL,10);
+	return (unsigned long long) wcstoll(ptr, NULL, 10);
 #elif defined WIN32
-	return (unsigned long long) _wcstoi64(ptr,NULL,10);
+	return (unsigned long long) _wcstoi64(ptr, NULL, 10);
 #else
-	return (unsigned long long) pplwcstoll(ptr,NULL,10);
+	return (unsigned long long) pplwcstoll(ptr, NULL, 10);
 #endif
 }
 
@@ -3112,13 +3110,13 @@ float WideString::toFloat() const
 {
 	if (!stringlen) return 0;
 #ifdef WIN32
-	return (float)wcstod(ptr,NULL);
+	return (float)wcstod(ptr, NULL);
 #elif defined HAVE_WCSTOF
-	return (float)wcstof(ptr,NULL);
+	return (float)wcstof(ptr, NULL);
 #elif defined HAVE_WCSTOD
-	return (float)wcstod(ptr,NULL);
+	return (float)wcstod(ptr, NULL);
 #else
-	#error *** Keine Funktion, um einen Wide-String in einen float zu konvertieren!
+#error *** Keine Funktion, um einen Wide-String in einen float zu konvertieren!
 	return 0;
 #endif
 }
@@ -3127,14 +3125,43 @@ double WideString::toDouble() const
 {
 	if (!stringlen) return 0;
 #ifdef WIN32
-	return wcstod(ptr,NULL);
+	return wcstod(ptr, NULL);
 #elif defined HAVE_WCSTOD
-	return wcstod(ptr,NULL);
+	return wcstod(ptr, NULL);
 #else
-	#error *** Keine Funktion, um einen Wide-String in einen double zu konvertieren!
+#error *** Keine Funktion, um einen Wide-String in einen double zu konvertieren!
 	return 0;
 #endif
 }
+
+
+bool WideString::startsWith(const WideString & prefix, size_t start, size_t end) const
+{
+	WideString part;
+	if (start > 0 || end != (size_t)-1) {
+		part=mid(start, end).left(prefix.size());
+	} else {
+		part=left(prefix.size());
+	}
+	return part == prefix;
+}
+
+bool WideString::endsWith(const WideString & suffix, size_t start, size_t end) const
+{
+	WideString part;
+	if (start > 0 || end != (size_t)-1) {
+		part=mid(start, end).right(suffix.size());
+	} else {
+		part=right(suffix.size());
+	}
+	return part == suffix;
+}
+
+WideString WideString::join(const ppl7::Array & iterable) const
+{
+	return WideString(iterable.implode(*this));
+}
+
 
 
 /*!\brief String addieren
@@ -3148,7 +3175,7 @@ double WideString::toDouble() const
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const WideString &str1, const WideString& str2)
+WideString operator+(const WideString & str1, const WideString & str2)
 {
 	WideString s=str1;
 	s.append(str2);
@@ -3166,7 +3193,7 @@ WideString operator+(const WideString &str1, const WideString& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const char *str1, const WideString& str2)
+WideString operator+(const char* str1, const WideString & str2)
 {
 	WideString s;
 	s.set(str1);
@@ -3185,7 +3212,7 @@ WideString operator+(const char *str1, const WideString& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const WideString &str1, const char *str2)
+WideString operator+(const WideString & str1, const char* str2)
 {
 	WideString s=str1;
 	s.append(str2);
@@ -3203,7 +3230,7 @@ WideString operator+(const WideString &str1, const char *str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const wchar_t *str1, const WideString& str2)
+WideString operator+(const wchar_t* str1, const WideString & str2)
 {
 	WideString s=str1;
 	s.append(str2);
@@ -3221,7 +3248,7 @@ WideString operator+(const wchar_t *str1, const WideString& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const WideString &str1, const wchar_t *str2)
+WideString operator+(const WideString & str1, const wchar_t* str2)
 {
 	WideString s=str1;
 	s.append(str2);
@@ -3239,7 +3266,7 @@ WideString operator+(const WideString &str1, const wchar_t *str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const std::string &str1, const WideString& str2)
+WideString operator+(const std::string & str1, const WideString & str2)
 {
 	WideString s=str1;
 	s.append(str2);
@@ -3257,7 +3284,7 @@ WideString operator+(const std::string &str1, const WideString& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const WideString &str1, const std::string &str2)
+WideString operator+(const WideString & str1, const std::string & str2)
 {
 	WideString s=str1;
 	s.append(str2);
@@ -3275,7 +3302,7 @@ WideString operator+(const WideString &str1, const std::string &str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const std::wstring &str1, const WideString& str2)
+WideString operator+(const std::wstring & str1, const WideString & str2)
 {
 	WideString s=str1;
 	s.append(str2);
@@ -3293,7 +3320,7 @@ WideString operator+(const std::wstring &str1, const WideString& str2)
  * @param[in] str2 Zweiter String
  * @return Neuer String
  */
-WideString operator+(const WideString &str1, const std::wstring &str2)
+WideString operator+(const WideString & str1, const std::wstring & str2)
 {
 	WideString s=str1;
 	s.append(str2);
@@ -3301,12 +3328,10 @@ WideString operator+(const WideString &str1, const std::wstring &str2)
 }
 
 
-std::ostream& operator<<(std::ostream& s, const WideString &str)
+std::ostream& operator<<(std::ostream & s, const WideString & str)
 {
 	ByteArray a=str.toLocalEncoding();
-	return s.write((const char*)a.adr(),a.size());
+	return s.write((const char*)a.adr(), a.size());
 }
 
 } // EOF namespace ppl7
-
-

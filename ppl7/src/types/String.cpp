@@ -564,11 +564,7 @@ String& String::set(const char* str, size_t size)
 			throw OutOfMemoryException();
 		}
 	}
-#ifdef HAVE_STRNCPY_S
-	strncpy_s((char*)ptr, s, str, inbytes);
-#else
-	strncpy((char*)ptr, str, inbytes);
-#endif
+	memmove((char*)ptr, str, inbytes);
 	stringlen=inbytes;
 	((char*)ptr)[stringlen]=0;
 	return *this;
@@ -657,21 +653,21 @@ String& String::set(const wchar_t* str, size_t size)
 #else
 	throw UnsupportedFeatureException();
 #endif
-}
+	}
 
-/*!\brief String anhand eines String-Pointers setzen
- *
- * \desc
- * Mit dieser Funktion wird der String anhand des Pointers \p str eines anderen
- * Strings gesetzt.
- *
- * \param str Pointer auf einen String
- * \param size Optionaler Parameter, der die Anzahl zu importierender Zeichen angibt.
- * Ist der Wert nicht angegeben, wird der komplette String übernommen. Ist der Wert größer als
- * der angegebene String, wird er ignoriert und der komplette String importiert.
- * \return Referenz auf den String
- * \exception OutOfMemoryException
- */
+	/*!\brief String anhand eines String-Pointers setzen
+	 *
+	 * \desc
+	 * Mit dieser Funktion wird der String anhand des Pointers \p str eines anderen
+	 * Strings gesetzt.
+	 *
+	 * \param str Pointer auf einen String
+	 * \param size Optionaler Parameter, der die Anzahl zu importierender Zeichen angibt.
+	 * Ist der Wert nicht angegeben, wird der komplette String übernommen. Ist der Wert größer als
+	 * der angegebene String, wird er ignoriert und der komplette String importiert.
+	 * \return Referenz auf den String
+	 * \exception OutOfMemoryException
+	 */
 String& String::set(const String* str, size_t size)
 {
 	if (!str) {
@@ -836,8 +832,7 @@ String& String::setf(const char* fmt, ...)
 		try {
 			set(buff);
 			free(buff);
-		}
-		catch (...) {
+		} catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -847,17 +842,17 @@ String& String::setf(const char* fmt, ...)
 	va_end(args);
 	free(buff);
 	throw Exception("String::setf");
-	}
+}
 
-	/*!\brief Einzelnes ASCII-Zeichen übernehmen
-	 *
-	 * \desc
-	 * Ein einzelnes ASCII-Zeichen \p c wird in den String übernommen.
-	 *
-	 * @param c ASCII-Wert des gewünschten Zeichens
-	 *
-	 * @return Referenz auf den String
-	 */
+/*!\brief Einzelnes ASCII-Zeichen übernehmen
+ *
+ * \desc
+ * Ein einzelnes ASCII-Zeichen \p c wird in den String übernommen.
+ *
+ * @param c ASCII-Wert des gewünschten Zeichens
+ *
+ * @return Referenz auf den String
+ */
 String& String::set(char c)
 {
 	char buffer[2];
@@ -900,8 +895,7 @@ String& String::vasprintf(const char* fmt, va_list args)
 		try {
 			set(buff);
 			free(buff);
-		}
-		catch (...) {
+		} catch (...) {
 			free(buff);
 			throw;
 		}
@@ -909,28 +903,28 @@ String& String::vasprintf(const char* fmt, va_list args)
 	}
 	free(buff);
 	throw Exception();
-	}
+}
 
 
-	/*!\brief String-Speicher übernehmen
-	 *
-	 * \desc
-	 * Mit dieser Funktion wird der Klasse die Verwaltung des Speicherbereich mit der Adresse \p adr und der
-	 * Größe \p size übergeben. Der Speicher muss zuvor mit "malloc" bzw. "calloc" allokiert worden sein
-	 * und darf von der Anwendung selbst nicht mehr freigegeben werden.
-	 *
-	 * @param[in] adr Startadresse des Speicherbereichs
-	 * @param[in] size Größe des Speicherbereichs in Bytes
-	 * @param[in] stringlen Optionaler Parameter, der die Länge des Strings innerhalb des übergebenen
-	 * Speicherbereichs angibt. Darf maximal \b size-1 groß sein. Ist der Wert nicht angegeben, wird die
-	 * Länge des Strings mit \b strlen berechnet
-	 *
-	 * \note Der String muss mit einem Null-Byte enden. Um dies sicherzustellen überschreibt die Methode
-	 * das letzte Byte des übergebenen Speicherbereichs mit 0.
-	 *
-	 * \return Referenz auf den String
-	 *
-	 */
+/*!\brief String-Speicher übernehmen
+ *
+ * \desc
+ * Mit dieser Funktion wird der Klasse die Verwaltung des Speicherbereich mit der Adresse \p adr und der
+ * Größe \p size übergeben. Der Speicher muss zuvor mit "malloc" bzw. "calloc" allokiert worden sein
+ * und darf von der Anwendung selbst nicht mehr freigegeben werden.
+ *
+ * @param[in] adr Startadresse des Speicherbereichs
+ * @param[in] size Größe des Speicherbereichs in Bytes
+ * @param[in] stringlen Optionaler Parameter, der die Länge des Strings innerhalb des übergebenen
+ * Speicherbereichs angibt. Darf maximal \b size-1 groß sein. Ist der Wert nicht angegeben, wird die
+ * Länge des Strings mit \b strlen berechnet
+ *
+ * \note Der String muss mit einem Null-Byte enden. Um dies sicherzustellen überschreibt die Methode
+ * das letzte Byte des übergebenen Speicherbereichs mit 0.
+ *
+ * \return Referenz auf den String
+ *
+ */
 String& String::useadr(void* adr, size_t size, size_t stringlen)
 {
 	if (adr == NULL || size == 0) throw IllegalArgumentException("adr and size must not be 0");
@@ -1118,8 +1112,7 @@ String& String::appendf(const char* fmt, ...)
 			a.set(buff);
 			free(buff);
 			append(a.ptr, a.stringlen);
-		}
-		catch (...) {
+		} catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -1129,17 +1122,17 @@ String& String::appendf(const char* fmt, ...)
 	va_end(args);
 	free(buff);
 	throw Exception();
-	}
+}
 
-	/*!\brief Einzelnes ASCII-Zeichen anhängen
-	 *
-	 * \desc
-	 * Ein einzelnes ASCII-Zeichen \p c wird in an den String angehangen.
-	 *
-	 * @param c ASCII-Wert des gewünschten Zeichens
-	 *
-	 * @return Referenz auf den String
-	 */
+/*!\brief Einzelnes ASCII-Zeichen anhängen
+ *
+ * \desc
+ * Ein einzelnes ASCII-Zeichen \p c wird in an den String angehangen.
+ *
+ * @param c ASCII-Wert des gewünschten Zeichens
+ *
+ * @return Referenz auf den String
+ */
 String& String::append(char c)
 {
 	char buffer[2];
@@ -1338,8 +1331,7 @@ String& String::prependf(const char* fmt, ...)
 			a.set(buff);
 			free(buff);
 			prepend(a.ptr, a.stringlen);
-		}
-		catch (...) {
+		} catch (...) {
 			free(buff);
 			va_end(args);
 			throw;
@@ -1349,18 +1341,18 @@ String& String::prependf(const char* fmt, ...)
 	va_end(args);
 	free(buff);
 	throw Exception();
-	}
+}
 
-	/*!\brief Einzelnes ASCII-Zeichen am Anfang einfügen
-	 *
-	 * \desc
-	 * Ein einzelnes ASCII-Zeichen \p c wird in am Anfang des Strings eingefügt.
-	 * Die nachfolgenden Zeichen des Strings verschieben sich nach rechts.
-	 *
-	 * @param c ASCII-Wert des gewünschten Zeichens
-	 *
-	 * @return Referenz auf den String
-	 */
+/*!\brief Einzelnes ASCII-Zeichen am Anfang einfügen
+ *
+ * \desc
+ * Ein einzelnes ASCII-Zeichen \p c wird in am Anfang des Strings eingefügt.
+ * Die nachfolgenden Zeichen des Strings verschieben sich nach rechts.
+ *
+ * @param c ASCII-Wert des gewünschten Zeichens
+ *
+ * @return Referenz auf den String
+ */
 String& String::prepend(char c)
 {
 	char buffer[2];
@@ -2602,25 +2594,25 @@ String& String::repeat(const String & str, size_t num)
 		strncpy(tmp, str.ptr, str.stringlen);
 #endif
 		tmp+=str.stringlen;
-	}
+}
 	if (ptr != empty_string) free(ptr);
 	ptr=buf;
 	stringlen=num;
 	ptr[stringlen]=0;
 	s=newsize;
 	return *this;
-}
+	}
 
-/*!\brief String multiplizieren
- *
- * \desc
- * Der aktuelle String wird \p count mal hintereinander wiederholt und
- * als neuer String zurückgegeben.
- *
- * @param[in] count Anzahl wiederholungen
- * @return Neuer String
- * \exception OutOfMemoryException Tritt auf, wenn kein Speicher mehr verfügbar ist.
- */
+	/*!\brief String multiplizieren
+	 *
+	 * \desc
+	 * Der aktuelle String wird \p count mal hintereinander wiederholt und
+	 * als neuer String zurückgegeben.
+	 *
+	 * @param[in] count Anzahl wiederholungen
+	 * @return Neuer String
+	 * \exception OutOfMemoryException Tritt auf, wenn kein Speicher mehr verfügbar ist.
+	 */
 String String::repeated(size_t count) const
 {
 	String ret;
@@ -3302,7 +3294,7 @@ String::operator std::wstring() const
 	free(w);
 	throw UnsupportedFeatureException();
 #endif
-}
+	}
 
 int String::toInt() const
 {
@@ -3399,6 +3391,34 @@ double String::toDouble() const
 	if (!stringlen) return 0.0;
 	return atof(ptr);
 }
+
+bool String::startsWith(const String & prefix, size_t start, size_t end) const
+{
+	String part;
+	if (start > 0 || end != (size_t)-1) {
+		part=mid(start, end).left(prefix.size());
+	} else {
+		part=left(prefix.size());
+	}
+	return part == prefix;
+}
+
+bool String::endsWith(const String & suffix, size_t start, size_t end) const
+{
+	String part;
+	if (start > 0 || end != (size_t)-1) {
+		part=mid(start, end).right(suffix.size());
+	} else {
+		part=right(suffix.size());
+	}
+	return part == suffix;
+}
+
+String String::join(const ppl7::Array & iterable) const
+{
+	return iterable.implode(*this);
+}
+
 
 
 /*!\brief String addieren

@@ -128,6 +128,7 @@ void PrintDebug(const char* format, ...)
 #endif
 	} else {
 		printf("%s", buff);
+		fflush(stdout);
 	}
 	free(buff);
 }
@@ -176,9 +177,10 @@ void PrintDebugTime(const char* format, ...)
 #endif
 	} else {
 		printf("%s%s", (const char*)Time, buff);
+		fflush(stdout);
 	}
 	free(buff);
-}
+	}
 
 void HexDump(const void* address, size_t bytes, bool skipheader)
 {

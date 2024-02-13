@@ -900,7 +900,8 @@ int File::fgetc()
 		pos++;
 		return ret;
 	}
-	throwErrno(errno);
+	if (ret == EOF) return EOF;
+	if (errno != 0) throwErrno(errno);
 	return 0;
 }
 
@@ -931,7 +932,7 @@ wchar_t File::fgetwc()
 		pos+=sizeof(wchar_t);
 		return(wchar_t)ret;
 	}
-	throwErrno(errno);
+	if (errno != 0)throwErrno(errno);
 	return 0;
 #endif
 }
@@ -1363,7 +1364,7 @@ void File::truncate(const String& filename, uint64_t bytes)
  */
 bool File::exists(const String& filename)
 {
-	if (filename.isEmpty()) throw IllegalArgumentException();
+	if (filename.isEmpty()) throw false;
 	FILE* fd=NULL;
 	//printf ("buffer=%s\n",buff);
 #ifdef WIN32
@@ -1479,6 +1480,9 @@ void File::rename(const String& oldfile, const String& newfile)
 			// Ja, wir löschen sie manuell
 			fclose(fd);
 #ifdef WIN32
+			ppl7::String o1=oldfile.toLowerCase();
+			ppl7::String n1=newfile.toLowerCase();
+			if (n1 == o1) return;
 			if (::_wunlink((const wchar_t*)WideString(oldfile)) == 0) return;
 #else
 			if (::unlink((const char*)oldfile) == 0) return;
@@ -1806,7 +1810,6 @@ DirEntry File::statFile(const String & filename)
 bool File::tryStatFile(const String & filename, DirEntry & result)
 {
 	if (filename.isEmpty()) return false;
-	if (!File::exists(filename)) return false;
 #ifdef WIN32
 	struct _stat st;
 	String File=filename;

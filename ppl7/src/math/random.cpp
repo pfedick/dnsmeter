@@ -175,8 +175,8 @@ static char sccsid[] = "@(#)random.c	8.2 (Berkeley) 5/19/95";
  */
 #define	MAX_TYPES	5		/* max number of types above */
 
-static long degrees[MAX_TYPES] =	{ DEG_0, DEG_1, DEG_2, DEG_3, DEG_4 };
-static long seps [MAX_TYPES] =	{ SEP_0, SEP_1, SEP_2, SEP_3, SEP_4 };
+static long degrees[MAX_TYPES] ={ DEG_0, DEG_1, DEG_2, DEG_3, DEG_4 };
+static long seps[MAX_TYPES] ={ SEP_0, SEP_1, SEP_2, SEP_3, SEP_4 };
 
 /*
  * Initially, everything is set up as if from:
@@ -192,7 +192,7 @@ static long seps [MAX_TYPES] =	{ SEP_0, SEP_1, SEP_2, SEP_3, SEP_4 };
  *	MAX_TYPES * (rptr - state) + TYPE_3 == TYPE_3.
  */
 
-static long randtbl[DEG_3 + 1] = {
+static long randtbl[DEG_3 + 1] ={
 	TYPE_3,
 #ifdef  USE_WEAK_SEEDING
 /* Historic implementation compatibility */
@@ -227,8 +227,8 @@ static long randtbl[DEG_3 + 1] = {
  * in the initialization of randtbl) because the state table pointer is set
  * to point to randtbl[1] (as explained below).
  */
-static long *fptr = &randtbl[SEP_3 + 1];
-static long *rptr = &randtbl[1];
+static long* fptr = &randtbl[SEP_3 + 1];
+static long* rptr = &randtbl[1];
 
 /*
  * The following things are the pointer to the state information table, the
@@ -240,18 +240,18 @@ static long *rptr = &randtbl[1];
  * this is more efficient than indexing every time to find the address of
  * the last element to see if the front and rear pointers have wrapped.
  */
-static long *state = &randtbl[1];
+static long* state = &randtbl[1];
 static long rand_type = TYPE_3;
 static long rand_deg = DEG_3;
 static long rand_sep = SEP_3;
-static long *end_ptr = &randtbl[DEG_3 + 1];
+static long* end_ptr = &randtbl[DEG_3 + 1];
 
 #ifndef _WIN32
 #define __inline inline
 #endif
 
 //static __inline long good_rand __P((long));
-static __inline long good_rand (long x)
+static __inline long good_rand(long x)
 {
 #ifdef  USE_WEAK_SEEDING
 /*
@@ -312,7 +312,7 @@ void srand(uint32_t x)
 		fptr = &state[rand_sep];
 		rptr = &state[0];
 		for (i = 0; i < 10 * rand_deg; i++)
-			(void)rand(0,0x7fffffff);
+			(void)rand(0, 0x7fffffff);
 	}
 }
 
@@ -339,7 +339,7 @@ void srand(uint32_t x)
  * word boundary; otherwise a bus error will occur. Even so, lint will
  * complain about mis-alignment, but you should disregard these messages.
  */
-char * rand_initstate(unsigned long seed, char *arg_state, long n)
+char* rand_initstate(unsigned long seed, char* arg_state, long n)
 /*!\ingroup PPLGroupMath
  */
 
@@ -347,16 +347,16 @@ char * rand_initstate(unsigned long seed, char *arg_state, long n)
 	//char *arg_state;		/* pointer to state array */
 	//long n;				/* # bytes of state info */
 {
-	char *ostate = (char *)(&state[-1]);
-	long *long_arg_state = (long *) arg_state;
+	char* ostate = (char*)(&state[-1]);
+	long* long_arg_state = (long*)arg_state;
 
 	if (rand_type == TYPE_0)
 		state[-1] = rand_type;
 	else
-		state[-1] = (long) (MAX_TYPES * (rptr - state) + rand_type);
+		state[-1] = (long)(MAX_TYPES * (rptr - state) + rand_type);
 	if (n < BREAK_0) {
 		(void)fprintf(stderr,
-		    "random: not enough state (%ld bytes); ignored.\n", n);
+			"random: not enough state (%ld bytes); ignored.\n", n);
 		return(0);
 	}
 	if (n < BREAK_1) {
@@ -380,7 +380,7 @@ char * rand_initstate(unsigned long seed, char *arg_state, long n)
 		rand_deg = DEG_4;
 		rand_sep = SEP_4;
 	}
-	state = (long *) (long_arg_state + 1); /* first location */
+	state = (long*)(long_arg_state + 1); /* first location */
 	end_ptr = &state[rand_deg];	/* must set end_ptr before srandom */
 	srand(seed);
 	if (rand_type == TYPE_0)
@@ -409,21 +409,21 @@ char * rand_initstate(unsigned long seed, char *arg_state, long n)
  * word boundary; otherwise a bus error will occur. Even so, lint will
  * complain about mis-alignment, but you should disregard these messages.
  */
-char * rand_setstate(char *arg_state)
+char* rand_setstate(char* arg_state)
 /*!\ingroup PPLGroupMath
  */
 	//char *arg_state;		/* pointer to state array */
 {
-	long *new_state = (long *) arg_state;
+	long* new_state = (long*)arg_state;
 	long type = new_state[0] % MAX_TYPES;
 	long rear = new_state[0] / MAX_TYPES;
-	char *ostate = (char *)(&state[-1]);
+	char* ostate = (char*)(&state[-1]);
 
 	if (rand_type == TYPE_0)
 		state[-1] = rand_type;
 	else
 		state[-1] = (long)(MAX_TYPES * (rptr - state) + rand_type);
-	switch(type) {
+	switch (type) {
 	case TYPE_0:
 	case TYPE_1:
 	case TYPE_2:
@@ -435,10 +435,10 @@ char * rand_setstate(char *arg_state)
 		break;
 	default:
 		(void)fprintf(stderr,
-		    "random: state info corrupted; not changed.\n");
+			"random: state info corrupted; not changed.\n");
 		break;
 	}
-	state = (long *) (new_state + 1);
+	state = (long*)(new_state + 1);
 	if (rand_type != TYPE_0) {
 		rptr = &state[rear];
 		fptr = &state[(rear + rand_sep) % rand_deg];
@@ -468,18 +468,18 @@ size_t rand(size_t min, size_t max)
 /*!\ingroup PPLGroupMath
  */
 {
-	size_t range=max-min+1;
-	if(range==0) range=0xffffffff;
+	size_t range=max - min + 1;
+	if (range == 0) range=0xffffffff;
 	long i;
-	long *f, *r;
+	long* f, * r;
 
 	if (!pplsrand_called) {
-		#ifndef _WIN32
-			pid_t p=getpid();
-			srand(time(NULL)+p);
-		#else
-			srand((int32_t)time(NULL));
-		#endif
+#ifndef _WIN32
+		pid_t p=getpid();
+		srand(time(NULL) + p);
+#else
+		srand((int32_t)time(NULL));
+#endif
 	}
 
 	if (rand_type == TYPE_0) {
@@ -495,14 +495,13 @@ size_t rand(size_t min, size_t max)
 		if (++f >= end_ptr) {
 			f = state;
 			++r;
-		}
-		else if (++r >= end_ptr) {
+		} else if (++r >= end_ptr) {
 			r = state;
 		}
 
 		fptr = f; rptr = r;
 	}
-	return (size_t) (min+((size_t)i*range/0x7fffffff));
+	return (size_t)(min + ((size_t)i * range / 0x7fffffff));
 }
 
 /*!\ingroup PPLGroupMath
@@ -518,12 +517,12 @@ size_t rand(size_t min, size_t max)
 ByteArray Random(size_t bytes)
 {
 	ByteArray bin;
-	char *buffer=(char*)malloc(bytes);
+	char* buffer=(char*)malloc(bytes);
 	if (!buffer) return bin;
-	for (size_t i=0;i<bytes;i++) {
-		buffer[i]=(char)rand(0,255);
+	for (size_t i=0;i < bytes;i++) {
+		buffer[i]=(char)rand(0, 255);
 	}
-	bin.useadr(buffer,bytes);
+	bin.useadr(buffer, bytes);
 	return bin;
 }
 
@@ -538,21 +537,24 @@ ByteArray Random(size_t bytes)
  * \return Gibt eine Referenz auf das übergebene CBinary Objekt \p buffer zurück, das
  * nun die gewünschte Anzahl Zufallsdaten enthält.
  */
-ByteArray &Random(ByteArray &buffer, size_t bytes)
+ByteArray& Random(ByteArray& buffer, size_t bytes)
 {
-	char *b=(char*)malloc(bytes);
+	char* b=(char*)malloc(bytes);
 	if (!b) return buffer;
-	for (size_t i=0;i<bytes;i++) {
-		b[i]=(char)rand(0,255);
+	for (size_t i=0;i < bytes;i++) {
+		b[i]=(char)rand(0, 255);
 	}
-	buffer.useadr(b,bytes);
+	buffer.useadr(b, bytes);
 	return buffer;
 }
 
 double randf(double min, double max)
 {
-	double range=max-min;
-	return ((::rand()/(RAND_MAX+1.0))*range)+min;
+	double range=max - min;
+	return ((double)::rand() / (double)(RAND_MAX)*range) + min;
 }
+
+
+
 
 } // end of namespace ppl

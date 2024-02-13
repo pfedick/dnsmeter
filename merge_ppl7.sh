@@ -21,7 +21,13 @@ find include/compat_ppl7.h include/ppl7.h include/ppl7-algorithms.h include/ppl7
 	src/internet/inet* src/internet/ip* src/internet/openssl* \
 	src/internet/sock* src/internet/*Socket* src/math  src/types \
 	| cpio -pdmv $WORK/ppl7
+if [ $? -ne 0 ] ; then
+	exit 1
+fi
 cp LICENSE.TXT $WORK/ppl7
+if [ $? -ne 0 ] ; then
+	exit 1
+fi
 
 rm -rf $WORK/ppl7/src/core/Resourcen.cpp
 
@@ -37,11 +43,15 @@ cp autoconf/ax_check_compiler_flags.m4 $WORK/autoconf
 cp autoconf/ax_gcc_archflag.m4 $WORK/autoconf
 cp autoconf/libbind.m4 $WORK/autoconf
 cp autoconf/config.rpath $WORK/autoconf
-cp acinclude.m4 $WORK 
+cp acinclude.m4 $WORK
 
 cd $WORK/ppl7
+# errors are ignored, genMakefile will not find all sources, because we copied only a subset of it
 ./genMakefile.in
+
 
 cd $WORK
 ./genConfigure
-   
+if [ $? -ne 0 ] ; then
+	exit 1
+fi
