@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.69)
-AC_INIT([dnsmeter], [1.0.0], [fedick@denic.de], [dnsmeter-1.0.0.tar.bz2])
+AC_PREREQ([2.71])
+AC_INIT([dnsmeter],[1.0.0],[fedick@denic.de],[dnsmeter-1.0.0.tar.bz2])
 AC_CONFIG_AUX_DIR([autoconf])
 
 #DNSPerfTest
@@ -47,6 +47,7 @@ OLD_CFLAGS=$CFLAGS
 AC_PROG_CC
 CFLAGS=$OLD_CFLAGS
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11
 
 case "$host_os" in
 	freebsd* )
@@ -138,7 +139,8 @@ AC_SUBST(PPLIBTESTVERSION)
 #--------------------------------------------------------------------
 
 AC_HEADER_STDBOOL
-AC_HEADER_TIME
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+
 AC_TYPE_MODE_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
@@ -267,9 +269,8 @@ AC_CHECK_LIB(pthread, pthread_setname_np,
 
 
 AC_CACHE_CHECK([for sa_len in struct sockaddr], ac_cv_struct_sa_len,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/socket.h>], [struct sockaddr s; s.sa_len;],
-ac_cv_struct_sa_len=yes, ac_cv_struct_sa_len=no)])
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#include <sys/socket.h>]], [[struct sockaddr s; s.sa_len;]])],[ac_cv_struct_sa_len=yes],[ac_cv_struct_sa_len=no])])
 if test $ac_cv_struct_sa_len = yes; then
   AC_DEFINE(HAVE_SOCKADDR_SA_LEN)
 fi

@@ -14,14 +14,11 @@ AC_SEARCH_LIBS(res_query,[resolv bind],have_res_query=yes,
 	AC_MSG_CHECKING([for res_query in -lresolv (with resolv.h if present)])
 	saved_libs="$LIBS"
 	LIBS="-lresolv $LIBS"
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#ifdef HAVE_RESOLV_H
 		#include <resolv.h>
-		#endif],
-		[res_query(0,0,0,0,0)],
-	[AC_MSG_RESULT(yes)
-		have_res_query=yes],
-	[AC_MSG_RESULT(no)
+		#endif]], [[res_query(0,0,0,0,0)]])],[AC_MSG_RESULT(yes)
+		have_res_query=yes],[AC_MSG_RESULT(no)
 		LIBS="$saved_libs"])
 	]
 )
@@ -38,14 +35,11 @@ AC_SEARCH_LIBS(res_search,[resolv bind],have_res_search=yes,
 	AC_MSG_CHECKING([for res_search in -lresolv (with resolv.h if present)])
 	saved_libs="$LIBS"
 	LIBS="-lresolv $LIBS"
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#ifdef HAVE_RESOLV_H
 		#include <resolv.h>
-		#endif],
-		[res_search(0,0,0,0,0)],
-	[AC_MSG_RESULT(yes)
-		have_res_search=yes],
-	[AC_MSG_RESULT(no)
+		#endif]], [[res_search(0,0,0,0,0)]])],[AC_MSG_RESULT(yes)
+		have_res_search=yes],[AC_MSG_RESULT(no)
 		LIBS="$saved_libs"])
 	]
 )
@@ -61,14 +55,11 @@ AC_SEARCH_LIBS(res_querydomain,[resolv bind],have_res_querydomain=yes,
 	AC_MSG_CHECKING([for res_querydomain in -lresolv (with resolv.h if present)])
 	saved_libs="$LIBS"
 	LIBS="-lresolv $LIBS"
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#ifdef HAVE_RESOLV_H
 		#include <resolv.h>
-		#endif],
-		[res_querydomain(0,0,0,0,0,0)],
-	[AC_MSG_RESULT(yes)
-		have_res_querydomain=yes],
-	[AC_MSG_RESULT(no)
+		#endif]], [[res_querydomain(0,0,0,0,0,0)]])],[AC_MSG_RESULT(yes)
+		have_res_querydomain=yes],[AC_MSG_RESULT(no)
 		LIBS="$saved_libs"])
 	]
 )
@@ -84,14 +75,11 @@ AC_SEARCH_LIBS(res_mkquery,[resolv bind],have_res_mkquery=yes,
 	AC_MSG_CHECKING([for res_mkquery in -lresolv (with resolv.h if present)])
 	saved_libs="$LIBS"
 	LIBS="-lresolv $LIBS"
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#ifdef HAVE_RESOLV_H
 		#include <resolv.h>
-		#endif],
-		[res_mkquery(0,0,0,0,0,0,0,0,0)],
-	[AC_MSG_RESULT(yes)
-		have_res_mkquery=yes],
-	[AC_MSG_RESULT(no)
+		#endif]], [[res_mkquery(0,0,0,0,0,0,0,0,0)]])],[AC_MSG_RESULT(yes)
+		have_res_mkquery=yes],[AC_MSG_RESULT(no)
 		LIBS="$saved_libs"])
 	]
 )
@@ -107,14 +95,11 @@ AC_SEARCH_LIBS(res_send,[resolv bind],have_res_send=yes,
 	AC_MSG_CHECKING([for res_send in -lresolv (with resolv.h if present)])
 	saved_libs="$LIBS"
 	LIBS="-lresolv $LIBS"
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#ifdef HAVE_RESOLV_H
 		#include <resolv.h>
-		#endif],
-		[res_send(0,0,0,0)],
-	[AC_MSG_RESULT(yes)
-		have_res_send=yes],
-	[AC_MSG_RESULT(no)
+		#endif]], [[res_send(0,0,0,0)]])],[AC_MSG_RESULT(yes)
+		have_res_send=yes],[AC_MSG_RESULT(no)
 		LIBS="$saved_libs"])
 	]
 )
@@ -130,14 +115,11 @@ AC_SEARCH_LIBS(dn_comp,[resolv bind],have_dn_comp=yes,
 	AC_MSG_CHECKING([for dn_comp in -lresolv (with resolv.h if present)])
 	saved_libs="$LIBS"
 	LIBS="-lresolv $LIBS"
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#ifdef HAVE_RESOLV_H
 		#include <resolv.h>
-		#endif],
-		[dn_comp(0,0,0,0,0)],
-	[AC_MSG_RESULT(yes)
-		have_dn_comp=yes],
-	[AC_MSG_RESULT(no)
+		#endif]], [[dn_comp(0,0,0,0,0)]])],[AC_MSG_RESULT(yes)
+		have_dn_comp=yes],[AC_MSG_RESULT(no)
 		LIBS="$saved_libs"])
 	]
 )
@@ -153,14 +135,11 @@ AC_SEARCH_LIBS(dn_expand,[resolv bind],have_dn_expand=yes,
 	AC_MSG_CHECKING([for dn_expand in -lresolv (with resolv.h if present)])
 	saved_libs="$LIBS"
 	LIBS="-lresolv $LIBS"
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#ifdef HAVE_RESOLV_H
 		#include <resolv.h>
-		#endif],
-		[dn_expand(0,0,0,0,0)],
-	[AC_MSG_RESULT(yes)
-		have_dn_expand=yes],
-	[AC_MSG_RESULT(no)
+		#endif]], [[dn_expand(0,0,0,0,0)]])],[AC_MSG_RESULT(yes)
+		have_dn_expand=yes],[AC_MSG_RESULT(no)
 		LIBS="$saved_libs"])
 	]
 )
@@ -176,14 +155,11 @@ AC_SEARCH_LIBS(ns_initparse,[resolv bind],have_ns_initparse=yes,
 	AC_MSG_CHECKING([for ns_initparse in -lresolv (with resolv.h if present)])
 	saved_libs="$LIBS"
 	LIBS="-lresolv $LIBS"
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 		#ifdef HAVE_RESOLV_H
 		#include <resolv.h>
-		#endif],
-		[ns_initparse(0,0,0,0,0)],
-	[AC_MSG_RESULT(yes)
-		have_ns_initparse=yes],
-	[AC_MSG_RESULT(no)
+		#endif]], [[ns_initparse(0,0,0,0,0)]])],[AC_MSG_RESULT(yes)
+		have_ns_initparse=yes],[AC_MSG_RESULT(no)
 		LIBS="$saved_libs"])
 	]
 )

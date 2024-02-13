@@ -6,7 +6,7 @@ dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 
-AC_PREREQ([2.54])
+AC_PREREQ([2.71])
 
 dnl AC_LIB_LINKFLAGS(name [, dependencies]) searches for libname and
 dnl the libraries corresponding to explicit and implicit dependencies.
@@ -75,9 +75,7 @@ AC_DEFUN([AC_LIB_HAVE_LINKFLAGS],
   AC_CACHE_CHECK([for lib[]$1], [ac_cv_lib[]Name], [
     ac_save_LIBS="$LIBS"
     LIBS="$LIBS $LIB[]NAME"
-    AC_TRY_LINK([$3], [$4],
-      [ac_cv_lib[]Name=yes],
-      [ac_cv_lib[]Name='m4_if([$5], [], [no], [[$5]])'])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[$3]], [[$4]])],[ac_cv_lib[]Name=yes],[ac_cv_lib[]Name='m4_if([$5], [], [no], [[$5]])'])
     LIBS="$ac_save_LIBS"
   ])
   if test "$ac_cv_lib[]Name" = yes; then
