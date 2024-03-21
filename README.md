@@ -3,7 +3,7 @@ DNSMeter is a tool for testing performance of nameserver and/or infrastructure a
 It generates dns queries and sends them via UDP to a target nameserver and counts the answers.
 
 features:
-  - payload can be given as text file or pcap file 
+  - payload can be given as text file or pcap file
   - can automatically run different load steps, which can be given as list or ranges
   - results per load step can be stored in CSV file
   - sender address can be spoofed from a given network or from pcap file, if payload
@@ -14,7 +14,7 @@ features:
   - amount of DNSSEC queries can be given as percentage of total traffic
   - optimized for high amount of packets. On an Intel(R) Xeon(R) CPU E5-2430 v2 @ 2.50GHz
     it can generate more than 900.000 packets per second
-  - runs on Linux (Ubuntu, CentOS) and FreeBSD
+  - runs on Linux (Fedora, Ubuntu, CentOS) and FreeBSD
 
 
 # Requirements
@@ -134,12 +134,9 @@ This makes the following command:
 
     dnsmeter -p /home/testdata/payload.txt -r 30000,40000,45000,50000,100000,150000 \
     -s 10.0.0.0/8 -z 192.168.0.1:53 -e igb0 -d 70 -c results.csv
-  
+
 In the second example, we want to use a pcap file as payload and want to spoof with the
 addresses from that file:
 
     dnsmeter -p /home/testdata/pcap.file1 -r 30000,40000,45000,50000,100000,150000 \
     -s pcap -z 192.168.0.1:53 -e igb0 -c results_pcap.csv
-
-
-

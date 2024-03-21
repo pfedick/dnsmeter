@@ -468,10 +468,9 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 	if (report_line == 0 || report_line > 25) {
 		printf("--------+--------------------------------------+-------------------------------+-----\n");
 		printf("        |Packets/Data Application side         |Packets/Data Network %-10s|\n", (const char*)InterfaceName);
-		printf("Time    |   send|    rcv|diff %%|KB send| KB rcv|     TX|     RX|  KB TX|  KB RX|CPU %%\n");
-		printf("--------+-------+-------+------+-------+-------+-------+-------+-------+-------+-----\n");
+		printf("Time    |   send|    rcv|diff %%|KB send| KB rcv|     TX|     RX|diff %%|  KB TX|  KB RX|CPU %%\n");
+		printf("--------+-------+-------+------+-------+-------+-------+-------+------+-------+-------+-----\n");
 		report_line=0;
-
 	}
 	report_line++;
 
@@ -491,8 +490,9 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 	const SystemStat::Interface& net2=snap_end.interfaces[InterfaceName];
 	SystemStat::Network transmit=SystemStat::Network::getDelta(net1.transmit, net2.transmit);
 	SystemStat::Network received=SystemStat::Network::getDelta(net1.receive, net2.receive);
-	printf("%7lu|%7lu|%7lu|%7lu|%5.1f",
-		transmit.packets, received.packets, transmit.bytes / 1024, received.bytes / 1024, cpu);
+	dp=0.0f - (transmit.packets-received.packets) * 100.0f / (double)transmit.packets;
+	printf("%7lu|%7lu|%6.1f|%7lu|%7lu|%5.1f",
+		transmit.packets, received.packets, dp,transmit.bytes / 1024, received.bytes / 1024, cpu);
 	//printf("|| start TX: %lu, RX: %lu || end TX: %lu, RX: %lu\n", net1.transmit.packets, net1.receive.packets, net2.transmit.packets, net2.receive.packets);
 	printf("\n");
 }
