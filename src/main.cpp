@@ -475,6 +475,7 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 	report_line++;
 
 	double dp=0.0f;
+	double differenz=0.0f;
 	if (diff.counter_send) {
 		double differenz=(double)diff.counter_send - (double)diff.counter_received;
 		dp=0.0f - differenz * 100.0f / (double)diff.counter_send;
@@ -490,7 +491,9 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 	const SystemStat::Interface& net2=snap_end.interfaces[InterfaceName];
 	SystemStat::Network transmit=SystemStat::Network::getDelta(net1.transmit, net2.transmit);
 	SystemStat::Network received=SystemStat::Network::getDelta(net1.receive, net2.receive);
-	dp=0.0f - (transmit.packets-received.packets) * 100.0f / (double)transmit.packets;
+	difference=transmit.packets-received.packets;
+	if (difference>0) dp=0.0f - difference * 100.0f / (double)transmit.packets;
+	else dp=fabs(difference) * 100.0f / (double)transmit.packets;
 	printf("%7lu|%7lu|%6.1f|%7lu|%7lu|%5.1f",
 		transmit.packets, received.packets, dp,transmit.bytes / 1024, received.bytes / 1024, cpu);
 	//printf("|| start TX: %lu, RX: %lu || end TX: %lu, RX: %lu\n", net1.transmit.packets, net1.receive.packets, net2.transmit.packets, net2.receive.packets);
