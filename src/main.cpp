@@ -491,7 +491,7 @@ void DNSSender::showCurrentStats(ppl7::ppl_time_t start_time, SystemStat& snap_s
 	const SystemStat::Interface& net2=snap_end.interfaces[InterfaceName];
 	SystemStat::Network transmit=SystemStat::Network::getDelta(net1.transmit, net2.transmit);
 	SystemStat::Network received=SystemStat::Network::getDelta(net1.receive, net2.receive);
-	differenz=transmit.packets-received.packets;
+	differenz=(double)transmit.packets-(double)received.packets;
 	if (differenz>0) dp=0.0f - differenz * 100.0f / (double)transmit.packets;
 	else dp=fabs(differenz) * 100.0f / (double)transmit.packets;
 	printf("%7lu|%7lu|%6.1f|%7lu|%7lu|%5.1f",
