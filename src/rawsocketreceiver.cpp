@@ -298,7 +298,7 @@ void RawSocketReceiver::setSource(const ppl7::IPAddress& ip_addr, int port)
 bool RawSocketReceiver::socketReady()
 {
 #ifdef __FreeBSD__
-	//if (useZeroCopyBuffer) return true;
+	if (useZeroCopyBuffer) return true;
 #endif
 	fd_set rset;
 	struct timeval timeout;
@@ -370,12 +370,17 @@ void RawSocketReceiver::receive(RawSocketReceiver::Counter& counter)
 		struct bpf_zbuf* zbuf=(struct bpf_zbuf*)buffer;
 		struct bpf_zbuf_header* zhdr=NULL;
 		if (buffer_check((struct bpf_zbuf_header*)zbuf->bz_bufa)) {
+			//ppl7::PrintDebug("Buffer A is ready\n");
 			zhdr=((struct bpf_zbuf_header*)zbuf->bz_bufa);
 			read_zbuffer(zhdr, counter);
-		}
-		if (buffer_check((struct bpf_zbuf_header*)zbuf->bz_bufb)) {
+		} else if (buffer_check((struct bpf_zbuf_header*)zbuf->bz_bufb)) {
+			//ppl7::PrintDebug("Buffer B is ready\n");
 			zhdr=((struct bpf_zbuf_header*)zbuf->bz_bufb);
 			read_zbuffer(zhdr, counter);
+		} else {
+			// Try swapping the buffers
+			struct bpf_zbuf zb;
+			ioctl(sd, BIOCROTZBUF, &zb);
 		}
 	} else {
 		ssize_t bufused=read(sd, buffer, buflen);
