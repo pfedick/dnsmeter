@@ -623,6 +623,15 @@ void DNSSender::presentResults(const DNSSender::Results& result)
 	printf("network if %s Pkt send: %lu, rcv: %lu, Data send: %lu KB, rcv: %lu KB\n",
 		(const char*)InterfaceName,
 		transmit.packets, received.packets, transmit.bytes / 1024, received.bytes / 1024);
+	int64_t network_packages_lost=transmit.packets - received.packets;
+	double network_lost_percent=(double)network_packages_lost * 100.0 / (double)transmit.packets;
+	if (network_packages_lost < 0) {
+		network_lost_percent=0;
+		network_packages_lost=0;
+	}
+	printf("Network pkg lost: %10lu, Qps: %7lu = %0.3f %%\n", network_packages_lost,
+		(uint64_t)((double)network_packages_lost/real_run_time),
+		network_lost_percent);
 
 	uint64_t qps_send=(uint64_t)((double)result.counter_send / (double)real_run_time);
 	uint64_t bps_send=(uint64_t)((double)result.bytes_send / (double)real_run_time);
