@@ -118,6 +118,7 @@ void initZeroCopyBuffer(int sd, struct bpf_zbuf* zbuf)
 		printf("DEBUG: maximum buffer: %zu\n", maxsize);
 	}
 	int v=65536 * 4;
+	if (maxsize>v) v=maxsize;
 	if (v > maxsize) v=maxsize;
 	while (v >= 4096) {
 		if (tryAllocZeroCopyBuffer(sd, zbuf, v)) return;
@@ -189,7 +190,6 @@ RawSocketReceiver::RawSocketReceiver()
 		useZeroCopyBuffer=false;
 		free(buffer);
 	}
-	buflen=65536;
 	buffer=(unsigned char*)malloc(buflen);
 	if (!buffer) { close(sd); throw ppl7::OutOfMemoryException(); }
 	try {
