@@ -297,9 +297,6 @@ void RawSocketReceiver::setSource(const ppl7::IPAddress& ip_addr, int port)
 
 bool RawSocketReceiver::socketReady()
 {
-#ifdef __FreeBSD__
-	if (useZeroCopyBuffer) return true;
-#endif
 	fd_set rset;
 	struct timeval timeout;
 	timeout.tv_sec=0;
@@ -311,6 +308,13 @@ bool RawSocketReceiver::socketReady()
 	if (FD_ISSET(sd, &rset)) {
 		return true;
 	}
+#ifdef __FreeBSD__
+	if (useZeroCopyBuffer) {
+		// Try force rotate the zero copy buffers
+		struct bpf_zbuf zb;
+		ioctl(sd, BIOCROTZBUF, &zb);
+	}
+#endif
 	return false;
 }
 
