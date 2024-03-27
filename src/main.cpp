@@ -32,6 +32,7 @@
 #include <resolv.h>
 #include <signal.h>
 #include <list>
+#include <math.h>
 
 #include "dnsmeter.h"
 #include "sensor.h"
