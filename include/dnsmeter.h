@@ -69,7 +69,6 @@ private:
 	unsigned char* buffer;
 	int buffersize;
 	int payload_size;
-	bool chksum_valid;
 
 	void updateChecksums();
 public:

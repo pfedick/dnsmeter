@@ -57,8 +57,9 @@ static unsigned short in_cksum(unsigned short* addr, int len)
 		nleft -=  2;
 	}
 	if (nleft == 1) {
-		*(unsigned char*)(&answer) = *(unsigned char*)w;
-		sum += answer;
+		//*(unsigned char*)(&answer) = *(unsigned char*)w;
+		//sum += answer;
+		sum+=*(unsigned char*)w;
 	}
 	sum  = (sum >> 16) + (sum & 0xffff);
 	sum += (sum >> 16);
@@ -66,24 +67,35 @@ static unsigned short in_cksum(unsigned short* addr, int len)
 	return (answer);
 }
 
+// Structure for IP pseudo-header (for IPv4)
+struct pseudo_header {
+    uint32_t src_addr;
+    uint32_t dest_addr;
+    uint8_t placeholder;
+    uint8_t protocol;
+    uint16_t udp_length;
+};
+
+
+
 static unsigned short udp_cksum(const struct ip* iphdr, const struct udphdr* udp, const unsigned char* payload, size_t payload_size)
 {
 	unsigned char cbuf[MAXPACKETSIZE];
 	memset(cbuf, 0, sizeof(cbuf));
-	unsigned char* p = (unsigned char*)cbuf;
-	*(unsigned int*)p = iphdr->ip_src.s_addr;
-	p += sizeof(unsigned int);
-	*(unsigned int*)p = iphdr->ip_dst.s_addr;
-	p += sizeof(unsigned int);
-	*(unsigned char*)p++ = 0;
-	*(unsigned char*)p++ = iphdr->ip_p;
-	*(unsigned short*)p   = udp->uh_ulen;
-	p += sizeof(unsigned short);
-	memcpy(p, udp, USZ);
-	p += USZ;
-	memcpy(p, payload, payload_size);
-	return in_cksum((unsigned short*)cbuf, sizeof(uint) * 3 + sizeof(struct udphdr) + payload_size + (payload_size % 2));
+	pseudo_header *psh=(pseudo_header*)cbuf;
+	psh->src_addr=iphdr->ip_src.s_addr;
+	psh->dest_addr=iphdr->ip_dst.s_addr;
+	psh->placeholder=0;
+	psh->protocol=iphdr->ip_p;
+	psh->udp_length=udp->uh_ulen;
+	memcpy(cbuf+sizeof(pseudo_header),udp,sizeof(struct udphdr));
+	memcpy(cbuf+sizeof(pseudo_header)+sizeof(struct udphdr),payload,payload_size);
+	return in_cksum((unsigned short*)cbuf, sizeof(pseudo_header) + sizeof(struct udphdr) + payload_size);
 }
+
+
+
+
 
 
 
@@ -108,10 +120,9 @@ Packet::Packet()
 	iphdr->ip_src.s_addr = 0;
 	iphdr->ip_dst.s_addr = 0;
 	iphdr->ip_len=htons(HDRSZ + payload_size);
-	iphdr->ip_sum = in_cksum((unsigned short*)iphdr, ISZ);
+	iphdr->ip_sum = 0;
 
 	udp->uh_ulen=htons(USZ + payload_size);
-	chksum_valid=false;
 }
 
 Packet::~Packet()
@@ -125,14 +136,12 @@ void Packet::setSource(const ppl7::IPAddress& ip_addr, int port)
 	struct udphdr* udp = (struct udphdr*)(buffer + ISZ);
 	iphdr->ip_src.s_addr = *(in_addr_t*)ip_addr.addr();
 	udp->uh_sport=htons(port);
-	chksum_valid=false;
 }
 
 void Packet::randomSourcePort()
 {
 	struct udphdr* udp = (struct udphdr*)(buffer + ISZ);
 	udp->uh_sport=htons(ppl7::rand(1024, 65535));
-	chksum_valid=false;
 }
 
 void Packet::randomSourceIP(const ppl7::IPNetwork& net)
@@ -141,14 +150,12 @@ void Packet::randomSourceIP(const ppl7::IPNetwork& net)
 	in_addr_t start=ntohl(*(in_addr_t*)net.first().addr());
 	size_t size=powl(2, 32 - net.prefixlen());
 	iphdr->ip_src.s_addr = htonl(ppl7::rand(start, start + size - 1));
-	chksum_valid=false;
 }
 
 void Packet::randomSourceIP(unsigned int start, unsigned int size)
 {
 	struct ip* iphdr = (struct ip*)buffer;
 	iphdr->ip_src.s_addr = htonl(ppl7::rand(start, start + size - 1));
-	chksum_valid=false;
 }
 
 
@@ -168,20 +175,17 @@ void Packet::setDestination(const ppl7::IPAddress& ip_addr, int port)
 	struct udphdr* udp = (struct udphdr*)(buffer + ISZ);
 	iphdr->ip_dst.s_addr = *(in_addr_t*)ip_addr.addr();
 	udp->uh_dport=htons(port);
-	chksum_valid=false;
 }
 
 void Packet::setIpId(unsigned short id)
 {
 	struct ip* iphdr = (struct ip*)buffer;
 	iphdr->ip_id  = htons(id);
-	chksum_valid=false;
 }
 
 void Packet::setDnsId(unsigned short id)
 {
 	*((unsigned short*)(buffer + HDRSZ))=htons(id);
-	chksum_valid=false;
 }
 
 void Packet::setPayload(const void* payload, size_t size)
@@ -193,7 +197,6 @@ void Packet::setPayload(const void* payload, size_t size)
 	struct udphdr* udp = (struct udphdr*)(buffer + ISZ);
 	iphdr->ip_len=htons(HDRSZ + payload_size);
 	udp->uh_ulen=htons(USZ + payload_size);
-	chksum_valid=false;
 }
 
 void Packet::setPayloadDNSQuery(const ppl7::String& query, bool dnssec)
@@ -203,7 +206,6 @@ void Packet::setPayloadDNSQuery(const ppl7::String& query, bool dnssec)
 	struct udphdr* udp = (struct udphdr*)(buffer + ISZ);
 	iphdr->ip_len=htons(HDRSZ + payload_size);
 	udp->uh_ulen=htons(USZ + payload_size);
-	chksum_valid=false;
 }
 
 void Packet::updateChecksums()
@@ -214,7 +216,6 @@ void Packet::updateChecksums()
 	iphdr->ip_sum = in_cksum((unsigned short*)iphdr, ISZ);
 	udp->uh_sum=0;
 	udp->uh_sum=udp_cksum(iphdr, udp, buffer + HDRSZ, payload_size);
-	chksum_valid=true;
 }
 
 size_t Packet::size() const
@@ -224,6 +225,6 @@ size_t Packet::size() const
 
 unsigned char* Packet::ptr()
 {
-	if (!chksum_valid) updateChecksums();
+	updateChecksums();
 	return buffer;
 }
