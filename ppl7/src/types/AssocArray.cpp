@@ -1,23 +1,18 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
- * Web: http://www.pfp.de/ppl/
- *
- * $Author$
- * $Revision$
- * $Date$
- * $Id$
- *
+ * Web: https://github.com/pfedick/pplib
  *******************************************************************************
- * Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    1. Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
+ *
+ *    1. Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,7 +22,7 @@
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
@@ -72,7 +67,7 @@ namespace ppl7 {
  * - AssocArray
  * - DateTime
  * \par
- * Die Schlüssel werden sortiert in einem AVL-Baum verwaltet (siehe AVLTree), so dass auch bei
+ * Die Schlüssel werden sortiert in einer std::map verwaltet, so dass auch bei
  * sehr großen Arrays eine schnelle Verarbeitung gewährleistet ist. Gross-/Kleinschreibung wird
  * ignoriert, der Schlüssel "TEST" wäre also identisch mit "test" oder "Test".
  * \par
@@ -1801,62 +1796,62 @@ size_t AssocArray::importBinary(const void* buffer, size_t buffersize)
 		key.set(ptr + p, keylen);
 		p+=keylen;
 		switch (type) {
-		case Variant::TYPE_STRING:
-			vallen=PeekN32(ptr + p);
-			p+=4;
-			set(key, (const char*)ptr + p, vallen);
-			p+=vallen;
-			break;
-		case Variant::TYPE_WIDESTRING:
-			vallen=PeekN32(ptr + p);
-			p+=4;
+			case Variant::TYPE_STRING:
+				vallen=PeekN32(ptr + p);
+				p+=4;
+				set(key, (const char*)ptr + p, vallen);
+				p+=vallen;
+				break;
+			case Variant::TYPE_WIDESTRING:
+				vallen=PeekN32(ptr + p);
+				p+=4;
 #ifdef HAVE_ICONV
-			iconv.transcode(ByteArrayPtr((const char*)ptr + p, vallen), nb);
-			ws.set((const wchar_t*)nb.ptr(), nb.size() / sizeof(wchar_t));
+				iconv.transcode(ByteArrayPtr((const char*)ptr + p, vallen), nb);
+				ws.set((const wchar_t*)nb.ptr(), nb.size() / sizeof(wchar_t));
 #else
-			ws.set((const char*)ptr + p, vallen);
+				ws.set((const char*)ptr + p, vallen);
 #endif
-			set(key, ws);
-			p+=vallen;
-			break;
-		case Variant::TYPE_ASSOCARRAY:
-			na.clear();
-			bytes=na.importBinary(ptr + p, buffersize - p);
-			p+=bytes;
-			set(key, na);
-			break;
-		case Variant::TYPE_ARRAY:
-		{
-			size_t elements=PeekN32(ptr + p);
-			p+=4;
-			Array stringarray;
-			stringarray.reserve(elements);
-			for (size_t i=0;i < elements;i++) {
-				str.set(ptr + p + 4, PeekN32(ptr + p));
-				p+=PeekN32(ptr + p) + 4;
-				stringarray.add(str);
+				set(key, ws);
+				p+=vallen;
+				break;
+			case Variant::TYPE_ASSOCARRAY:
+				na.clear();
+				bytes=na.importBinary(ptr + p, buffersize - p);
+				p+=bytes;
+				set(key, na);
+				break;
+			case Variant::TYPE_ARRAY:
+			{
+				size_t elements=PeekN32(ptr + p);
+				p+=4;
+				Array stringarray;
+				stringarray.reserve(elements);
+				for (size_t i=0;i < elements;i++) {
+					str.set(ptr + p + 4, PeekN32(ptr + p));
+					p+=PeekN32(ptr + p) + 4;
+					stringarray.add(str);
+				}
+				set(key, stringarray);
 			}
-			set(key, stringarray);
-		}
-		break;
-		case Variant::TYPE_BYTEARRAY:
-			vallen=PeekN32(ptr + p);
-			p+=4;
-			nb.free();
-			nb.copy(ptr + p, vallen);
-			p+=vallen;
-			set(key, nb);
 			break;
-		case Variant::TYPE_DATETIME:
-			vallen=PeekN32(ptr + p);
-			p+=4;
-			dt.setLongInt(PeekN64(ptr + p));
-			p+=vallen;
-			set(key, dt);
-			break;
-		default:
-			vallen=PeekN32(ptr + p);
-			throw ImportFailedException("unknown datatype in AssocArray binary export [type=%d, size=%zu]", type, vallen);
+			case Variant::TYPE_BYTEARRAY:
+				vallen=PeekN32(ptr + p);
+				p+=4;
+				nb.free();
+				nb.copy(ptr + p, vallen);
+				p+=vallen;
+				set(key, nb);
+				break;
+			case Variant::TYPE_DATETIME:
+				vallen=PeekN32(ptr + p);
+				p+=4;
+				dt.setLongInt(PeekN64(ptr + p));
+				p+=vallen;
+				set(key, dt);
+				break;
+			default:
+				vallen=PeekN32(ptr + p);
+				throw ImportFailedException("unknown datatype in AssocArray binary export [type=%d, size=%zu]", type, vallen);
 		};
 	}
 	p++;

@@ -1,17 +1,18 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
- * Web: http://www.pfp.de/ppl/
+ * Web: https://github.com/pfedick/pplib
  *******************************************************************************
- * Copyright (c) 2022, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    1. Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
+ *
+ *    1. Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -21,7 +22,7 @@
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
@@ -235,6 +236,7 @@ public:
 	ByteArray(const ByteArrayPtr& other);
 	ByteArray(const ByteArray& other);
 	ByteArray(const String& str);
+	ByteArray(const WideString& str);
 	ByteArray(const void* adr, size_t size);
 	ByteArray(size_t size);
 	~ByteArray();
@@ -254,6 +256,7 @@ public:
 	ByteArray& operator=(const ByteArrayPtr& other);
 	ByteArray& operator=(const ByteArray& other);
 	ByteArray& operator=(const String& str);
+	ByteArray& operator=(const WideString& str);
 	operator const void* () const;
 	operator const unsigned char* () const;
 	operator const char* () const;
@@ -307,16 +310,6 @@ public:
 		QByteArray a=q->toLocal8Bit();
 #endif
 		set((const char*)a);
-	}
-#endif
-#ifdef _PPL6_INCLUDE
-	String(const ppl6::CString& q) {
-		ptr=NULL; stringlen=0; s=0;
-		set(q.GetPtr(), q.Size());
-	}
-	String(const ppl6::CString* q) {
-		ptr=NULL; stringlen=0; s=0;
-		set(q->GetPtr(), q->Size());
 	}
 #endif
 		//@}
@@ -431,11 +424,13 @@ public:
 	String& stripSlashes();
 
 	String& replace(const String& search, const String& replacement);
+
+	/*
 	String& pregReplace(const String& expression, const String& replacement, int max=0);
 	String& pregEscape();
-
 	bool pregMatch(const String& expression) const;
 	bool pregMatch(const String& expression, Array& matches, size_t maxmatches=16) const;
+	*/
 	//@}
 
 	//! @name String ausgeben und auslesen
@@ -518,6 +513,16 @@ public:
 
 	//@}
 
+#ifdef PPL_WITH_QT6
+	operator QAnyStringView() const {
+#ifdef PPL_QT_STRING_UTF8
+		return QAnyStringView(ptr, stringlen);
+#else
+		return QAnyStringView(ptr, stringlen);
+#endif
+	}
+#endif
+
 #ifdef WITH_QT
 		//! @name Operatoren zur Verwendung der Klasse mit Qt
 		//@{
@@ -566,32 +571,6 @@ public:
 		return *this;
 	}
 	//@}
-#endif
-#ifdef _PPL6_INCLUDE
-		//! @name Operatoren zur Verwendung der Klasse mit ppl6
-		//@{
-	operator const ppl6::CString() const {
-		return ppl6::CString(ptr, stringlen);
-	}
-	ppl6::CString toPpl6CString() const {
-		return ppl6::CString(ptr, stringlen);
-	}
-
-	String& operator=(const ppl6::CString& q) {
-		set(q.GetPtr(), q.Size());
-		return *this;
-	}
-	String& operator=(const ppl6::CString* q) {
-		set(q->GetPtr(), q->Size());
-		return *this;
-	}
-	String& operator+=(const ppl6::CString& str) {
-		ppl7::String p7(str);
-		return (*this)+=p7;
-	}
-
-	//@}
-
 #endif
 };
 
@@ -747,11 +726,14 @@ public:
 	WideString& stripSlashes();
 
 	WideString& replace(const WideString& search, const WideString& replacement);
+
+	/*
 	WideString& pregReplace(const WideString& expression, const WideString& replacement, int max=0);
 	WideString& pregEscape();
-
 	bool pregMatch(const WideString& expression) const;
 	bool pregMatch(const WideString& expression, Array& matches, size_t maxmatches=16) const;
+	*/
+
 	//@}
 
 	//! @name String ausgeben und auslesen

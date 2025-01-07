@@ -24,7 +24,7 @@ AC_CONFIG_HEADERS([ppl7/include/ppl7-config.h])
 ###############################################################################
 ## PPL7
 sinclude(autoconf/ax_cxx_compile_stdcxx.m4)
-sinclude(autoconf/ax_path_lib_pcre.m4)
+sinclude(autoconf/pcre2.m4)
 sinclude(autoconf/ax_pthread.m4)
 sinclude(autoconf/lib-link.m4)
 sinclude(autoconf/checkfuncs.m4)
@@ -35,7 +35,7 @@ sinclude(autoconf/libbind.m4)
 sinclude(autoconf/libpcap.m4)
 
 report_have_pthreads="no"
-report_have_pcre="no"
+report_have_pcre2="no"
 report_have_libpcap="no"
 
 AC_CANONICAL_TARGET
@@ -293,10 +293,9 @@ fi
 LDFLAGS="$LDFLAGS -L/usr/local/lib"
 CFLAGS="$CFLAGS -I/usr/local/include"
 
-# PCRE exists?
-AX_PATH_LIB_PCRE(
-            AC_DEFINE(HAVE_PCRE, 1, [ Define if you have pcre. ])
-            report_have_pcre="yes"
+# PCRE2 exists?
+AC_CHECK_PCRE2(AC_DEFINE(HAVE_PCRE2, 1, [ Define if you have pcre2. ])
+            report_have_pcre2="yes"
             ,
             )
 
@@ -452,7 +451,7 @@ AC_SUBST(HAVE_X86_ASSEMBLER)
 
 
 ############################
-AC_SUBST(report_have_pcre)
+AC_SUBST(report_have_pcre2)
 AC_SUBST(report_have_pthreads)
 AC_SUBST(report_have_libbind)
 AC_SUBST(report_have_libpcap)
@@ -485,7 +484,7 @@ AC_MSG_RESULT([
 ** Features:
 **   Threads:              $report_have_pthreads
 **   Resolver lib:         $report_have_libbind
-**   PCRE:                 $report_have_pcre
+**   PCRE2:                $report_have_pcre2
 **   LIBPCAP:              $report_have_libpcap
 ******************************************************************************
 ])
@@ -499,9 +498,9 @@ then
 "
 fi
 
-if test "$report_have_pcre" != "yes"
+if test "$report_have_pcre2" != "yes"
 then
-	missing="$missing  - libpcre is required but not found
+	missing="$missing  - libpcre2 is required but not found
 "
 fi
 

@@ -1,18 +1,18 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
- * Web: http://www.pfp.de/ppl/
- *
+ * Web: https://github.com/pfedick/pplib
  *******************************************************************************
- * Copyright (c) 2022, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    1. Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
+ *
+ *    1. Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -22,7 +22,7 @@
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
@@ -869,21 +869,23 @@ const DirEntry& Dir::getFirstPattern(Iterator & it, const String & pattern, bool
 const DirEntry& Dir::getNextPattern(Iterator & it, const String & pattern, bool ignorecase) const
 {
 	String Pattern;
-	Pattern=pattern;
+	Pattern=RegEx::escape(pattern);
 	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
-	Pattern.pregEscape();
 	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
+	Pattern.replace(".", "\\.");
 	Pattern.replace("\\*", ".*");
 	Pattern.replace("\\?", ".");
-	Pattern="/^" + Pattern;
-	Pattern+="$/s";
-	if (ignorecase) Pattern+="i";
-	//printf ("Pattern: %s\n",(const char*)Pattern);
+	Pattern="^" + Pattern;
+	Pattern+="$";
+	int flags=RegEx::Flags::DOTALL;
+	if (ignorecase) flags|=RegEx::Flags::CASELESS;
+	RegEx::Pattern regex=RegEx::compile(Pattern,flags);
+
 	while (SortedFiles.getNext(it)) {
 		const DirEntry* de=it.value();
 		// Patternmatch
 		//printf ("Match gegen: %s\n",(const char*)de->Filename);
-		if (de->Filename.pregMatch(Pattern)) return *de;
+		if (RegEx::match(pattern,de->Filename)) return *de;
 	}
 	throw EndOfListException();
 }
@@ -927,10 +929,11 @@ const DirEntry& Dir::getFirstRegExp(Iterator & it, const String & regexp) const
  */
 const DirEntry& Dir::getNextRegExp(Iterator & it, const String & regexp) const
 {
+	RegEx::Pattern pattern=RegEx::compile(regexp);
 	while (SortedFiles.getNext(it)) {
 		const DirEntry* de=it.value();
 		// Patternmatch
-		if (de->Filename.pregMatch(regexp)) return *de;
+		if (RegEx::match(pattern,de->Filename)) return *de;
 	}
 	throw EndOfListException();
 }
@@ -976,7 +979,6 @@ bool Dir::getNext(DirEntry & e, Iterator & it) const
 	if (!SortedFiles.getNext(it)) return false;
 	e=*it.value();
 	return true;
-
 }
 
 /*!\brief Erster Verzeichniseintrag, der zu einem bestimmten Muster passt
@@ -1031,22 +1033,23 @@ bool Dir::getFirstPattern(DirEntry & e, Iterator & it, const String & pattern, b
  */
 bool Dir::getNextPattern(DirEntry & e, Iterator & it, const String & pattern, bool ignorecase) const
 {
-	String Pattern;
-	Pattern=pattern;
-	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
-	Pattern.pregEscape();
-	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
+	//printf ("Pattern: %s\n",(const char*)pattern);
+	String Pattern=RegEx::escape(pattern);
+	//printf ("Pattern: %s\n",(const char*)Pattern);
+	Pattern.replace(".", "\\.");
 	Pattern.replace("\\*", ".*");
 	Pattern.replace("\\?", ".");
-	Pattern="/^" + Pattern;
-	Pattern+="$/";
-	if (ignorecase) Pattern+="i";
-	//printf ("Pattern: %ls\n",(const wchar_t*)Pattern);
+	Pattern="^" + Pattern;
+	Pattern+="$";
+	int flags=RegEx::Flags::DOTALL;
+	if (ignorecase) flags|=RegEx::Flags::CASELESS;
+	RegEx::Pattern regex=RegEx::compile(Pattern,flags);
+	//ppl7::PrintDebug ("final Pattern: %s\n",(const char*)Pattern);
 	while (SortedFiles.getNext(it)) {
 		const DirEntry* de=it.value();
 		// Patternmatch
-		//printf ("Match gegen: %ls\n",(const wchar_t*)Name);
-		if (de->Filename.pregMatch(Pattern)) {
+		//ppl7::PrintDebug ("Match gegen: %s\n",(const char*)de->Filename);
+		if (RegEx::match(regex,de->Filename)) {
 			e=*de;
 			return true;
 		}
@@ -1099,10 +1102,11 @@ bool Dir::getFirstRegExp(DirEntry & e, Iterator & it, const String & regexp) con
  */
 bool Dir::getNextRegExp(DirEntry & e, Iterator & it, const String & regexp) const
 {
+	RegEx::Pattern pattern=RegEx::compile(regexp);
 	while (SortedFiles.getNext(it)) {
 		const DirEntry* de=it.value();
 		// Patternmatch
-		if (de->Filename.pregMatch(regexp)) {
+		if (RegEx::match(pattern,de->Filename)) {
 			e=*de;
 			return true;
 		}

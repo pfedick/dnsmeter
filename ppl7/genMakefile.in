@@ -1,40 +1,31 @@
 #!/bin/sh
-#
 ###############################################################################
 # This file is part of "Patrick's Programming Library", Version 7 (PPL7).
-# Web: http://www.pfp.de/ppl/
-#
-# $Author$
-# $Revision$
-# $Date$
-# $Id$
-#
+# Web: https://github.com/pfedick/pplib
 ###############################################################################
-#
-# Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+# Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
-#   1. Redistributions of source code must retain the above copyright notice,
-#      this list of conditions and the following disclaimer. 
-#   2. Redistributions in binary form must reproduce the above copyright notice,
-#      this list of conditions and the following disclaimer in the documentation
-#      and/or other materials provided with the distribution. 
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER AND CONTRIBUTORS BE
 # LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-#
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
 SED=sed
@@ -53,7 +44,7 @@ find_c_files() {
 	# $3=FLAGS
 	# $4=PREFIX
 	# $5=Zusaetzliche Header-Dependencies
-	
+
 	COMPILE_RELEASE="$COMPILE_RELEASE
 ### $2"
 	COMPILE_DEBUG="$COMPILE_DEBUG
@@ -63,7 +54,7 @@ find_c_files() {
 	FOUND_RELEASE=""
 	FOUND_DEBUG=""
 	FOUND_COVERAGE=""
-	filelist=`ls *.cpp *.c 2>/dev/null |sort` 
+	filelist=`ls *.cpp *.c 2>/dev/null |sort`
 	for file in $filelist; do
 		BASENAME=`echo $file | $SED -e "s;.cpp\$;;" | $SED -e "s;.c\$;;" `
 		SOURCEN="$SOURCEN $1/$file"
@@ -79,25 +70,8 @@ find_c_files() {
 			FOUND_DEBUG="debug/$4$BASENAME.o"
 			FOUND_COVERAGE="coverage/$4$BASENAME.o"
 		fi
-		
-		ADDITIONAL_DEPENDENCY=""
-		if test "$1/$file" = "grafix/CGrafix.cpp"
-		then
-			ADDITIONAL_DEPENDENCY="	\$(incdir)/ppl7-tk.h"
-		fi
-		if test "$1/$file" = "grafix/CEngine.cpp"
-		then
-			ADDITIONAL_DEPENDENCY="	\$(incdir)/ppl7-tk.h"
-		fi
-		if test "$1/$file" = "grafix/CEngineSDL.cpp"
-		then
-			ADDITIONAL_DEPENDENCY="	\$(incdir)/ppl7-tk.h"
-		fi
 
-		if test "$1/$file" = "core/AVLTree.cpp"
-		then
-			ADDITIONAL_DEPENDENCY="	\$(incdir)/ppl7-algorithms.h"
-		fi
+		ADDITIONAL_DEPENDENCY=""
 
 		COMPILE_RELEASE="$COMPILE_RELEASE
 release/$4$BASENAME.o:	\$(srcdir)/$1/$file \$(incdir)/ppl7.h \$(incdir)/ppl7-exceptions.h \$(incdir)/ppl7-types.h \$(incdir)/ppl7-config.h Makefile $5 $ADDITIONAL_DEPENDENCY
@@ -146,7 +120,7 @@ find_asm_files() {
 			ASM_DEBUG="debug/asm_$BASENAME.o"
 			ASM_COVERAGE="coverage/asm_$BASENAME.o"
 		fi
-		
+
 		COMPILE_RELEASE="$COMPILE_RELEASE
 release/asm_$BASENAME.o:	\$(srcdir)/$1/$file Makefile
 	\$(ASM) -o release/asm_$BASENAME.o -l release/asm_$BASENAME.lst \$(srcdir)/$1/$file
@@ -190,7 +164,7 @@ CORE_DEBUG="$CORE_DEBUG \\
 	$FOUND_DEBUG"
 CORE_COVERAGE="$CORE_COVERAGE \\
 	$FOUND_COVERAGE"
-	
+
 
 
 find_c_files "crypto" "CRYPTO" "" "crypto_" "\$(incdir)/ppl7-crypto.h"
@@ -217,12 +191,6 @@ GFX_DEBUG="$FOUND_DEBUG"
 GFX_COVERAGE="$FOUND_COVERAGE"
 
 
-find_c_files "toolkit" "TOOLKIT" "" "tk_" "\$(incdir)/ppl7-grafix.h \$(incdir)/ppl7-tk.h"
-TK_RELEASE="$FOUND_RELEASE"
-TK_DEBUG="$FOUND_DEBUG"
-TK_COVERAGE="$FOUND_COVERAGE"
-
-
 find_c_files "audio" "AUDIO" "" "audio_" "\$(incdir)/ppl7-audio.h"
 AUDIO_RELEASE="$FOUND_RELEASE"
 AUDIO_DEBUG="$FOUND_DEBUG"
@@ -236,43 +204,32 @@ find_asm_files "asm" "ASM"
 ######################################################################################################################
 
 echo "###############################################################################
-###
-### PPL7 Makefile
-###
-###############################################################################
 # This file is part of \"Patrick's Programming Library\", Version 7 (PPL7).
-# Web: http://www.pfp.de/ppl/
-#
-# \$Author: pafe \$
-# \$Revision: 588 \$
-# \$Date: 2013-04-26 20:47:43 +0200 (Fr, 26 Apr 2013) \$
-# \$Id: Makefile.in 588 2013-04-26 18:47:43Z pafe \$
-#
+# Web: https://github.com/pfedick/pplib
 ###############################################################################
-#
-# Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+# Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
-#   1. Redistributions of source code must retain the above copyright notice,
-#      this list of conditions and the following disclaimer. 
-#   2. Redistributions in binary form must reproduce the above copyright notice,
-#      this list of conditions and the following disclaimer in the documentation
-#      and/or other materials provided with the distribution. 
+#    1. Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#    2. Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER AND CONTRIBUTORS BE
 # LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
 #
 ###############################################################################
 ### Global Options
@@ -289,34 +246,33 @@ TARGETINCLUDE	?= @includedir@
 CC			= @CC@
 CXX			= @CXX@
 CFLAGS		=  -I\${incdir} $DEFINES @CFLAGS@ @DEFS@  @PTHREAD_CFLAGS@ \
-	@ZLIB_CFLAGS@ @BZ2_CFLAGS@ @PCRE_CFLAGS@ @OPENSSL_INCLUDES@ @ICONV_CFLAGS@ @MYSQL_CFLAGS@ @POSTGRESQL_CFLAGS@ \
+	@ZLIB_CFLAGS@ @BZ2_CFLAGS@ @PCRE2_CFLAGS@ @OPENSSL_INCLUDES@ @ICONV_CFLAGS@ @MYSQL_CFLAGS@ @POSTGRESQL_CFLAGS@ \
 	@SQLITE3_CFLAGS@ \
 	@LAME_CFLAGS@ @MPG123_CFLAGS@ @LIBMICROHTTPD_CFLAGS@ @LIBCDIO_CFLAGS@ \
-	@SDL2_CFLAGS@ \
 	@LIBIDN_CFLAGS@ @LIBCURL_CPPFLAGS@ \
 	@FT2_CFLAGS@ @LIBLDNS_CFLAGS@ @IMLIB_CFLAGS@
-	
-	
+
+
 CPPFLAGS	= @CPPFLAGS@
 CXXFLAGS	= @CXXFLAGS@
 LDFLAGS		= @LDFLAGS@
-LIBS		= @OPENSSL_LDFLAGS@ @OPENSSL_LIBS@ @LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @ZLIB_LIBS@ @BZ2_LIBS@ @PCRE_LIBS@ @IMLIB_LIBS@ \
+LIBS		= @OPENSSL_LDFLAGS@ @OPENSSL_LIBS@ @LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @ZLIB_LIBS@ @BZ2_LIBS@ @PCRE2_LIBS@ @IMLIB_LIBS@ \
 	@FT2_LIBS@ @ICONV_LIBS@ @MYSQL_LDFLAGS@ @POSTGRESQL_LDFLAGS@ @SQLITE3_LDFLAGS@ \
 	@LAME_LIBS@ @LIBLDNS_LIBS@ @MPG123_LIBS@ \
-	@SDL2_LIBS@ @LIBCURL@ @LIBCDIO_LDFLAGS@ \
+	@LIBCURL@ @LIBCDIO_LDFLAGS@ \
 	@LIBMICROHTTPD_LIBS@ @LIBIDN_LIBS@
-	
+
 LIBNAME		= $LIBNAME
 LIBDEBUG	= $LIBNAME-debug
 DISTNAME	= ${DISTNAME}
 ASM			= @ASM@ @ASMFLAGS@
-ASMDEBUGFLAGS	= @ASMDEBUGFLAGS@	
+ASMDEBUGFLAGS	= @ASMDEBUGFLAGS@
 
 ###########################################################################
 ### Object Files RELEASE
 ###########################################################################
 
-RELEASE	= $CORE_RELEASE $CRYPTO_RELEASE $INET_RELEASE $DB_RELEASE $GFX_RELEASE $TK_RELEASE $AUDIO_RELEASE
+RELEASE	= $CORE_RELEASE $CRYPTO_RELEASE $INET_RELEASE $DB_RELEASE $GFX_RELEASE $AUDIO_RELEASE
 
 CORE_RELEASE = $CORE_RELEASE
 
@@ -328,8 +284,6 @@ DB_RELEASE = $DB_RELEASE
 
 GFX_RELEASE = $GFX_RELEASE
 
-TK_RELEASE = $TK_RELEASE
-
 AUDIO_RELEASE = $AUDIO_RELEASE
 
 ASM_OBJ_RELEASE	=	$ASM_RELEASE
@@ -338,7 +292,7 @@ ASM_OBJ_RELEASE	=	$ASM_RELEASE
 ### Object Files DEBUG
 ###########################################################################
 
-DEBUG	= $CORE_DEBUG $CRYPTO_DEBUG $INET_DEBUG $DB_DEBUG $GFX_DEBUG $TK_DEBUG $AUDIO_DEBUG
+DEBUG	= $CORE_DEBUG $CRYPTO_DEBUG $INET_DEBUG $DB_DEBUG $GFX_DEBUG $AUDIO_DEBUG
 
 CORE_DEBUG = $CORE_DEBUG
 
@@ -350,8 +304,6 @@ DB_DEBUG = $DB_DEBUG
 
 GFX_DEBUG = $GFX_DEBUG
 
-TK_DEBUG = $TK_DEBUG
-
 AUDIO_DEBUG = $AUDIO_DEBUG
 
 ASM_OBJ_DEBUG	=	$ASM_DEBUG
@@ -361,7 +313,7 @@ ASM_OBJ_DEBUG	=	$ASM_DEBUG
 ### Object Files COVERAGE
 ###########################################################################
 
-COVERAGE	= $CORE_COVERAGE $CRYPTO_COVERAGE $INET_COVERAGE $DB_COVERAGE $GFX_COVERAGE $TK_COVERAGE $AUDIO_COVERAGE
+COVERAGE	= $CORE_COVERAGE $CRYPTO_COVERAGE $INET_COVERAGE $DB_COVERAGE $GFX_COVERAGE $AUDIO_COVERAGE
 
 ASM_OBJ_COVERAGE	=	$ASM_COVERAGE
 
@@ -374,22 +326,22 @@ ASM_OBJ_COVERAGE	=	$ASM_COVERAGE
 
 release: release/\$(LIBNAME).a release/\$(LIBNAME)-core.a release/\$(LIBNAME)-crypto.a \
          release/\$(LIBNAME)-inet.a release/\$(LIBNAME)-db.a release/\$(LIBNAME)-gfx.a \
-         release/\$(LIBNAME)-tk.a debug/make release/\$(LIBNAME)-audio.a
-	
+         release/make release/\$(LIBNAME)-audio.a
+
 coverage: coverage/\$(LIBNAME).a
-	
+
 debug: debug/\$(LIBDEBUG).a
-	
+
 all:	install_debug install
 
 debug/\$(LIBDEBUG).a: debug/make \$(DEBUG) \$(ASM_DEBUG)
 	ar -r debug/\$(LIBDEBUG).a \$(DEBUG) \$(ASM_DEBUG)
 	-chmod a+x ppl7-config
-	
+
 release/\$(LIBNAME).a: release/make \$(RELEASE) \$(ASM_RELEASE)
 	ar -r release/\$(LIBNAME).a \$(RELEASE) \$(ASM_RELEASE)
 	-chmod a+x ppl7-config
-	
+
 coverage/\$(LIBNAME).a: coverage/make \$(COVERAGE) \$(ASM_COVERAGE)
 	ar -r coverage/\$(LIBNAME).a \$(COVERAGE) \$(ASM_COVERAGE)
 	-chmod a+x ppl7-config
@@ -405,12 +357,9 @@ release/\$(LIBNAME)-inet.a: release/make \$(INET_RELEASE)
 
 release/\$(LIBNAME)-db.a: release/make \$(DB_RELEASE)
 	ar -r release/\$(LIBNAME)-db.a \$(DB_RELEASE)
-	
+
 release/\$(LIBNAME)-gfx.a: release/make \$(GFX_RELEASE)
 	ar -r release/\$(LIBNAME)-gfx.a \$(GFX_RELEASE)
-
-release/\$(LIBNAME)-tk.a: release/make \$(TK_RELEASE)
-	ar -r release/\$(LIBNAME)-tk.a \$(TK_RELEASE)
 
 release/\$(LIBNAME)-audio.a: release/make \$(AUDIO_RELEASE)
 	ar -r release/\$(LIBNAME)-audio.a \$(AUDIO_RELEASE)
@@ -428,12 +377,9 @@ debug/\$(LIBNAME)-inet.a: debug/make \$(INET_DEBUG)
 
 debug/\$(LIBNAME)-db.a: debug/make \$(DB_DEBUG)
 	ar -r debug/\$(LIBNAME)-db.a \$(DB_DEBUG)
-	
+
 debug/\$(LIBNAME)-gfx.a: debug/make \$(GFX_DEBUG)
 	ar -r debug/\$(LIBNAME)-gfx.a \$(GFX_DEBUG)
-
-debug/\$(LIBNAME)-tk.a: debug/make \$(TK_DEBUG)
-	ar -r debug/\$(LIBNAME)-tk.a \$(TK_DEBUG)
 
 debug/\$(LIBNAME)-audio.a: debug/make \$(AUDIO_DEBUG)
 	ar -r debug/\$(LIBNAME)-audio.a \$(AUDIO_DEBUG)
@@ -453,7 +399,7 @@ coverage/make:
 
 install:	release/\$(LIBNAME).a release/\$(LIBNAME)-core.a release/\$(LIBNAME)-crypto.a \
             release/\$(LIBNAME)-inet.a release/\$(LIBNAME)-db.a release/\$(LIBNAME)-gfx.a \
-            release/\$(LIBNAME)-tk.a debug/make release/\$(LIBNAME)-audio.a
+            release/make release/\$(LIBNAME)-audio.a
 	mkdir -p \$(TARGETLIB) \$(TARGETINCLUDE) \$(TARGETBIN)
 	cp release/\$(LIBNAME)*.a \$(TARGETLIB)
 	cp \$(incdir)/ppl7.h \$(TARGETINCLUDE)
@@ -463,12 +409,10 @@ install:	release/\$(LIBNAME).a release/\$(LIBNAME)-core.a release/\$(LIBNAME)-cr
 	cp \$(incdir)/ppl7-inet.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-crypto.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-grafix.h \$(TARGETINCLUDE)
-	cp \$(incdir)/ppl7-tk.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-audio.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-db.h \$(TARGETINCLUDE)
-	cp \$(incdir)/ppl7-ppl6compat.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-config.h \$(TARGETINCLUDE)/ppl7-config.h
-	chmod a+x ppl7-config  
+	chmod a+x ppl7-config
 	cp ppl7-config \$(TARGETBIN)
 
 install_debug: debug/\$(LIBDEBUG).a
@@ -480,11 +424,9 @@ install_debug: debug/\$(LIBDEBUG).a
 	cp \$(incdir)/ppl7-exceptions.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-inet.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-grafix.h \$(TARGETINCLUDE)
-	cp \$(incdir)/ppl7-tk.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-audio.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-crypto.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-db.h \$(TARGETINCLUDE)
-	cp \$(incdir)/ppl7-ppl6compat.h \$(TARGETINCLUDE)
 	cp \$(incdir)/ppl7-config.h \$(TARGETINCLUDE)/ppl7-config.h
 	chmod a+x ppl7-config
 	cp ppl7-config \$(TARGETBIN)
@@ -501,7 +443,7 @@ deinstall:
 	-rm -f \$(TARGETLIB)/\$(LIBDEBUG)*.a
 	-rm -f \$(TARGETLIB)/\$(LIBNAME)*.a
 	-rm -f \$(TARGETBIN)/ppl7-config
-	
+
 distclean: clean
 	-rm -rf \$(incdir)/ppl7-config.h \$(incdir)/config.h config.log config.status autom4te.cache configure.scan
 
@@ -510,7 +452,7 @@ configure: genConfigure genMakefile.in configure.in
 
 Makefile:
 	sh genMakefile.in
-	
+
 doku: html
 
 html:
@@ -522,10 +464,10 @@ html:
 
 test:
 	cd tests; make xml
-	
+
 memcheck:
 	cd tests; make memcheck
-	 
+
 
 #release/pplgenresource.o: release/make Makefile tools/pplgenresource/genresource.cpp
 #	\$(CXX) -Wall -c -o release/pplgenresource.o tools/pplgenresource/genresource.cpp \$(CFLAGS)
@@ -556,5 +498,3 @@ $COMPILE_COVERAGE
 
 
 " > Makefile.in
-
-
