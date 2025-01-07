@@ -1,23 +1,18 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
- * Web: http://www.pfp.de/ppl/
- *
- * $Author$
- * $Revision$
- * $Date$
- * $Id$
- *
+ * Web: https://github.com/pfedick/pplib
  *******************************************************************************
- * Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    1. Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
+ *
+ *    1. Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,7 +22,7 @@
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
@@ -45,6 +40,8 @@
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #endif
+
+#include <set>
 
 #include "ppl7.h"
 
@@ -94,7 +91,7 @@ namespace ppl7 {
 
 
 typedef struct {
-	String *value;
+	String* value;
 } ROW;
 
 static String EmptyString;
@@ -119,7 +116,7 @@ Array::Array()
  *
  * @param other Anderes Array
  */
-Array::Array(const Array &other)
+Array::Array(const Array& other)
 {
 	numElements=0;
 	numCapacity=0;
@@ -143,12 +140,12 @@ Array::Array(const Array &other)
  * \see
  * Dieser Konstruktor verwendet die Funktion Array::explode zum Zerlegen des Strings.
  */
-Array::Array(const String &str, const String &delimiter, size_t limit, bool skipemptylines)
+Array::Array(const String& str, const String& delimiter, size_t limit, bool skipemptylines)
 {
 	numElements=0;
 	numCapacity=0;
 	rows=NULL;
-	explode(str,delimiter,limit,skipemptylines);
+	explode(str, delimiter, limit, skipemptylines);
 }
 
 /*!\brief Destruktor
@@ -170,9 +167,9 @@ Array::~Array()
  */
 void Array::clear()
 {
-	ROW *r=(ROW*)rows;
+	ROW* r=(ROW*)rows;
 	if (r) {
-		for (size_t i=0;i<numCapacity;i++) {
+		for (size_t i=0;i < numCapacity;i++) {
 			if (r[i].value) {
 				delete(r[i].value);
 				r[i].value=NULL;
@@ -193,13 +190,13 @@ void Array::clear()
  *
  * @param other Zu kopierendes Array
  */
-void Array::copy(const Array &other)
+void Array::copy(const Array& other)
 {
 	clear();
 	reserve(other.numElements);
-	ROW *r=(ROW*)other.rows;
-	for (size_t i=0;i<other.numElements;i++) {
-		if (r[i].value!=NULL) set(i,*r[i].value);
+	ROW* r=(ROW*)other.rows;
+	for (size_t i=0;i < other.numElements;i++) {
+		if (r[i].value != NULL) set(i, *r[i].value);
 	}
 }
 
@@ -210,13 +207,13 @@ void Array::copy(const Array &other)
  *
  * @param other Zu kopierendes Array
  */
-void Array::add(const Array &other)
+void Array::add(const Array& other)
 {
-	ROW *r=(ROW*)other.rows;
+	ROW* r=(ROW*)other.rows;
 	size_t first=numElements;
-	reserve(numElements+other.numElements);
-	for (size_t i=0;i<other.numElements;i++) {
-		if (r[i].value!=NULL) set(first+i,*r[i].value);
+	reserve(numElements + other.numElements);
+	for (size_t i=0;i < other.numElements;i++) {
+		if (r[i].value != NULL) set(first + i, *r[i].value);
 	}
 }
 
@@ -227,9 +224,9 @@ void Array::add(const Array &other)
  *
  * @param value String
  */
-void Array::add(const String &value)
+void Array::add(const String& value)
 {
-	set(numElements,value);
+	set(numElements, value);
 }
 
 /*!\brief Teilstring anhängen
@@ -240,11 +237,11 @@ void Array::add(const String &value)
  * @param value String
  * @param size Größe des Strings
  */
-void Array::add(const String &value, size_t size)
+void Array::add(const String& value, size_t size)
 {
 	String str;
-	str.set(value,size);
-	set(numElements,str);
+	str.set(value, size);
+	set(numElements, str);
 }
 
 /*!\brief Teilstring anhängen
@@ -255,11 +252,11 @@ void Array::add(const String &value, size_t size)
  * @param value String
  * @param size Größe des Strings
  */
-void Array::add(const char *value, size_t size)
+void Array::add(const char* value, size_t size)
 {
 	String str;
-	str.set(value,size);
-	set(numElements,str);
+	str.set(value, size);
+	set(numElements, str);
 }
 
 /*!\brief Formatierten String anhängen
@@ -271,14 +268,14 @@ void Array::add(const char *value, size_t size)
  * @param fmt Formatstring
  * @param ... Optionale Parameter
  */
-void Array::addf(const char *fmt, ...)
+void Array::addf(const char* fmt, ...)
 {
 	String value;
 	va_list args;
 	va_start(args, fmt);
-	value.vasprintf(fmt,args);
+	value.vasprintf(fmt, args);
 	va_end(args);
-	set(numElements,value);
+	set(numElements, value);
 }
 
 /*!\brief Wert eines Elements setzen
@@ -290,23 +287,26 @@ void Array::addf(const char *fmt, ...)
  * @param index Position innerhalb des Arrays, beginnend mit 0
  * @param value String
  */
-void Array::set(size_t index, const String &value)
+void Array::set(size_t index, const String& value)
 {
-	ROW *r;
-	if (index>=numCapacity) {
+	ROW* r;
+	if (index >= numCapacity) {
 		// Array muss vergroessert werden
-		reserve(index+10);
+		size_t newsize=numCapacity / 3;
+		if (newsize < 10) newsize=10;
+		if (newsize < index + 10) newsize=index + 10;
+		reserve(newsize);
 	}
 	r=(ROW*)rows;
-	if ((index+1)>numElements) numElements=index+1;
+	if ((index + 1) > numElements) numElements=index + 1;
 	if (value.notEmpty()) {
-		if (r[index].value==NULL) {
+		if (r[index].value == NULL) {
 			r[index].value=new String;
 			if (!r[index].value) throw OutOfMemoryException();
 		}
 		r[index].value->set(value);
 	} else {
-		if (r[index].value!=NULL) {
+		if (r[index].value != NULL) {
 			delete r[index].value;
 			r[index].value=NULL;
 		}
@@ -324,14 +324,14 @@ void Array::set(size_t index, const String &value)
  * @param fmt Formatstring
  * @param ... Optionale Parameter
  */
-void Array::setf(size_t index, const char *fmt, ...)
+void Array::setf(size_t index, const char* fmt, ...)
 {
 	String value;
 	va_list args;
 	va_start(args, fmt);
-	value.vasprintf(fmt,args);
+	value.vasprintf(fmt, args);
 	va_end(args);
-	set(index,value);
+	set(index, value);
 }
 
 
@@ -345,21 +345,21 @@ void Array::setf(size_t index, const char *fmt, ...)
  * @param index Position, an der das Element eingefügt werden soll
  * @param value Wert des Elements
  */
-void Array::insert(size_t index, const String &value)
+void Array::insert(size_t index, const String& value)
 {
-	ROW *r=(ROW*)rows;
+	ROW* r=(ROW*)rows;
 	// Zunächst sorgen wir dafür, dass im Array genug Platz ist
-	reserve(numElements+2);
+	reserve(numElements + 2);
 	// Nun verschieben wir alle Elemente ab Position index um eins nach hinten
-	if (numElements>index) {
-		for (size_t i=numElements;i>index;i--) {
-			r[i].value=r[i-1].value;
+	if (numElements > index) {
+		for (size_t i=numElements;i > index;i--) {
+			r[i].value=r[i - 1].value;
 		}
 		numElements++;
 		r[index].value=NULL;
 	}
 	// Den neuen Wert einfügen
-	set(index,value);
+	set(index, value);
 }
 
 /*!\brief Array einfügen
@@ -372,31 +372,31 @@ void Array::insert(size_t index, const String &value)
  * @param index Position, an der das Element eingefügt werden soll
  * @param other Einzufügendes Array
  */
-void Array::insert(size_t index, const Array &other)
+void Array::insert(size_t index, const Array& other)
 {
-	if (other.numElements==0) return;	// Anderes Array ist leer
+	if (other.numElements == 0) return;	// Anderes Array ist leer
 	// Zunächst sorgen wir dafür, dass im Array genug Platz ist
-	reserve(numElements+other.numElements+2);
-	ROW *r=(ROW*)rows;
+	reserve(numElements + other.numElements + 2);
+	ROW* r=(ROW*)rows;
 	// Nun verschieben wir alle Elemente ab Position index um die größe des anderen
 	// Arrays nach hinten
-	if (numElements>index) {
-		for (size_t i=numElements;i>index;--i) {
-			size_t ii=i-1;
-			r[ii+other.numElements].value=r[ii].value;
+	if (numElements > index) {
+		for (size_t i=numElements;i > index;--i) {
+			size_t ii=i - 1;
+			r[ii + other.numElements].value=r[ii].value;
 			r[ii].value=NULL;
 		}
 	}
 	// Die neuen Werte einfügen
-	ROW *r2=(ROW*)other.rows;
-	for (size_t i=0;i<other.numElements;i++) {
-		if (r2[i].value!=NULL) {
-			r[index+i].value=new String;
-			if (!r[index+i].value) throw OutOfMemoryException();
-			r[index+i].value->set(r2[i].value);
+	ROW* r2=(ROW*)other.rows;
+	for (size_t i=0;i < other.numElements;i++) {
+		if (r2[i].value != NULL) {
+			r[index + i].value=new String;
+			if (!r[index + i].value) throw OutOfMemoryException();
+			r[index + i].value->set(r2[i].value);
 		}
 	}
-	if (index>numElements) numElements+=(index-numElements);
+	if (index > numElements) numElements+=(index - numElements);
 	numElements+=other.numElements;
 }
 
@@ -412,14 +412,14 @@ void Array::insert(size_t index, const Array &other)
  * @param fmt Formatstring
  * \param ... Zusätzliche optionale Parameter
  */
-void Array::insertf(size_t index, const char *fmt, ...)
+void Array::insertf(size_t index, const char* fmt, ...)
 {
 	String value;
 	va_list args;
 	va_start(args, fmt);
-	value.vasprintf(fmt,args);
+	value.vasprintf(fmt, args);
 	va_end(args);
-	insert(index,value);
+	insert(index, value);
 }
 
 
@@ -442,18 +442,18 @@ void Array::insertf(size_t index, const char *fmt, ...)
  * Mit der Funktion Array::capacity kann abgefragt werden, für wieviele Elemente derzeit Speicher
  * reserviert ist.
  */
-void Array::reserve (size_t size)
+void Array::reserve(size_t size)
 {
-	if (size>numCapacity) {
+	if (size > numCapacity) {
 		//PrintDebugTime ("Array::reserve von %zu auf %zu Elemente\n",numCapacity,size);
-		ROW *r;
+		ROW* r;
 		// Array muss vergroessert werden
-		void *newrows=realloc(rows,(size)*sizeof(ROW));
+		void* newrows=realloc(rows, (size) * sizeof(ROW));
 		if (!newrows) {
 			throw OutOfMemoryException();
 		}
 		r=(ROW*)newrows;
-		for (size_t i=numCapacity;i<size;i++) {
+		for (size_t i=numCapacity;i < size;i++) {
 			r[i].value=NULL;
 		}
 		rows=newrows;
@@ -520,7 +520,7 @@ size_t Array::size() const
  */
 bool Array::empty() const
 {
-	if (numElements==0) return true;
+	if (numElements == 0) return true;
 	return false;
 }
 
@@ -551,23 +551,23 @@ MeinArray,      3: Value 4
 MeinArray,      4: Value 5
 \endverbatim
  */
-void Array::list(const String &prefix) const
+void Array::list(const String& prefix) const
 {
-	ROW *r=(ROW*)rows;
+	ROW* r=(ROW*)rows;
 	if (prefix.isEmpty()) {
-		if ((!rows) || numElements==0) {
+		if ((!rows) || numElements == 0) {
 			PrintDebug("Array ist leer\n");
 		}
-		for (size_t i=0;i<numElements;i++) {
-			if (r[i].value!=NULL) PrintDebug ("%6zu: %s\n",i,(const char*)r[i].value->getPtr());
+		for (size_t i=0;i < numElements;i++) {
+			if (r[i].value != NULL) PrintDebug("%6zu: %s\n", i, (const char*)r[i].value->getPtr());
 
 		}
 	} else {
-		if ((!rows) || numElements==0) {
+		if ((!rows) || numElements == 0) {
 			PrintDebug("Array \"%s\" ist leer\n", (const char*)prefix);
 		}
-		for (size_t i=0;i<numElements;i++) {
-			if (r[i].value!=NULL) PrintDebug ("%s, %6zu: %s\n",(const char*)prefix, i,(const char*)r[i].value->getPtr());
+		for (size_t i=0;i < numElements;i++) {
+			if (r[i].value != NULL) PrintDebug("%s, %6zu: %s\n", (const char*)prefix, i, (const char*)r[i].value->getPtr());
 		}
 
 	}
@@ -583,15 +583,15 @@ void Array::list(const String &prefix) const
  * @return Referenz auf den Inhalt des Elements
  * \exception OutOfBoundsEception: Wird geworfen, wenn \p index größer als die Anzahl Elemente des Arrays ist
  */
-const String &Array::get(ssize_t index) const
+const String& Array::get(ssize_t index) const
 {
-	if (index<0) {
-		index=numElements+index;
-		if (index<0) throw OutOfBoundsEception();
+	if (index < 0) {
+		index=numElements + index;
+		if (index < 0) throw OutOfBoundsEception();
 	}
-	ROW *r=(ROW*)rows;
-	if ((size_t)index>=numElements) throw OutOfBoundsEception();
-	if (r[index].value!=NULL) return *r[index].value;
+	ROW* r=(ROW*)rows;
+	if ((size_t)index >= numElements) throw OutOfBoundsEception();
+	if (r[index].value != NULL) return *r[index].value;
 	return EmptyString;
 }
 
@@ -605,15 +605,15 @@ const String &Array::get(ssize_t index) const
  * @return Referenz auf den Inhalt des Elements
  * \exception OutOfBoundsEception: Wird geworfen, wenn \p index größer als die Anzahl Elemente des Arrays ist
  */
-String &Array::get(ssize_t index)
+String& Array::get(ssize_t index)
 {
-	if (index<0) {
-		index=numElements+index;
-		if (index<0) throw OutOfBoundsEception();
+	if (index < 0) {
+		index=numElements + index;
+		if (index < 0) throw OutOfBoundsEception();
 	}
-	ROW *r=(ROW*)rows;
-	if ((size_t)index>=numElements) throw OutOfBoundsEception();
-	if (r[index].value!=NULL) return *r[index].value;
+	ROW* r=(ROW*)rows;
+	if ((size_t)index >= numElements) throw OutOfBoundsEception();
+	if (r[index].value != NULL) return *r[index].value;
 	return EmptyString;
 }
 
@@ -626,12 +626,12 @@ String &Array::get(ssize_t index)
  * @return Referenz auf ein zufälliges Elements des Arrays.
  * Ist das Array leer, wird immer ein leerer String zurückgegeben.
  */
-const String &Array::getRandom() const
+const String& Array::getRandom() const
 {
 	if (!numElements) return EmptyString;
-	ROW *r=(ROW*)rows;
-	size_t index=ppl7::rand(0,numElements-1);
-	if (index<numElements && r[index].value!=NULL) return *r[index].value;
+	ROW* r=(ROW*)rows;
+	size_t index=ppl7::rand(0, numElements - 1);
+	if (index < numElements && r[index].value != NULL) return *r[index].value;
 	return EmptyString;
 }
 
@@ -643,12 +643,12 @@ const String &Array::getRandom() const
  * @return Referenz auf ein zufälliges Elements des Arrays.
  * Ist das Array leer, wird immer ein leerer String zurückgegeben.
  */
-String &Array::getRandom()
+String& Array::getRandom()
 {
 	if (!numElements) return EmptyString;
-	ROW *r=(ROW*)rows;
-	size_t index=ppl7::rand(0,numElements-1);
-	if (index<numElements && r[index].value!=NULL) return *r[index].value;
+	ROW* r=(ROW*)rows;
+	size_t index=ppl7::rand(0, numElements - 1);
+	if (index < numElements && r[index].value != NULL) return *r[index].value;
 	return EmptyString;
 }
 
@@ -663,7 +663,7 @@ String &Array::getRandom()
  * @return Pointer auf den C-String des gewünschten Elements.
  * \exception OutOfBoundsEception: Wird geworfen, wenn \p index größer als die Anzahl Elemente des Arrays ist
  */
-const char *Array::getPtr(ssize_t index) const
+const char* Array::getPtr(ssize_t index) const
 {
 	return get(index).getPtr();
 }
@@ -676,12 +676,12 @@ const char *Array::getPtr(ssize_t index) const
  * @return Pointer auf den C-String eines zufälligen Elements des Arrays.
  * Ist das Array leer, wird immer ein leerer String zurückgegeben.
  */
-const char *Array::getRandomPtr() const
+const char* Array::getRandomPtr() const
 {
 	if (!numElements) return String();
-	ROW *r=(ROW*)rows;
-	size_t index=ppl7::rand(0,numElements-1);
-	if (index<numElements && r[index].value!=NULL) return r[index].value->getPtr();
+	ROW* r=(ROW*)rows;
+	size_t index=ppl7::rand(0, numElements - 1);
+	if (index < numElements && r[index].value != NULL) return r[index].value->getPtr();
 	return "";
 }
 
@@ -696,13 +696,13 @@ const char *Array::getRandomPtr() const
  *        werden sollen
  * @return String
  */
-String Array::getRest(size_t index, const String &delimiter)
+String Array::getRest(size_t index, const String& delimiter)
 {
 	String rest;
-	ROW *r=(ROW*)rows;
-	for (size_t i=index;i<numElements;i++) {
-		if (i>index) rest+=delimiter;
-		if (r[i].value!=NULL) rest+= *r[i].value;
+	ROW* r=(ROW*)rows;
+	for (size_t i=index;i < numElements;i++) {
+		if (i > index) rest+=delimiter;
+		if (r[i].value != NULL) rest+= *r[i].value;
 	}
 	return rest;
 }
@@ -731,7 +731,7 @@ try {
 }
  * \endcode
  */
-void Array::reset(Iterator &it) const
+void Array::reset(Iterator& it) const
 {
 	it.pos=0;
 }
@@ -762,7 +762,7 @@ try {
 }
  * \endcode
  */
-const String &Array::getFirst(Iterator &it) const
+const String& Array::getFirst(Iterator& it) const
 {
 	it.pos=0;
 	return getNext(it);
@@ -793,13 +793,13 @@ try {
 }
  * \endcode
  */
-const String &Array::getNext(Iterator &it) const
+const String& Array::getNext(Iterator& it) const
 {
-	ROW *r=(ROW*)rows;
-	if (it.pos<numElements) {
-		String *s=r[it.pos].value;
+	ROW* r=(ROW*)rows;
+	if (it.pos < numElements) {
+		String* s=r[it.pos].value;
 		it.pos++;
-		if (s!=NULL) return *s;
+		if (s != NULL) return *s;
 		return EmptyString;
 	}
 	throw OutOfBoundsEception();
@@ -822,15 +822,15 @@ const String &Array::getNext(Iterator &it) const
  */
 String Array::erase(size_t index)
 {
-	if (index>=numElements) throw OutOfBoundsEception();
+	if (index >= numElements) throw OutOfBoundsEception();
 	String ret;
-	ROW *r=(ROW*)rows;
-	if (r[index].value!=NULL) {
+	ROW* r=(ROW*)rows;
+	if (r[index].value != NULL) {
 		ret=r[index].value;
 		delete r[index].value;
 	}
-	for (size_t i=index;i<numElements-1;i++) {
-		r[i].value=r[i+1].value;
+	for (size_t i=index;i < numElements - 1;i++) {
+		r[i].value=r[i + 1].value;
 	}
 	numElements--;
 	r[numElements].value=NULL;
@@ -855,13 +855,13 @@ String Array::shift()
 {
 	if (!numElements) throw EmptyDataException();
 	String ret;
-	ROW *r=(ROW*)rows;
-	if (r[0].value!=NULL) {
+	ROW* r=(ROW*)rows;
+	if (r[0].value != NULL) {
 		ret=r[0].value;
 		delete r[0].value;
 	}
-	for (size_t i=0;i<numElements-1;i++) {
-		r[i].value=r[i+1].value;
+	for (size_t i=0;i < numElements - 1;i++) {
+		r[i].value=r[i + 1].value;
 	}
 	numElements--;
 	r[numElements].value=NULL;
@@ -881,12 +881,12 @@ String Array::shift()
 String Array::pop()
 {
 	if (!numElements) throw EmptyDataException();
-	ROW *r=(ROW*)rows;
+	ROW* r=(ROW*)rows;
 	String ret;
-	if (r[numElements-1].value!=NULL) {
+	if (r[numElements - 1].value != NULL) {
 		ret=r[numElements].value;
-		delete r[numElements-1].value;
-		r[numElements-1].value=NULL;
+		delete r[numElements - 1].value;
+		r[numElements - 1].value=NULL;
 	}
 	numElements--;
 	return ret;
@@ -915,37 +915,37 @@ String Array::pop()
  * \see
  * Array::implode ist die Umkehrfunktion zu dieser
  */
-Array &Array::explode(const String &text, const String &delimiter, size_t limit, bool skipemptylines)
+Array& Array::explode(const String& text, const String& delimiter, size_t limit, bool skipemptylines)
 {
 	if (text.isEmpty()) return *this;
 	if (delimiter.isEmpty()) return *this;
 	ssize_t p;
 	size_t t=delimiter.len();
 	size_t count=0;
-	const char *del=(const char *)delimiter;
-	char *etext=(char*)text.getPtr();
-	char *_t;
+	const char* del=(const char*)delimiter;
+	char* etext=(char*)text.getPtr();
+	char* _t;
 	String str;
 	while (1) {
-		_t=strstr(etext,del);
+		_t=strstr(etext, del);
 		if (_t) {
-			p=_t-etext;
-			if (p==0 && skipemptylines==true) {
+			p=_t - etext;
+			if (p == 0 && skipemptylines == true) {
 				etext+=t;
 				continue;
 			}
-			if (limit>0 && count>=limit) {
+			if (limit > 0 && count >= limit) {
 				return *this;
 			}
-			str.set(etext,p);
+			str.set(etext, p);
 			//add(etext,p);
-			set(numElements,str);
-			etext=etext+p+t;
+			set(numElements, str);
+			etext=etext + p + t;
 			count++;
 		} else {
-			if (skipemptylines==false || strlen(etext)>0) {
+			if (skipemptylines == false || strlen(etext) > 0) {
 				count++;
-				if (limit==0 || count<=limit) {
+				if (limit == 0 || count <= limit) {
 					add(etext);
 				}
 			}
@@ -964,10 +964,10 @@ Array &Array::explode(const String &text, const String &delimiter, size_t limit,
  * @param delimiter Trennzeichen oder String
  * @return Zusammengesetzter String mit dem Inhalt des Arrays
  */
-String Array::implode(const String &delimiter) const
+String Array::implode(const String& delimiter) const
 {
 	String ret;
-	for (size_t i=0;i<numElements;i++) {
+	for (size_t i=0;i < numElements;i++) {
 		if (i) ret+=delimiter;
 		ret+=get(i);
 	}
@@ -984,10 +984,10 @@ String Array::implode(const String &delimiter) const
  * @param argv Pointer auf ein Array mit C-Strings
  * @return Gibt eine Referenz auf das Array zurück.
  */
-Array &Array::fromArgs(int argc, const char **argv)
+Array& Array::fromArgs(int argc, const char** argv)
 {
 	clear();
-	for (int i=0;i<argc;i++) {
+	for (int i=0;i < argc;i++) {
 		add(argv[i]);
 	}
 	return *this;
@@ -1001,7 +1001,7 @@ Array &Array::fromArgs(int argc, const char **argv)
  * @param args Aufrufstring
  * @return Gibt eine Referenz auf das Array zurück.
  */
-Array &Array::fromArgs(const String &args)
+Array& Array::fromArgs(const String& args)
 {
 	clear();
 	String buffer(args);
@@ -1013,48 +1013,46 @@ Array &Array::fromArgs(const String &args)
 	bool inDoubleQuote=false;
 	bool inSingleQuote=false;
 	size_t start=0;
-	for (size_t i=0;i<l;i++) {
-		if(buffer[i]==34 && inDoubleQuote==false && inSingleQuote==false) {
-			if (i==0) {
+	for (size_t i=0;i < l;i++) {
+		if (buffer[i] == 34 && inDoubleQuote == false && inSingleQuote == false) {
+			if (i == 0) {
 				inDoubleQuote=true;
-				start=i+1;
-			}
-			else if (buffer[i-1]!='\\') {
+				start=i + 1;
+			} else if (buffer[i - 1] != '\\') {
 				inDoubleQuote=true;
-				start=i+1;
+				start=i + 1;
 			}
-		} else if(buffer[i]=='\'' && inDoubleQuote==false && inSingleQuote==false) {
-				if (i==0) {
-					inSingleQuote=true;
-					start=i+1;
-				}
-				else if (buffer[i-1]!='\\') {
-					inSingleQuote=true;
-					start=i+1;
-				}
+		} else if (buffer[i] == '\'' && inDoubleQuote == false && inSingleQuote == false) {
+			if (i == 0) {
+				inSingleQuote=true;
+				start=i + 1;
+			} else if (buffer[i - 1] != '\\') {
+				inSingleQuote=true;
+				start=i + 1;
+			}
 
-		} else if(buffer[i]==34 && inDoubleQuote==true && buffer[i-1]!='\\') {
+		} else if (buffer[i] == 34 && inDoubleQuote == true && buffer[i - 1] != '\\') {
 			inDoubleQuote=false;
-			arg=buffer.mid(start,i-start);
+			arg=buffer.mid(start, i - start);
 			if (arg.notEmpty()) add(arg);
 
 			//if(argv[argc][0]!=0) argc++;
-			start=i+1;
-		} else if(buffer[i]=='\'' && inSingleQuote==true && buffer[i-1]!='\\') {
+			start=i + 1;
+		} else if (buffer[i] == '\'' && inSingleQuote == true && buffer[i - 1] != '\\') {
 			inSingleQuote=false;
-			arg=buffer.mid(start,i-start);
+			arg=buffer.mid(start, i - start);
 			if (arg.notEmpty()) add(arg);
 
 			//if(argv[argc][0]!=0) argc++;
-			start=i+1;
-		} else if((buffer[i]==' ' || buffer[i]=='\t') && inDoubleQuote==false && inSingleQuote==false) {
-			arg=Trim(buffer.mid(start,i-start));
+			start=i + 1;
+		} else if ((buffer[i] == ' ' || buffer[i] == '\t') && inDoubleQuote == false && inSingleQuote == false) {
+			arg=Trim(buffer.mid(start, i - start));
 			if (arg.notEmpty()) add(arg);
-			start=i+1;
+			start=i + 1;
 		}
 	}
-	if (start<l) {
-		arg=Trim(buffer.mid(start,l-start));
+	if (start < l) {
+		arg=Trim(buffer.mid(start, l - start));
 		if (arg.notEmpty()) add(arg);
 	}
 	return *this;
@@ -1071,7 +1069,7 @@ Array &Array::fromArgs(const String &args)
  * @return Referenz auf den Inhalt des Elements
  * \exception OutOfBoundsEception: Wird geworfen, wenn \p index größer als die Anzahl Elemente des Arrays ist
  */
-String &Array::operator[](ssize_t index)
+String& Array::operator[](ssize_t index)
 {
 	return get(index);
 }
@@ -1086,7 +1084,7 @@ String &Array::operator[](ssize_t index)
  * @return Referenz auf den Inhalt des Elements
  * \exception OutOfBoundsEception: Wird geworfen, wenn \p index größer als die Anzahl Elemente des Arrays ist
  */
-const String &Array::operator[](ssize_t index) const
+const String& Array::operator[](ssize_t index) const
 {
 	return get(index);
 }
@@ -1101,7 +1099,7 @@ const String &Array::operator[](ssize_t index) const
  * @param other Zu kopierendes Array
  * @return Referenz auf das Array
  */
-Array& Array::operator=(const Array &other)
+Array& Array::operator=(const Array& other)
 {
 	copy(other);
 	return *this;
@@ -1117,7 +1115,7 @@ Array& Array::operator=(const Array &other)
  * @return Referenz auf das Array
  * \see Array::add(const Array &other)
  */
-Array& Array::operator+=(const Array &other)
+Array& Array::operator+=(const Array& other)
 {
 	add(other);
 	return *this;
@@ -1133,11 +1131,11 @@ Array& Array::operator+=(const Array &other)
  * @param other Referenz auf ein zweites Array
  * @return Liefert \c true zurück, wenn beide Arrays identisch sind, sonst \c false.
  */
-bool Array::operator==(const Array &other) const
+bool Array::operator==(const Array& other) const
 {
-	if (numElements!=other.numElements) return false;
-	for (size_t i=0;i<numElements;i++)
-		if (get(i)!=other.get(i)) return false;
+	if (numElements != other.numElements) return false;
+	for (size_t i=0;i < numElements;i++)
+		if (get(i) != other.get(i)) return false;
 	return true;
 }
 
@@ -1151,11 +1149,11 @@ bool Array::operator==(const Array &other) const
  * @param other Referenz auf ein zweites Array
  * @return Liefert \c true zurück, wenn beide Arrays unterschiedlich sind, sonst \c false.
  */
-bool Array::operator!=(const Array &other) const
+bool Array::operator!=(const Array& other) const
 {
-	if (numElements!=other.numElements) return true;
-	for (size_t i=0;i<numElements;i++)
-		if (get(i)!=other.get(i)) return true;
+	if (numElements != other.numElements) return true;
+	for (size_t i=0;i < numElements;i++)
+		if (get(i) != other.get(i)) return true;
 	return false;
 }
 
@@ -1171,7 +1169,7 @@ bool Array::operator!=(const Array &other) const
  * @param a2 Zweites Array
  * @return Neues Array mit den Werten beider Arrays
  */
-Array operator+(const Array &a1, const Array& a2)
+Array operator+(const Array& a1, const Array& a2)
 {
 	Array ret(a1);
 	ret.add(a2);
@@ -1201,16 +1199,13 @@ Array::Iterator::Iterator()
  */
 void Array::sort()
 {
-	ppl7::AVLTree<ppl7::String, size_t> s;
-	s.allowDupes(true);
-	for (size_t i=0;i<numElements;i++) {
-		s.add(get(i),i);
+	std::multiset <ppl7::String> s;
+	for (size_t i=0;i < numElements;i++) {
+		s.insert(get(i));
 	}
-	ppl7::AVLTree<ppl7::String, size_t>::Iterator it;
-	s.reset(it);
 	clear();
-	while (s.getNext(it)) {
-		add(it.key());
+	for (std::multiset<ppl7::String>::const_iterator it = s.begin();it != s.end();++it) {
+		add(*it);
 	}
 }
 
@@ -1222,16 +1217,13 @@ void Array::sort()
  */
 void Array::sortReverse()
 {
-	ppl7::AVLTree<ppl7::String, size_t> s;
-	s.allowDupes(true);
-	for (size_t i=0;i<numElements;i++) {
-		s.add(get(i),i);
+	std::multiset <ppl7::String> s;
+	for (size_t i=0;i < numElements;i++) {
+		s.insert(get(i));
 	}
-	ppl7::AVLTree<ppl7::String, size_t>::Iterator it;
-	s.reset(it);
 	clear();
-	while (s.getPrevious(it)) {
-		add(it.key());
+	for (std::multiset<ppl7::String>::const_reverse_iterator it = s.rbegin();it != s.rend();++it) {
+		add(*it);
 	}
 }
 
@@ -1242,20 +1234,13 @@ void Array::sortReverse()
  */
 void Array::sortUnique()
 {
-	ppl7::AVLTree<ppl7::String, size_t> s;
-	s.allowDupes(false);
-	for (size_t i=0;i<numElements;i++) {
-		try {
-			s.add(get(i),i);
-		} catch (ppl7::DuplicateItemException &) {
-
-		}
+	std::set <ppl7::String> s;
+	for (size_t i=0;i < numElements;i++) {
+		s.insert(get(i));
 	}
-	ppl7::AVLTree<ppl7::String, size_t>::Iterator it;
-	s.reset(it);
 	clear();
-	while (s.getNext(it)) {
-		add(it.key());
+	for (std::multiset<ppl7::String>::const_iterator it = s.begin();it != s.end();++it) {
+		add(*it);
 	}
 }
 
@@ -1271,36 +1256,35 @@ void Array::sortUnique()
  */
 void Array::makeUnique()
 {
-	String value;
-	ppl7::AVLTree<ppl7::String, size_t> s;
-	s.allowDupes(false);
-	for (size_t i=0;i<numElements;i++) {
-		value=get(i);
-		if (s.exists(value)) {
+	std::set <String> s;
+	for (size_t i=0;i < numElements;i++) {
+		const String& value=get(i);
+		auto it=s.find(value);
+		if (it == s.end()) {
 			erase(i);
 			i--;
 		} else {
-			s.add(value,i);
+			s.insert(value);
 		}
 	}
 }
 
-size_t Array::indexOf(const String &search)
+size_t Array::indexOf(const String& search)
 {
 	if (!numElements) throw ItemNotFoundException(search);
-	ROW *r=(ROW*)rows;
-	for (size_t i=0;i<numElements;i++) {
-		if (*r[i].value==search) return i;
+	ROW* r=(ROW*)rows;
+	for (size_t i=0;i < numElements;i++) {
+		if (*r[i].value == search) return i;
 	}
 	throw ItemNotFoundException(search);
 }
 
-bool Array::has(const String &search)
+bool Array::has(const String& search)
 {
 	if (!numElements) return false;
-	ROW *r=(ROW*)rows;
-	for (size_t i=0;i<numElements;i++) {
-		if (*r[i].value==search) return true;
+	ROW* r=(ROW*)rows;
+	for (size_t i=0;i < numElements;i++) {
+		if (*r[i].value == search) return true;
 	}
 	return false;
 }
@@ -1318,23 +1302,25 @@ bool Array::has(const String &search)
  * false=Duplikate bleiben erhalten (Default)
  * \return Sortieres Array
  */
-Array Sort(const Array &array, bool unique)
+Array Sort(const Array& array, bool unique)
 {
 	Array ret;
-	ppl7::AVLTree<ppl7::String, size_t> s;
-	s.allowDupes(!unique);
-	size_t num=array.count();
-	for (size_t i=0;i<num;i++) {
-		try {
-			s.add(array.get(i),i);
-		} catch (ppl7::DuplicateItemException &) {
-
+	if (unique) {
+		std::set <ppl7::String> s;
+		for (size_t i=0;i < array.size();i++) {
+			s.insert(array.get(i));
 		}
-	}
-	ppl7::AVLTree<ppl7::String, size_t>::Iterator it;
-	s.reset(it);
-	while (s.getNext(it)) {
-		ret.add(it.key());
+		for (std::multiset<ppl7::String>::const_iterator it = s.begin();it != s.end();++it) {
+			ret.add(*it);
+		}
+	} else {
+		std::multiset <ppl7::String> s;
+		for (size_t i=0;i < array.size();i++) {
+			s.insert(array.get(i));
+		}
+		for (std::multiset<ppl7::String>::const_iterator it = s.begin();it != s.end();++it) {
+			ret.add(*it);
+		}
 	}
 	return(ret);
 }
@@ -1350,25 +1336,27 @@ Array Sort(const Array &array, bool unique)
  * false=Duplikate bleiben erhalten (Default)
  * \return Sortieres Array
  */
-Array SortReverse(const Array &array, bool unique)
+Array SortReverse(const Array& array, bool unique)
 {
 	Array ret;
-	ppl7::AVLTree<ppl7::String, size_t> s;
-	s.allowDupes(!unique);
-	size_t num=array.count();
-	for (size_t i=0;i<num;i++) {
-		try {
-			s.add(array.get(i),i);
-		} catch (ppl7::DuplicateItemException &) {
-
+	if (unique) {
+		std::set <ppl7::String> s;
+		for (size_t i=0;i < array.size();i++) {
+			s.insert(array.get(i));
+		}
+		for (std::multiset<ppl7::String>::const_reverse_iterator it = s.rbegin();it != s.rend();++it) {
+			ret.add(*it);
+		}
+	} else {
+		std::multiset <ppl7::String> s;
+		for (size_t i=0;i < array.size();i++) {
+			s.insert(array.get(i));
+		}
+		for (std::multiset<ppl7::String>::const_reverse_iterator it = s.rbegin();it != s.rend();++it) {
+			ret.add(*it);
 		}
 	}
-	ppl7::AVLTree<ppl7::String, size_t>::Iterator it;
-	s.reset(it);
-	while (s.getPrevious(it)) {
-		ret.add(it.key());
-	}
-	return (ret);
+	return(ret);
 }
 
 

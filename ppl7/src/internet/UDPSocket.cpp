@@ -1,23 +1,18 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
- * Web: http://www.pfp.de/ppl/
- *
- * $Author$
- * $Revision$
- * $Date$
- * $Id$
- *
+ * Web: https://github.com/pfedick/pplib
  *******************************************************************************
- * Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    1. Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
+ *
+ *    1. Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,7 +22,7 @@
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
@@ -138,7 +133,7 @@ UDPSocket::UDPSocket()
 UDPSocket::~UDPSocket()
 /*! \brief Destruktor der Klasse
  *
- * \header \#include <ppl6-inet.h>
+ * \header \#include <ppl7-inet.h>
  * \desc
  * De-Initialisiert interne Daten der Klasse
  *
@@ -257,7 +252,7 @@ static int out_bind(const char *host, int port)
  *
  * @exception IllegalArgumentException Wird geworfen, wenn \p host auf NULL zeigt und \p port 0 enthält
  *
- * \relates ppl6::CTCPSocket
+ * \relates ppl7::TCPSocket
  */
 static int out_bind(const char *host, int port)
 {
@@ -367,7 +362,7 @@ void UDPSocket::connect(const String &host_and_port)
  * @param[in] usec Timeout in Mikrosekunden. Der tatsächliche Timeout errechnet sich aus \p sec + \p usec
  * @return Bei Erfolg liefert die Funktion 1 zurück, im Fehlerfall 0.
  *
- * \relates ppl6::CTCPSocket
+ * \relates ppl7::TCPSocket
  * \note
  * Zur Zeit wird diese Funktion nur unter Unix unterstützt.
  */
@@ -978,7 +973,7 @@ size_t UDPSocket::writef(const char *fmt, ...)
 	void UDPSocket::setTimeoutRead(int seconds, int useconds)
 	/*! \brief Timeout setzen
 	 *
-	 * \header \#include <ppl6.h>
+	 * \header \#include <ppl7.h>
 	 * \desc
 	 * Mit dieser Funktion wird der Timeout für das Empfangen von Daten gesetzt.
 	 *
@@ -997,7 +992,7 @@ size_t UDPSocket::writef(const char *fmt, ...)
 size_t UDPSocket::sendTo(const String &host, int port, const String &buffer)
 /*! \brief UDP-Packet verschicken
  *
- * \header \#include <ppl6.h>
+ * \header \#include <ppl7.h>
  * \desc
  * Mit dieser Funktion wird ein UDP-Paket an den angegebenen Host verschickt.
  *

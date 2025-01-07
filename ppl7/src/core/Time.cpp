@@ -1,23 +1,18 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
- * Web: http://www.pfp.de/ppl/
- *
- * $Author$
- * $Revision$
- * $Date$
- * $Id$
- *
+ * Web: https://github.com/pfedick/pplib
  *******************************************************************************
- * Copyright (c) 2013, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    1. Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
+ *
+ *    1. Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,7 +22,7 @@
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
@@ -138,8 +133,8 @@ int datum (char *str1)
  * sowie die Struktur PPLTIME gefüllt, sofert der Parameter \a t nicht NULL ist.
  * Tritt ein Fehler auf, wird ((uint64_t)-1) zurückgegeben und errno entsprechend gesetzt.
  *
- * \see ppl6::GetTime()
- * \see ppl6::GetTime(PPLTIME *t, uint64_t now)
+ * \see ppl7::GetTime()
+ * \see ppl7::GetTime(PPLTIME *t, uint64_t now)
  *
  */
 uint64_t GetTime(PPLTIME *t)
@@ -169,7 +164,7 @@ uint64_t GetTime(PPLTIME &t)
 	return GetTime(t,now);
 }
 
-/*! \fn ppl6::GetTime (PPLTIME *t, uint64_t now)
+/*! \fn ppl7::GetTime (PPLTIME *t, uint64_t now)
  * \ingroup PPLGroupDateTime
  * \brief Wandelt Unix-Zeit in die Struktur PPLTIME um
  *
@@ -182,8 +177,8 @@ uint64_t GetTime(PPLTIME &t)
  * zurückgeliefert und die Struktur PPLTIME wird gefüllt,
  * \exception Bei Auftreten eines Fehlers wird eine InvalidDateException geworfen.
  *
- * \see ppl6::GetTime()
- * \see ppl6::GetTime(PPLTIME *t)
+ * \see ppl7::GetTime()
+ * \see ppl7::GetTime(PPLTIME *t)
  *
  */
 ppl_time_t GetTime(PPLTIME *t, ppl_time_t now)
@@ -228,8 +223,8 @@ ppl_time_t GetTime(PPLTIME *t, ppl_time_t now)
  * zurückgeliefert und die Struktur PPLTIME wird gefüllt.
  * \exception Bei Auftreten eines Fehlers wird eine InvalidDateException geworfen.
  *
- * \see ppl6::GetTime()
- * \see ppl6::GetTime(PPLTIME *t)
+ * \see ppl7::GetTime()
+ * \see ppl7::GetTime(PPLTIME *t)
  *
  */
 ppl_time_t GetTime(PPLTIME &t, ppl_time_t now)
@@ -272,8 +267,8 @@ ppl_time_t GetTime(PPLTIME &t, ppl_time_t now)
  * \returns Bei Erfolg wird die Zeit seit 1.1.1970, 00:00 Uhr in Sekunden zurückgegeben.
  * Tritt ein Fehler auf, wird ((ppl_time_t)-1) zurückgegeben und errno entsprechend gesetzt.
  *
- * \see ppl6::GetTime(PPLTIME *t)
- * \see ppl6::GetTime(PPLTIME *t, ppl_time_t now)
+ * \see ppl7::GetTime(PPLTIME *t)
+ * \see ppl7::GetTime(PPLTIME *t, ppl_time_t now)
  *
  */
 ppl_time_t GetTime()
@@ -326,7 +321,7 @@ int SSleep(uint64_t seconds)
 		if (usleep(1000000*seconds)==0) return 1;
 		return 0;
 	#else
-		sleep(seconds);
+		::sleep(seconds);
 	#endif
 	return 0;
 }
@@ -440,16 +435,16 @@ ppl_time_t MkTime(const String &iso8601date, PPLTIME *t)
 /*!\ingroup PPLGroupDateTime
  */
 {
-	Array match;
+	std::vector<String> match;
 	struct tm Time;
 	memset(&Time,0,sizeof(Time));
-	if (iso8601date.pregMatch("/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\\+([0-9]{2}):([0-9]{2})$/i",match)) {
+	if (RegEx::capture("/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\\+([0-9]{2}):([0-9]{2})$/i",iso8601date,match)) {
 		Time.tm_hour = 0-match[7].toInt();
 		Time.tm_min = 0-match[8].toInt();
-	} else if (iso8601date.pregMatch("/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\\-([0-9]{2}):([0-9]{2})$/i",match)) {
+	} else if (RegEx::capture("/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\\-([0-9]{2}):([0-9]{2})$/i",iso8601date,match)) {
 		Time.tm_hour = match[7].toInt();
 		Time.tm_min = match[8].toInt();
-	} else if (!iso8601date.pregMatch("/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})$/i",match)) {
+	} else if (!RegEx::capture("/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})$/i",iso8601date,match)) {
 		throw InvalidFormatException();
 	}
 	Time.tm_mday = match[3].toInt();
@@ -706,7 +701,7 @@ void datumsauswertung (pplchar * d, pplchar * dat)
 /*!\brief Datum/Zeit formatieren
  * \ingroup PPLGroupDateTime
  *
- * \header \#include <ppl6.h>
+ * \header \#include <ppl7.h>
  * \desc
  * Die Funktion MkDate wandelt einen Unix-Timestamp in einen String um.
  *
@@ -756,7 +751,7 @@ char *MkDate (char *buffer, int size, const char *format, uint64_t sec)
 /*!\brief Datum/Zeit formatieren
  * \ingroup PPLGroupDateTime
  *
- * \header \#include <ppl6.h>
+ * \header \#include <ppl7.h>
  * \desc
  * Die Funktion MkDate wandelt einen Unix-Timestamp in einen String um.
  *
@@ -838,5 +833,5 @@ double Timer::duration()
 
 
 
-}		// EOF namespace ppl6
+}		// EOF namespace ppl7
 

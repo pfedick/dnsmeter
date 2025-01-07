@@ -452,54 +452,6 @@ bool IsTrue(const String& str)
 }
 
 
-/*!\brief Der String wird anhand einer Regular Expression durchsucht
- * \relates String
- *
- * \desc
- * Durchsucht den String \p subject anhand der Perl-Expression \p expression
- * und gibt \c true zurück, wenn die Expression auf den String matched.
- *
- * \param[in] expression Ist eine Perl-kompatible Regular Expression, die mit Slash (/) beginnt und
- * endet. Optional können nach dem schließenden Slash folgende Optionen angegeben werden:
- * \copydoc pregexpr.dox
- * \param[in] subject Der String, auf den die Regular Expression angewendet werden soll
- * \return Liefert \c true zurück, wenn ein Match gefunden wurde, ansonsten \c false
- * \remarks
- * Der String wird intern zuerst nach UTF-8 kodiert, bevor die pcre-Funktionen aufgerufen werden.
- * \note
- * \copydoc pcrenote.dox
- */
-bool PregMatch(const String& expression, const String& subject)
-{
-	return subject.pregMatch(expression);
-}
-
-/*!\brief Der String wird anhand einer Regular Expression durchsucht
- * \relates String
- *
- * \desc
- * Durchsucht den String anhand einer Perl-Expression und liefert die die zu kopierenden Werte (Capture)
- * in einem Array zurück.
- *
- * \param[in] expression Ist eine Perl-kompatible Regular Expression, die mit Slash (/) beginnt und
- * endet. Optional können nach dem schließenden Slash folgende Optionen angegeben werden:
- * \copydoc pregexpr.dox
- * \param[in] subject Der String, auf den die Regular Expression angewendet werden soll
- * \param[out] matches Array, dass die zu kopierenden Werte aufnimmt.
- * \param[in] maxmatches Optionaler Parameter, der die maximale Anzahl zu kopierender Werte aufnimmt
- * (Default=16).
- * \return Liefert \c true(1) zurück, wenn ein Match gefunden wurde, ansonsten \c false(0)
- * \remarks
- * Der String wird intern zuerst nach UTF-8 kodiert, bevor die pcre-Funktionen aufgerufen werden.
- * \note
- * \copydoc pcrenote.dox
- */
-bool PregMatch(const String& expression, const String& subject, Array& matches, size_t maxmatches)
-{
-	return subject.pregMatch(expression, matches, maxmatches);
-}
-
-
 /*!\brief String anhand eines Trennzeichens zerlegen
  *
  * \desc

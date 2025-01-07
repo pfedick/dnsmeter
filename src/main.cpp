@@ -222,8 +222,9 @@ ppl7::Array DNSSender::getQueryRates(const ppl7::String& QueryRates)
 	if (QueryRates.isEmpty()) {
 		rates.add("0");
 	} else {
-		ppl7::Array matches;
-		if (QueryRates.pregMatch("/^([0-9]+)-([0-9]+),([0-9]+)$", matches)) {
+		std::vector<ppl7::String> matches;
+		if (ppl7::RegEx::capture("/^([0-9]+)-([0-9]+),([0-9]+)$", QueryRates, matches)) {
+			//if (QueryRates.pregMatch("/^([0-9]+)-([0-9]+),([0-9]+)$", matches)) {
 			for (uint64_t i = matches[1].toUnsignedInt64(); i <= matches[2].toUnsignedInt64(); i += matches[3].toUnsignedInt64()) {
 				rates.addf("%llu", i);
 			}
@@ -233,7 +234,8 @@ ppl7::Array DNSSender::getQueryRates(const ppl7::String& QueryRates)
 			rates_in.explode(QueryRates, ",");
 			for (size_t i=0;i < rates_in.size();i++) {
 				const ppl7::String& element=rates_in.get(i);
-				if (element.pregMatch("/^([0-9]+)-([0-9]+):([0-9]+)$", matches)) {
+				if (ppl7::RegEx::capture("/^([0-9]+)-([0-9]+):([0-9]+)$", element, matches)) {
+					//if (element.pregMatch("/^([0-9]+)-([0-9]+):([0-9]+)$", matches)) {
 					for (uint64_t i = matches[1].toUnsignedInt64(); i <= matches[2].toUnsignedInt64(); i += matches[3].toUnsignedInt64()) {
 						rates.addf("%llu", i);
 					}

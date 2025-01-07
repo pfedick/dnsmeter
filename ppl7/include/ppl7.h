@@ -1,17 +1,18 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
- * Web: http://www.pfp.de/ppl/
+ * Web: https://github.com/pfedick/pplib
  *******************************************************************************
- * Copyright (c) 2022, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    1. Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
+ *
+ *    1. Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -21,7 +22,7 @@
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
@@ -31,10 +32,10 @@
 #define _PPL7_INCLUDE
 
 #define PPL7_VERSION_MAJOR	7
-#define PPL7_VERSION_MINOR	0
-#define PPL7_VERSION_BUILD	1
-#define PPL7_RELEASEDATE	20191027
-#define PPL7_COPYRIGHT		"Copyright (c) 2019 by Patrick Fedick"
+#define PPL7_VERSION_MINOR	1
+#define PPL7_VERSION_BUILD	0
+#define PPL7_RELEASEDATE	20240904
+#define PPL7_COPYRIGHT		"Copyright (c) 2024 by Patrick Fedick"
 
 // Inlcude PPL7 configuration file
 #ifndef _PPL7_CONFIG
@@ -86,6 +87,14 @@
 
 #include <set>
 #include <list>
+#include <vector>
+
+#ifdef PPL_WITH_QT6
+#include <QAnyStringView>
+#ifndef WITH_QT
+#define WITH_QT
+#endif
+#endif
 
 #ifdef WITH_QT
 #include <QString>
@@ -241,8 +250,64 @@ void StrTok(Array& result, const String& string, const String& div=String("\n"))
 String GetArgv(int argc, char* argv[], const String& argument);
 bool HaveArgv(int argc, char* argv[], const String& argument);
 
-bool PregMatch(const String& expression, const String& subject);
-bool PregMatch(const String& expression, const String& subject, Array& matches, size_t maxmatches=16);
+
+class RegEx {
+	public:
+	class Flags {
+		public:
+		enum {
+			NONE=0,
+			CASELESS=1,
+			ANCHORED=2,
+			MULTILINE=4,
+			EXTENDED=8,
+			DOTALL=16,
+			UNGREEDY=32
+		};
+	};
+
+	class Pattern {
+		friend class RegEx;
+		private:
+			void *p;
+			char bits;
+		public:
+			Pattern();
+			Pattern(const Pattern &other);
+			Pattern(const Pattern &&other);
+			~Pattern();
+	};
+
+	static Pattern compile(const String& regex, int flags=Flags::NONE);
+	static Pattern compile(const WideString& regex, int flags=Flags::NONE);
+
+	static bool match(const String& regex, const String& subject, int flags=Flags::NONE);
+	static bool match(const WideString& regex, const WideString& subject, int flags=Flags::NONE);
+	static bool match(const Pattern& pattern, const String& subject);
+	static bool match(const Pattern& pattern, const WideString& subject);
+
+	static bool capture(const String& regex, const String& subject, std::vector<String>& matches, int flags=Flags::NONE);
+	static bool capture(const Pattern& pattern, const String& subject, std::vector<String>& matches);
+	static bool capture(const WideString& regex, const WideString& subject, std::vector<WideString>& matches, int flags=Flags::NONE);
+	static bool capture(const Pattern& pattern, const WideString& subject, std::vector<WideString>& matches);
+
+	static String replace(const String& regex, const String& subject, const String &replacement, int flags=Flags::NONE, int max=0);
+	static String replace(const Pattern& pattern, const String& subject, const String &replacement, int max=0);
+	static WideString replace(const WideString& regex, const WideString& subject, const WideString &replacement, int flags=Flags::NONE, int max=0);
+	static WideString replace(const Pattern& pattern, const WideString& subject, const WideString &replacement, int max=0);
+
+	static String escape(const String &subject);
+	static WideString escape(const WideString &subject);
+};
+
+/*
+bool PregMatch(const String& regex, const String& string);
+bool PregMatch(const String& regex, const String& string, Array& matches, size_t maxmatches=16);
+String PregEscape(const String &string);
+WideString PregEscape(const WideString &string);
+String& pregReplace(const String &string, const String& regex, const String& replacement, int max=0);
+WideString& pregReplace(const WideString &string, const WideString& regex, const WideString& replacement, int max=0);
+*/
 
 Array Sort(const Array& array, bool unique=false);
 Array SortReverse(const Array& array, bool unique=false);
@@ -1293,6 +1358,7 @@ public:
 	void createSection(const String& name);
 	void setSection(const String& name);
 	void deleteSection(const String& name);
+	bool hasSection(const String& sectionname) const;
 	void add(const String& section, const String& key, const String& value);
 	void add(const String& section, const String& key, const char* value);
 	void add(const String& key, const String& value);
@@ -1303,6 +1369,8 @@ public:
 	void add(const String& section, const String& key, bool value);
 	void deleteKey(const String& key);
 	void deleteKey(const String& section, const String& key);
+	bool hasKey(const String& key) const;
+	bool hasKey(const String& section, const String& key) const;
 	String get(const String& key, const String& defaultvalue=String()) const;
 	bool	getBool(const String& key, bool defaultvalue=false) const;
 	int		getInt(const String& key, int defaultvalue=0) const;

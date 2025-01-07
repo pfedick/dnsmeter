@@ -1,17 +1,18 @@
 /*******************************************************************************
  * This file is part of "Patrick's Programming Library", Version 7 (PPL7).
- * Web: http://www.pfp.de/ppl/
+ * Web: https://github.com/pfedick/pplib
  *******************************************************************************
- * Copyright (c) 2022, Patrick Fedick <patrick@pfp.de>
+ * Copyright (c) 2024, Patrick Fedick <patrick@pfp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *    1. Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
+ *
+ *    1. Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -21,7 +22,7 @@
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
@@ -542,61 +543,6 @@ public:
 
 };
 
-class Webserver
-{
-private:
-	SSLContext	SSL;
-	void* daemon;
-	int			port;
-	AssocArray	res;
-	TCPSocket	Socket;
-	bool		basicAuthentication;
-	bool		SSLEnabled;
-	String		realm;
-	String		sslkey, sslcert;
-
-public:
-	class Request {
-		friend class Webserver;
-	private:
-
-	public:
-		void* connection;
-		void* postprocessor;
-		String url;
-		String method;
-		String version;
-		AssocArray header;
-		AssocArray data;
-		AssocArray auth;
-	};
-	Webserver();
-	virtual ~Webserver();
-	void bind(const String& adr, int port);
-	void loadCertificate(const String& certificate, const String& privatekey, const String& password);
-	void enableSSL(bool enable);
-	bool sslEnabled() const;
-	void start();
-	void stop();
-	void requireBasicAuthentication(bool enable, const String& realm);
-	bool useBasicAuthentication() const;
-	int queueResponse(const Request& req, const String& text, int httpStatus=200);
-	int queueBasicAuthFailedResponse(const Request& req);
-
-	virtual int request(Request& req);
-	virtual int authenticate(const String& username, const String& password, Request& req);
-	virtual String getDenyMessage();
-
-
-
-
-	PPL7EXCEPTION(CouldNotBindToSocket, Exception);
-	PPL7EXCEPTION(InvalidSSLCertificate, Exception);
-	PPL7EXCEPTION(NoAddressSpecified, Exception);
-	PPL7EXCEPTION(CouldNotStartDaemon, Exception);
-	PPL7EXCEPTION(SSLInitializationFailed, Exception);
-
-};
 
 //! \brief CURL-Klasse
 class Curl

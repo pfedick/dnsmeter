@@ -14,9 +14,9 @@ find include/compat_ppl7.h include/ppl7.h include/ppl7-algorithms.h include/ppl7
 	include/ppl7-inet.h include/ppl7-types.h include/prolog_ppl7.h include/socket_ppl7.h \
 	include/ppl7-crypto.h \
 	include/threads_ppl7.h include/config_ppl7.h.in include/ppl7-config.h.in $WORK/ppl7/include \
-	src/core/Compat.cpp src/core/Dir* src/core/Exceptions* src/core/File* \
+	src/core/Compat.cpp src/core/Dir* src/core/Pcre.cpp src/core/Exceptions* src/core/File* \
 	src/core/Functions* src/core/MemFile* src/core/Mutex* src/core/Signal* \
-	src/core/String* src/core/Thread* src/core/Time* src/core/AVL* \
+	src/core/String* src/core/Thread* src/core/Time* \
 	src/core/Memory* src/internet/resolver.cpp \
 	src/internet/inet* src/internet/ip* src/internet/openssl* \
 	src/internet/sock* src/internet/*Socket* src/math  src/types \
@@ -34,7 +34,7 @@ rm -rf $WORK/ppl7/src/core/Resourcen.cpp
 cp genMakefile.in $WORK/ppl7
 
 cp autoconf/ax_cxx_compile_stdcxx.m4 $WORK/autoconf
-cp autoconf/ax_path_lib_pcre.m4 $WORK/autoconf
+cp autoconf/pcre2.m4 $WORK/autoconf
 cp autoconf/ax_pthread.m4 $WORK/autoconf
 cp autoconf/lib-link.m4 $WORK/autoconf
 cp autoconf/checkfuncs.m4 $WORK/autoconf
