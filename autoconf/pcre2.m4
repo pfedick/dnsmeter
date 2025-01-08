@@ -8,6 +8,10 @@ AC_ARG_WITH([pcre2],
 	[libpcre2_prefix="$withval"],
 	[libpcre2_prefix="auto"])
 
+	have_libpcre2="no"
+	PCRE2_LIBS=""
+	PCRE2_CFLAGS=""
+
 	if test "$libpcre2_prefix" != "no"
 	then
 		AC_MSG_RESULT(yes)
@@ -19,17 +23,18 @@ AC_ARG_WITH([pcre2],
 
 		if test "$libpcre2_prefix" = "yes" -o "$libpcre2_prefix" = "auto"
 		then
+			AC_PATH_PROG([PKGCONFIG], [pkg-config], [no])
 			AC_PATH_PROG(pcre2config,pcre2-config)
-			PKG_CHECK_MODULES([PCRE2_8], [libpcre2-8],
-				have_libpcre2="yes"
-				PCRE2_LIBS="$PCRE2_8_LIBS"
-				PCRE2_CFLAGS="$PCRE2_8_CFLAGS"
-				AC_DEFINE(HAVE_PCRE2_BITS_8)
-				,
-				have_libpcre2="no"
-				PCRE2_LIBS=""
-				PCRE2_CFLAGS=""
-
+			if test "$PKGCONFIG" != "no"
+			then
+				PKG_CHECK_MODULES([PCRE2_8], [libpcre2-8],
+					have_libpcre2="yes"
+					PCRE2_LIBS="$PCRE2_8_LIBS"
+					PCRE2_CFLAGS="$PCRE2_8_CFLAGS"
+					AC_DEFINE(HAVE_PCRE2_BITS_8)
+					,
+				)
+			else
 				if test [ -x "$pcre2config" ]
 				then
 					have_libpcre2="yes"
@@ -37,15 +42,18 @@ AC_ARG_WITH([pcre2],
 					PCRE2_CFLAGS=`$pcre2config --cflags`
 					AC_DEFINE(HAVE_PCRE2_BITS_8)
 				fi
-			)
+			fi
 			if test ${ac_cv_sizeof_wchar_t} -eq 2
 			then
-				PKG_CHECK_MODULES([PCRE2_WIDE16], [libpcre2-16],
-					PCRE2_LIBS="$PCRE2_LIBS $PCRE2_WIDE16_LIBS"
-					PCRE2_CFLAGS="$PCRE2_CFLAGS $PCRE2_WIDE16_CFLAGS"
-					AC_DEFINE(HAVE_PCRE2_BITS_16)
-					,
-
+				if test "$PKGCONFIG" != "no"
+				then
+					PKG_CHECK_MODULES([PCRE2_WIDE16], [libpcre2-16],
+						PCRE2_LIBS="$PCRE2_LIBS $PCRE2_WIDE16_LIBS"
+						PCRE2_CFLAGS="$PCRE2_CFLAGS $PCRE2_WIDE16_CFLAGS"
+						AC_DEFINE(HAVE_PCRE2_BITS_16)
+						,
+					)
+				else
 					if test [ -x "$pcre2config" ]
 					then
 						have_libpcre2="yes"
@@ -53,15 +61,19 @@ AC_ARG_WITH([pcre2],
 						PCRE2_LIBS="$PCRE2_LIBS $libs16"
 						AC_DEFINE(HAVE_PCRE2_BITS_16)
 					fi
-				)
+				fi
 			fi
 			if test ${ac_cv_sizeof_wchar_t} -eq 4
 			then
-				PKG_CHECK_MODULES([PCRE2_WIDE32], [libpcre2-32],
-					PCRE2_LIBS="$PCRE2_LIBS $PCRE2_WIDE32_LIBS"
-					PCRE2_CFLAGS="$PCRE2_CFLAGS $PCRE2_WIDE32_CFLAGS"
-					AC_DEFINE(HAVE_PCRE2_BITS_32)
-					,
+				if test "$PKGCONFIG" != "no"
+				then
+					PKG_CHECK_MODULES([PCRE2_WIDE32], [libpcre2-32],
+						PCRE2_LIBS="$PCRE2_LIBS $PCRE2_WIDE32_LIBS"
+						PCRE2_CFLAGS="$PCRE2_CFLAGS $PCRE2_WIDE32_CFLAGS"
+						AC_DEFINE(HAVE_PCRE2_BITS_32)
+						,
+					)
+				else
 					if test [ -x "$pcre2config" ]
 					then
 						have_libpcre2="yes"
@@ -69,8 +81,7 @@ AC_ARG_WITH([pcre2],
 						PCRE2_LIBS="$PCRE2_LIBS $libs32"
 						AC_DEFINE(HAVE_PCRE2_BITS_32)
 					fi
-
-				)
+				fi
 			fi
 		else
 			LIBS="-L$libpng_prefix/lib"
