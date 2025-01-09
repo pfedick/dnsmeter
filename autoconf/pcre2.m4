@@ -1,12 +1,12 @@
 dnl AC_CHECK_PCRE2([ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
 
 AC_DEFUN([AC_CHECK_PCRE2],[
-AC_MSG_CHECKING(if we should use pcre2)
+	AC_MSG_CHECKING(if we should use pcre2)
 
-AC_ARG_WITH([pcre2],
-	[  --with-pcre2[[=PATH]]     Prefix where libpcre2 is installed (optional)],
-	[libpcre2_prefix="$withval"],
-	[libpcre2_prefix="auto"])
+	AC_ARG_WITH([pcre2],
+		[  --with-pcre2[[=PATH]]     Prefix where libpcre2 is installed (optional)],
+		[libpcre2_prefix="$withval"],
+		[libpcre2_prefix="auto"])
 
 	have_libpcre2="no"
 	PCRE2_LIBS=""
@@ -19,11 +19,11 @@ AC_ARG_WITH([pcre2],
 		am_save_CPPFLAGS="$CPPFLAGS"
 		am_save_LIBS="$LIBS"
 		am_save_LDFLAGS="$LDFLAGS"
+		AC_PATH_PROG([PKGCONFIG], [pkg-config], [no])
 
 
 		if test "$libpcre2_prefix" = "yes" -o "$libpcre2_prefix" = "auto"
 		then
-			AC_PATH_PROG([PKGCONFIG], [pkg-config], [no])
 			AC_PATH_PROG(pcre2config,pcre2-config)
 			if test "$PKGCONFIG" != "no"
 			then
